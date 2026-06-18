@@ -1,0 +1,17 @@
+# Build
+bin/
+obj/
+*.user
+
+# IDE
+.vs/
+.idea/
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
+
+# Sortie Thunderstore
+*.zip
+dist/

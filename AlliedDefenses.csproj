@@ -1,0 +1,89 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    AlliedDefenses - csproj
+    ============================================================
+    Ce fichier décrit COMMENT compiler le mod en .dll.
+
+    Points clés :
+      - On cible netstandard2.1 (requis par BepInEx / Unity Mono).
+      - On NE référence PAS manuellement Assembly-CSharp.dll : on utilise
+        le paquet NuGet "LethalCompany.GameLibs.Steam" qui fournit des
+        versions "stripped" (allégées) des DLL du jeu, légales à distribuer.
+      - HarmonyX, BepInEx et Unity arrivent aussi via NuGet.
+
+    Pour compiler : ouvrir un terminal dans ce dossier et lancer
+        dotnet build -c Release
+    Le .dll final sera dans bin/Release/netstandard2.1/AlliedDefenses.dll
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>AlliedDefenses</AssemblyName>
+    <Product>AlliedDefenses</Product>
+    <!-- Garde ce numéro synchronisé avec manifest.json -->
+    <Version>0.1.0</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>annotations</Nullable>
+
+    <!-- The Netcode Patcher requires portable (not full) debug symbols, or it errors. -->
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+
+    <!-- Génère un netcode patcher friendly build (voir README, section réseau) -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+
+    <!-- Active les références publiques aux membres internes/privés du jeu -->
+    <RestoreAdditionalProjectSources>
+      https://api.nuget.org/v3/index.json;
+      https://nuget.bepinex.dev/v3/index.json
+    </RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Framework de modding -->
+    <PackageReference Include="BepInEx.Core" Version="5.*" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+
+    <!-- DLL du jeu (stripped) : fournit Assembly-CSharp, Unity, Netcode, etc.
+         Remplace la version par celle correspondant à ta build du jeu.
+         Voir : https://www.nuget.org/packages/LethalCompany.GameLibs.Steam -->
+    <PackageReference Include="LethalCompany.GameLibs.Steam"
+                      Version="*-*"
+                      Publicize="true"
+                      PrivateAssets="all" />
+
+    <!-- Unity Netcode for GameObjects (pour la synchro multijoueur) -->
+    <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" IsImplicitlyDefined="true" />
+  </ItemGroup>
+
+  <!--
+    "Publicize=true" ci-dessus rend accessibles les champs/méthodes privés
+    du jeu sans réflexion. C'est ce qui te permet d'écrire
+    turret.targetPlayer alors que ce champ est privé dans le code original.
+  -->
+
+  <!--
+    OPTIONAL build-time Netcode Patch.
+    Runs ONLY when you pass  -p:NetcodePatch=true  (the GitHub Actions workflow does).
+    A normal `dotnet build` stays patch-free so it never needs the CLI tool installed.
+    Requires the CLI:  dotnet tool install -g Evaisa.NetcodePatcher.Cli
+    Versions below must match the GAME (Lethal Company). Adjust if a game update changes them.
+  -->
+  <PropertyGroup>
+    <NcpUnityVersion>2022.3.9</NcpUnityVersion>
+    <NcpNetcodeVersion>1.5.2</NcpNetcodeVersion>
+    <NcpTransportVersion>1.0.0</NcpTransportVersion>
+  </PropertyGroup>
+
+  <Target Name="NetcodePatch" AfterTargets="PostBuildEvent" Condition="'$(NetcodePatch)' == 'true'">
+    <PropertyGroup>
+      <NetcodePatcherDepsListFile>$(IntermediateOutputPath)ncp-deps.list</NetcodePatcherDepsListFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(NetcodePatcherDepsListFile)" Lines="@(ReferencePathWithRefAssemblies)" Overwrite="true" />
+    <Exec Command="netcode-patch -uv $(NcpUnityVersion) -nv $(NcpNetcodeVersion) -tv $(NcpTransportVersion) &quot;$(TargetPath)&quot; --dependency-file &quot;$(NetcodePatcherDepsListFile)&quot;" />
+  </Target>
+
+</Project>

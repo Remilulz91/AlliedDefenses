@@ -1,0 +1,246 @@
+using System.Collections.Generic;
+using AlliedDefenses.Config;
+using AlliedDefenses.Networking;
+using Unity.Netcode;
+using UnityEngine;
+
+namespace AlliedDefenses.Core
+{
+    /// <summary>A defense currently under our control.</summary>
+    public class HijackEntry
+    {
+        public ulong NetworkId;       // network id of the object (stable across host/clients)
+        public string TypeId = "";    // "turret", "mine", ...
+        public Component Defense = null!;
+        public float ExpireTime;      // Time.time at which control ends (0 = never)
+    }
+
+    /// <summary>
+    /// Central brain: keeps the list of hijacked defenses, applies/removes the
+    /// "allied" state, and handles expiry. Every state change goes through here and
+    /// is then broadcast to all players via the networker (never applied locally
+    /// only, otherwise multiplayer desyncs).
+    ///
+    /// Full hijack flow:
+    ///   Terminal -> HijackManager.RequestHijack(code)
+    ///            -> Networker.RequestHijackServerRpc(netId, typeId)   [client -> server]
+    ///            -> Networker.ApplyHijackClientRpc(netId, typeId, true) [server -> everyone]
+    ///            -> HijackManager.ApplyHijack(...) on EACH machine
+    /// </summary>
+    public static class HijackManager
+    {
+        private static readonly Dictionary<ulong, HijackEntry> _active = new();
+
+        /// <summary>Is the defense (by network id) currently allied?</summary>
+        public static bool IsAllied(ulong networkId) => _active.ContainsKey(networkId);
+
+        /// <summary>Convenience overload from the component.</summary>
+        public static bool IsAllied(Component defense)
+        {
+            var netId = ResolveNetworkId(defense);
+            return netId.HasValue && _active.ContainsKey(netId.Value);
+        }
+
+        /// <summary>Number of currently hijacked defenses.</summary>
+        public static int ActiveCount => _active.Count;
+
+        /// <summary>Get the active entry for a network id (or null).</summary>
+        public static HijackEntry? Get(ulong networkId) =>
+            _active.TryGetValue(networkId, out var e) ? e : null;
+
+        // ----------------------------------------------------------------
+        // STEP 1: called locally by the terminal when the player types the
+        // command. We resolve the target, then request the network sync.
+        // ----------------------------------------------------------------
+        public static string RequestHijack(string code)
+        {
+            if (!DefenseRegistry.TryResolve(code, out var module, out var defense) || defense == null || module == null)
+                return $"No defense found for code '{code}'.";
+
+            var netId = ResolveNetworkId(defense);
+            if (!netId.HasValue)
+                return "This defense has no network identity (cannot be hijacked).";
+
+            if (HijackNetworker.Instance == null)
+                return "Network handler not ready yet. Try again in a moment.";
+
+            // Delegate to the networker, which travels server -> all clients.
+            HijackNetworker.Instance.RequestHijack(netId.Value, module.TypeId);
+
+            float dur = ModConfig.HijackDuration.Value;
+            string durText = dur > 0f ? $"for {dur:0} seconds" : "until end of round";
+            return $"Hijacking {module.DisplayName} '{code}' {durText}...";
+        }
+
+        // ----------------------------------------------------------------
+        // GROUP hijack: flip EVERY defense of a given type at once. Used for
+        // weapons that have no individual terminal code (e.g. mines): "ally mines".
+        // Also works for turrets ("ally turrets").
+        // ----------------------------------------------------------------
+        public static string RequestHijackAllOfType(string typeId)
+        {
+            var module = DefenseRegistry.FindModule(typeId);
+            if (module == null)
+                return $"Unknown defense type '{typeId}'.";
+
+            if (HijackNetworker.Instance == null)
+                return "Network handler not ready yet. Try again in a moment.";
+
+            int count = 0;
+            foreach (var obj in UnityEngine.Object.FindObjectsOfType(module.ComponentType))
+            {
+                if (obj is not Component c) continue;
+                var netId = ResolveNetworkId(c);
+                if (!netId.HasValue) continue;
+
+                HijackNetworker.Instance.RequestHijack(netId.Value, typeId);
+                count++;
+            }
+
+            if (count == 0)
+                return $"No {module.DisplayName.ToLower()} found on this level.";
+
+            float dur = ModConfig.HijackDuration.Value;
+            string durText = dur > 0f ? $"for {dur:0} seconds" : "until end of round";
+            return $"Hijacking {count} {module.DisplayName.ToLower()}(s) {durText}...";
+        }
+
+        // ----------------------------------------------------------------
+        // MANUAL CONTROL: take over a turret by id (it gets hijacked first so the
+        // auto-targeting bypass is active), then release it.
+        // ----------------------------------------------------------------
+        public static string RequestControl(string code)
+        {
+            var defense = TerminalCodeResolver.Resolve(code, typeof(Turret));
+            if (defense == null)
+                return $"No turret found for code '{code}'. Only turrets can be remote-controlled.";
+
+            var netId = ResolveNetworkId(defense);
+            if (!netId.HasValue)
+                return "This turret has no network identity (cannot be controlled).";
+
+            if (HijackNetworker.Instance == null)
+                return "Network handler not ready yet. Try again in a moment.";
+
+            // Make sure it is allied (so our driving logic runs), then take control.
+            if (!IsAllied(netId.Value))
+                HijackNetworker.Instance.RequestHijack(netId.Value, "turret");
+            HijackNetworker.Instance.RequestControl(netId.Value);
+
+            string releaseKey = ModConfig.ManualControlReleaseKey.Value;
+            return $"Taking manual control of turret '{code}'.\n" +
+                   $"Watch the monitor, aim with the mouse, LMB to fire.\n" +
+                   $"Press {releaseKey} or type '{ModConfig.HijackCommand.Value} release' to stop.";
+        }
+
+        public static string RequestRelease()
+        {
+            var netId = TurretControlSession.TurretControlledByLocal();
+            if (!netId.HasValue)
+                return "You are not controlling any turret.";
+
+            HijackNetworker.Instance?.RequestRelease(netId.Value);
+            return "Released turret control.";
+        }
+
+        // ----------------------------------------------------------------
+        // STEP 2: called on EACH machine via ClientRpc. This is where the
+        // state actually changes, identically everywhere.
+        // ----------------------------------------------------------------
+        public static void ApplyHijack(ulong networkId, string typeId, bool allied)
+        {
+            var defense = ResolveComponent(networkId, typeId);
+            var module = DefenseRegistry.FindModule(typeId);
+            if (defense == null || module == null)
+            {
+                Plugin.Log.LogWarning($"ApplyHijack: could not resolve netId={networkId} type={typeId}");
+                return;
+            }
+
+            module.ApplyAlliedState(defense, allied);
+
+            if (allied)
+            {
+                float duration = ModConfig.HijackDuration.Value;
+                _active[networkId] = new HijackEntry
+                {
+                    NetworkId = networkId,
+                    TypeId = typeId,
+                    Defense = defense,
+                    ExpireTime = duration > 0f ? Time.time + duration : 0f
+                };
+                Plugin.Log.LogInfo($"{module.DisplayName} (net {networkId}) is now ALLIED.");
+            }
+            else
+            {
+                TurretControlSession.End(networkId);  // stop any manual control when it expires
+                RadarTimerDisplay.Restore(defense);   // put the plain code back on the map
+                _active.Remove(networkId);
+                Plugin.Log.LogInfo($"{module.DisplayName} (net {networkId}) is hostile again.");
+            }
+        }
+
+        // ----------------------------------------------------------------
+        // Called every frame (from HijackTicker). Handles expiry and the
+        // targeting logic of "passive" defenses (e.g. mines).
+        // ----------------------------------------------------------------
+        public static void Tick()
+        {
+            if (_active.Count == 0) return;
+
+            // Only the host decides expiry, then broadcasts the return to hostile.
+            bool isServer = NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer;
+
+            List<ulong>? toExpire = null;
+            foreach (var kv in _active)
+            {
+                var entry = kv.Value;
+
+                // Active targeting for defenses without a native loop (e.g. mine).
+                DefenseRegistry.FindModule(entry.TypeId)?.TickAlliedTargeting(entry.Defense);
+
+                // Live countdown on the radar map, next to the code box.
+                RadarTimerDisplay.Update(entry);
+
+                if (isServer && entry.ExpireTime > 0f && Time.time >= entry.ExpireTime)
+                    (toExpire ??= new List<ulong>()).Add(entry.NetworkId);
+            }
+
+            if (toExpire != null)
+                foreach (var id in toExpire)
+                    HijackNetworker.Instance?.RequestUnhijack(id, _active[id].TypeId);
+        }
+
+        public static void ClearAll()
+        {
+            foreach (var entry in _active.Values)
+            {
+                DefenseRegistry.FindModule(entry.TypeId)?.ApplyAlliedState(entry.Defense, false);
+                RadarTimerDisplay.Restore(entry.Defense);
+            }
+            _active.Clear();
+        }
+
+        // ----------------------------------------------------------------
+        // Network <-> component resolution helpers
+        // ----------------------------------------------------------------
+        public static ulong? ResolveNetworkId(Component c)
+        {
+            var no = c.GetComponentInParent<NetworkObject>();
+            return no != null ? no.NetworkObjectId : (ulong?)null;
+        }
+
+        private static Component? ResolveComponent(ulong networkId, string typeId)
+        {
+            var sm = NetworkManager.Singleton?.SpawnManager;
+            if (sm == null) return null;
+            if (!sm.SpawnedObjects.TryGetValue(networkId, out var no) || no == null) return null;
+
+            var module = DefenseRegistry.FindModule(typeId);
+            if (module == null) return null;
+
+            // Find the game component (e.g. Turret) on the resolved network object.
+            return no.GetComponentInChildren(module.ComponentType);
+        }
+    }
+}

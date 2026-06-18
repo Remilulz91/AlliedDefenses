@@ -1,0 +1,64 @@
+name: Build AlliedDefenses
+
+# Builds the mod on every push and pull request, netcode-patches the DLL, and
+# uploads it as a downloadable artifact. Pushing a tag like "v0.1.0" also creates
+# a GitHub Release with the ready-to-use DLL and a Thunderstore zip attached.
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ "v*" ]
+  pull_request:
+  workflow_dispatch:   # lets you run it manually from the Actions tab
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Install Netcode Patcher CLI
+        run: |
+          dotnet tool install -g Evaisa.NetcodePatcher.Cli
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Restore
+        run: dotnet restore
+
+      # -p:NetcodePatch=true makes the build also patch the DLL for multiplayer RPCs.
+      # If this step fails because of a game version change, see GITHUB_BUILD.md
+      # (adjust the Unity/Netcode versions, or build without patching and use the
+      # "Runtime Netcode Patcher" mod in-game instead).
+      - name: Build (Release, netcode-patched)
+        run: dotnet build -c Release -p:NetcodePatch=true
+
+      - name: Stage package
+        run: |
+          mkdir -p dist/AlliedDefenses
+          cp bin/Release/AlliedDefenses.dll dist/AlliedDefenses/
+          cp manifest.json icon.png README.md dist/AlliedDefenses/
+
+      - name: Upload DLL + package (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AlliedDefenses
+          path: dist/AlliedDefenses
+
+      - name: Zip for Thunderstore
+        run: |
+          cd dist/AlliedDefenses
+          zip -r ../../AlliedDefenses.zip .
+
+      - name: Attach to GitHub Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/AlliedDefenses/AlliedDefenses.dll
+            AlliedDefenses.zip
