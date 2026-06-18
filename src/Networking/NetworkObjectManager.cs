@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using HarmonyLib;
 using Unity.Netcode;
@@ -10,12 +11,14 @@ namespace AlliedDefenses.Networking
     /// HijackNetworker). This is the required path to have custom RPCs in a Netcode
     /// for GameObjects game.
     ///
-    /// Two steps, following the standard modding-wiki pattern:
-    ///   1) When the network manager starts (GameNetworkManager.Start), we build a
-    ///      prefab {NetworkObject + HijackNetworker} and register it as a known
-    ///      "network prefab".
-    ///   2) When a game starts (StartOfRound.Awake), the HOST instantiates and spawns
-    ///      that object; it is then replicated to all clients.
+    ///   1) GameNetworkManager.Start  -> build the prefab {NetworkObject + HijackNetworker}
+    ///      and register it as a known network prefab.
+    ///   2) StartOfRound.Start        -> the HOST instantiates and spawns it (once), so
+    ///      it is replicated to all clients. We spawn in Start (not Awake) and guard on
+    ///      HijackNetworker.Instance to be sure the host/server is ready.
+    ///
+    /// Every step logs, and risky calls are wrapped in try/catch, so the BepInEx log
+    /// tells you exactly what happened.
     /// </summary>
     public static class NetworkObjectManager
     {
@@ -25,41 +28,91 @@ namespace AlliedDefenses.Networking
         [HarmonyPatch(typeof(GameNetworkManager), "Start")]
         public static void RegisterPrefab()
         {
-            if (_networkPrefab != null) return;
+            Plugin.Log.LogInfo("NetworkObjectManager: GameNetworkManager.Start reached.");
 
-            _networkPrefab = new GameObject("AlliedDefensesNetworkHandler");
-            var netObj = _networkPrefab.AddComponent<NetworkObject>();
-            _networkPrefab.AddComponent<HijackNetworker>();
+            if (_networkPrefab != null)
+            {
+                Plugin.Log.LogInfo("NetworkObjectManager: prefab already created, skipping.");
+                return;
+            }
 
-            // A NetworkObject needs a stable global hash so host and clients recognize
-            // it the same way. We set one via reflection.
-            AssignStableHash(netObj, "AlliedDefenses.HijackNetworker");
+            try
+            {
+                if (NetworkManager.Singleton == null)
+                {
+                    Plugin.Log.LogError("NetworkObjectManager: NetworkManager.Singleton is null; cannot register prefab.");
+                    return;
+                }
 
-            NetworkManager.Singleton.AddNetworkPrefab(_networkPrefab);
-            Plugin.Log.LogInfo("Network prefab registered.");
+                _networkPrefab = new GameObject("AlliedDefensesNetworkHandler");
+                UnityEngine.Object.DontDestroyOnLoad(_networkPrefab);
+                _networkPrefab.hideFlags = HideFlags.HideAndDontSave;
+
+                var netObj = _networkPrefab.AddComponent<NetworkObject>();
+                _networkPrefab.AddComponent<HijackNetworker>();
+
+                AssignStableHash(netObj, "AlliedDefenses.HijackNetworker");
+
+                NetworkManager.Singleton.AddNetworkPrefab(_networkPrefab);
+                Plugin.Log.LogInfo("NetworkObjectManager: network prefab registered.");
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogError($"NetworkObjectManager: failed to register prefab: {e}");
+            }
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(StartOfRound), "Awake")]
+        [HarmonyPatch(typeof(StartOfRound), "Start")]
         public static void SpawnHandler()
         {
-            var nm = NetworkManager.Singleton;
-            if (nm == null || !(nm.IsHost || nm.IsServer)) return; // only the host spawns
-            if (_networkPrefab == null) return;
+            try
+            {
+                var nm = NetworkManager.Singleton;
+                if (nm == null)
+                {
+                    Plugin.Log.LogWarning("NetworkObjectManager: NetworkManager null at StartOfRound.Start.");
+                    return;
+                }
+                if (!(nm.IsHost || nm.IsServer))
+                {
+                    Plugin.Log.LogInfo("NetworkObjectManager: not the host; client will receive the handler from the host.");
+                    return;
+                }
+                if (HijackNetworker.Instance != null)
+                {
+                    Plugin.Log.LogInfo("NetworkObjectManager: handler already spawned.");
+                    return;
+                }
+                if (_networkPrefab == null)
+                {
+                    Plugin.Log.LogError("NetworkObjectManager: prefab is null (registration failed?); cannot spawn.");
+                    return;
+                }
 
-            var instance = Object.Instantiate(_networkPrefab);
-            instance.GetComponent<NetworkObject>().Spawn(destroyWithScene: false);
-            Plugin.Log.LogInfo("HijackNetworker spawned by the host.");
+                var instance = UnityEngine.Object.Instantiate(_networkPrefab);
+                instance.GetComponent<NetworkObject>().Spawn(destroyWithScene: false);
+                Plugin.Log.LogInfo("NetworkObjectManager: HijackNetworker spawned by the host.");
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogError($"NetworkObjectManager: failed to spawn handler: {e}");
+            }
         }
 
         private static void AssignStableHash(NetworkObject netObj, string key)
         {
             uint hash = (uint)key.GetHashCode();
-            // GlobalObjectIdHash is read-only publicly -> set it via reflection.
             var field = typeof(NetworkObject).GetField(
                 "GlobalObjectIdHash",
                 BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            field?.SetValue(netObj, hash);
+            if (field == null)
+            {
+                Plugin.Log.LogError("NetworkObjectManager: GlobalObjectIdHash field not found; spawn will likely fail.");
+                return;
+            }
+            field.SetValue(netObj, hash);
+            Plugin.Log.LogInfo($"NetworkObjectManager: GlobalObjectIdHash set to {hash}.");
         }
     }
 }
