@@ -55,8 +55,11 @@
                       Publicize="true"
                       PrivateAssets="all" />
 
-    <!-- Unity Netcode for GameObjects (pour la synchro multijoueur) -->
-    <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" IsImplicitlyDefined="true" />
+    <!--
+      Note: we do NOT reference UnityEngine.Modules directly. GameLibs.Steam already
+      pulls the matching Unity version (e.g. 2022.3.62 for game v81). Pinning it here
+      caused a NU1605 package-downgrade error.
+    -->
   </ItemGroup>
 
   <!--
@@ -73,8 +76,9 @@
     Versions below must match the GAME (Lethal Company). Adjust if a game update changes them.
   -->
   <PropertyGroup>
-    <NcpUnityVersion>2022.3.9</NcpUnityVersion>
-    <NcpNetcodeVersion>1.5.2</NcpNetcodeVersion>
+    <!-- Lethal Company v81 stack (Unity 2022.3.62, Netcode for GameObjects 1.12.2). -->
+    <NcpUnityVersion>2022.3.62</NcpUnityVersion>
+    <NcpNetcodeVersion>1.12.2</NcpNetcodeVersion>
     <NcpTransportVersion>1.0.0</NcpTransportVersion>
   </PropertyGroup>
 

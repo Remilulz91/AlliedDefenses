@@ -2,7 +2,7 @@
 
 A **Lethal Company** (BepInEx) mod that lets you **hijack the facility defenses from the ship terminal**. A hijacked defense becomes **allied**: it stops aiming at players and shoots **enemies** instead.
 
-Author: **Remilulz_91**
+Author: **Remilulz_91** — © 2026 Remilulz_91, all rights reserved (see [License & Copyright](#license--copyright)).
 
 > Status: **working skeleton**. Structure, networking and terminal commands are in place. Most game member names are now confirmed against the vanilla decompiled code; the remaining defensive reflection is noted below.
 
@@ -162,6 +162,22 @@ To add another defense, create a class implementing `IHijackableDefense`, then r
 
 - **More faithful aiming**: instead of bypassing the turret's `Update`, patch only its player-detection method to target an enemy → keeps native animations and sounds.
 - **Credit cost** (`HijackCreditCost`) and a global cooldown, validated server-side.
-- **Visual feedback**: allied turret LED/color, ambient message.
-- **icon.png** (256×256) to add for Thunderstore publishing.
-```
+- **First-person turret view** as an alternative to the monitor gun-cam.
+
+---
+
+## License & Copyright
+
+© 2026 **Remilulz_91**. All rights reserved.
+
+This mod and its source code are the property of their author, Remilulz_91. You are welcome to:
+
+- **download, install and play** the mod, and
+- **contribute** to its development (report issues, submit pull requests, or fork it for the purpose of contributing back).
+
+You may **not**:
+
+- claim authorship or ownership of this mod or any part of its code,
+- redistribute it as your own work, or publish modified copies under a different author, without the author's permission.
+
+The mod remains credited to and owned by Remilulz_91. See the `LICENSE` file for the full notice.

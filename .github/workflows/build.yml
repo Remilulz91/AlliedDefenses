@@ -42,7 +42,7 @@ jobs:
         run: |
           mkdir -p dist/AlliedDefenses
           cp bin/Release/AlliedDefenses.dll dist/AlliedDefenses/
-          cp manifest.json icon.png README.md dist/AlliedDefenses/
+          cp manifest.json icon.png README.md CHANGELOG.md LICENSE dist/AlliedDefenses/
 
       - name: Upload DLL + package (artifact)
         uses: actions/upload-artifact@v4
