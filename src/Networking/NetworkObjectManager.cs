@@ -20,6 +20,11 @@ namespace AlliedDefenses.Networking
     /// Every step logs, and risky calls are wrapped in try/catch, so the BepInEx log
     /// tells you exactly what happened.
     /// </summary>
+    // The class-level [HarmonyPatch] is REQUIRED: Harmony's PatchAll() only scans
+    // classes that carry it. Without it, the method-level patches below are silently
+    // ignored (this was the bug that left the network handler unspawned). The bare
+    // attribute is enough; each method declares its own target type.
+    [HarmonyPatch]
     public static class NetworkObjectManager
     {
         private static GameObject? _networkPrefab;
