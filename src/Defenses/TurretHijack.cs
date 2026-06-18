@@ -33,6 +33,10 @@ namespace AlliedDefenses.Defenses
 
         // Allied fire cadence, per turret (key = Unity instanceID).
         private static readonly Dictionary<int, float> _nextFire = new();
+        // Facing captured when the turret becomes allied, used as the idle-scan centre.
+        private static readonly Dictionary<int, Quaternion> _baseRotation = new();
+        // Turrets whose transform hierarchy we've already logged (diagnostic).
+        private static readonly HashSet<int> _loggedHierarchy = new();
         private const float FireInterval = 0.21f;   // matches the vanilla fire rate
         private const int EnemyDamagePerShot = 1;   // damage dealt to monsters per shot (tune to taste)
         private const float AlignToleranceDeg = 10f; // max angle to consider the target "on aim"
@@ -63,10 +67,18 @@ namespace AlliedDefenses.Defenses
                     turret.turretAnimator.SetInteger("TurretMode", (int)TurretMode.Detection);
 
                 TurretVisuals.SetAllied(turret, true);  // green laser/light cue
+
+                // Remember the current facing as the centre of the idle scan, and log
+                // the turret's transform hierarchy once (helps pick the real rotation node).
+                Transform pivot0 = turret.centerPoint != null ? turret.centerPoint : turret.transform;
+                _baseRotation[turret.GetInstanceID()] = pivot0.rotation;
+                LogHierarchyOnce(turret);
             }
             else
             {
-                _nextFire.Remove(turret.GetInstanceID());
+                int id = turret.GetInstanceID();
+                _nextFire.Remove(id);
+                _baseRotation.Remove(id);
                 TurretVisuals.SetAllied(turret, false); // restore original red/orange
                 // Vanilla Update resumes on its own next frame (patch stops bypassing).
             }
@@ -109,6 +121,7 @@ namespace AlliedDefenses.Defenses
 
             if (enemy == null)
             {
+                IdleScan(turret, pivot);        // gently sweep so it looks alive, not frozen
                 TurretVisuals.HideBeam(turret); // no target -> no beam
                 return;
             }
@@ -127,6 +140,46 @@ namespace AlliedDefenses.Defenses
             bool isServer = NetworkManager.Singleton == null || NetworkManager.Singleton.IsServer;
             if (isServer && Vector3.Angle(pivot.forward, toEnemy) <= AlignToleranceDeg)
                 TryFireAtEnemy(turret, enemy);
+        }
+
+        /// <summary>
+        /// Gentle left-right sweep around the facing captured when the turret was
+        /// hijacked, so an allied turret with no target looks alive instead of frozen.
+        /// NOTE: this rotates `centerPoint`. If the turret model does NOT visibly turn
+        /// in-game, centerPoint is not the rotation pivot — the one-time hierarchy log
+        /// (see LogHierarchyOnce) tells us which child transform to rotate instead.
+        /// </summary>
+        private static void IdleScan(Turret turret, Transform pivot)
+        {
+            int id = turret.GetInstanceID();
+            Quaternion baseRot = _baseRotation.TryGetValue(id, out var b) ? b : pivot.rotation;
+            float yaw = Mathf.Sin(Time.time * 0.6f) * 50f;     // +/- 50 degrees sweep
+            Quaternion target = baseRot * Quaternion.Euler(0f, yaw, 0f);
+            pivot.rotation = Quaternion.Slerp(pivot.rotation, target, Time.deltaTime * 2.5f);
+        }
+
+        /// <summary>
+        /// One-time diagnostic: dumps the turret's child transforms (and which carry a
+        /// Renderer / Light / LineRenderer) so we can identify the exact node the game
+        /// rotates, and drive that instead of centerPoint if needed.
+        /// </summary>
+        private static void LogHierarchyOnce(Turret turret)
+        {
+            int id = turret.GetInstanceID();
+            if (!_loggedHierarchy.Add(id)) return;
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"[Turret hierarchy {id}] (R=Renderer L=Light Ln=LineRenderer)");
+            foreach (var t in turret.GetComponentsInChildren<Transform>(true))
+            {
+                string tags = "";
+                if (t.GetComponent<Renderer>() != null) tags += "R";
+                if (t.GetComponent<Light>() != null) tags += "L";
+                if (t.GetComponent<LineRenderer>() != null) tags += "Ln";
+                string centre = (turret.centerPoint == t) ? "  <== centerPoint" : "";
+                sb.AppendLine($"  {t.name} [{tags}]{centre}");
+            }
+            Plugin.Log.LogInfo(sb.ToString());
         }
 
         /// <summary>

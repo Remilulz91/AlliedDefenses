@@ -47,14 +47,20 @@ namespace AlliedDefenses.Defenses
 
         public void ApplyAlliedState(Component defense, bool allied)
         {
-            // No state to flip on the mine itself: player-safety is handled by
-            // MinePatches and enemy detonation by TickAlliedTargeting. Both read the
-            // allied state from HijackManager, so nothing to store here.
+            // Player-safety is handled by MinePatches and enemy detonation by
+            // TickAlliedTargeting. We only restore the light colour when it stops
+            // being allied (the green tint is (re)applied each tick below).
+            if (!allied)
+                AlliedLightTint.Apply(defense, false);
         }
 
         public void TickAlliedTargeting(Component defense)
         {
             if (defense is not Landmine mine || mine.hasExploded) return;
+
+            // Keep the mine's light green so you can SEE it's hijacked (re-asserted each
+            // frame in case the game animates it back to red).
+            AlliedLightTint.Apply(mine, true);
 
             // Only the host decides to detonate; the explosion is then networked to
             // everyone by the game's own RPC, so it stays in sync.
