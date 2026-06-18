@@ -4,6 +4,11 @@ A **Lethal Company** (BepInEx) mod that lets you **hijack the facility defenses 
 
 Author: **Remilulz_91** — © 2026 Remilulz_91, all rights reserved (see [License & Copyright](#license--copyright)).
 
+> ⚠️ **MULTIPLAYER — EVERY player must install this mod (same version).**
+> It adds networked behaviour (custom RPCs + a spawned network object), so it will
+> **not** work if only the host has it, and a version mismatch can cause errors/desyncs.
+> Installing it solo / single-player is of course fine.
+
 > Status: **working skeleton**. Structure, networking and terminal commands are in place. Most game member names are now confirmed against the vanilla decompiled code; the remaining defensive reflection is noted below.
 
 ## Terminal commands
@@ -118,14 +123,22 @@ Without this step, hijacking won't sync between players (the RPCs do nothing). `
 
 ---
 
-## Install / test
+## Install
 
-1. Install **BepInEx** on the game (easiest: the **r2modman** mod manager).
-2. Copy the netcode-patched `AlliedDefenses.dll` into `Lethal Company/BepInEx/plugins/`.
-3. Launch the game: the BepInEx console should show `AlliedDefenses v0.1.0 by Remilulz_91 loaded`.
-4. In a round, open the terminal and type `ally <id>` with a turret's id (or `ally help`).
+Easiest — with **r2modman** (recommended):
 
-In multiplayer, **every player must have the mod** (same version).
+1. Install **r2modman** (https://thunderstore.io/c/lethal-company/p/ebkr/r2modman/), open it and select **Lethal Company**, then create a profile.
+2. Install **BepInExPack** from the Online tab (or let it install as a dependency).
+3. Install this mod: **Settings → Import local mod** and pick `AlliedDefenses.zip` (the release package), or just install it from Thunderstore once published.
+4. Launch with **Start modded**.
+
+Manual (without r2modman): install BepInEx into the game folder, then put the
+netcode-patched `AlliedDefenses.dll` into `Lethal Company/BepInEx/plugins/AlliedDefenses/`.
+
+Check the BepInEx console / `BepInEx/LogOutput.log` for
+`AlliedDefenses v0.1.0 by Remilulz_91 loaded`, then in a round type `ally help` in the terminal.
+
+> Reminder: in multiplayer **every player must have the mod**, same version (see the banner at the top).
 
 ---
 

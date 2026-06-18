@@ -3,7 +3,7 @@
   "author": "Remilulz_91",
   "version_number": "0.1.0",
   "website_url": "",
-  "description": "Hijack the facility defenses from the ship terminal: turrets (mines soon) become your allies and target enemies instead of players.",
+  "description": "Hijack turrets & mines from the terminal: they fight enemies, not you. Manual turret control, colour cues, timers. ALL players must install (same version).",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2100"
   ]
