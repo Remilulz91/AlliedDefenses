@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+- More robust network handler spawn (on StartOfRound.Start, host-only, spawn-once).
+- Added diagnostic logging around prefab registration and spawn.
+
 ## 0.1.0
 - Initial version.
 - Hijack turrets and mines from the ship terminal: `ally <id>` (e.g. `ally U9`),
