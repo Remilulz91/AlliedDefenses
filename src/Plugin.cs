@@ -43,7 +43,9 @@ namespace AlliedDefenses
             Log = Logger;
 
             // 1) Configuration (command keyword, duration, range, etc.)
-            ModConfig.Init(Config);
+            //    base.Config is BepInEx's ConfigFile (qualified to avoid any clash
+            //    with the AlliedDefenses.Config namespace).
+            ModConfig.Init(base.Config);
 
             // 2) Apply ALL Harmony patches found in this assembly.
             //    Harmony automatically scans classes marked with [HarmonyPatch].

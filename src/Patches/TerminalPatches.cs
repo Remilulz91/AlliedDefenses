@@ -1,7 +1,7 @@
 using System;
 using AlliedDefenses.Config;
 using AlliedDefenses.Core;
-using AlliedDefenses.Terminal;
+using AlliedDefenses.UI;
 using HarmonyLib;
 using UnityEngine;
 

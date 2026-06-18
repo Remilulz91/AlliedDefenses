@@ -2,7 +2,7 @@ using System.Text;
 using AlliedDefenses.Config;
 using AlliedDefenses.Core;
 
-namespace AlliedDefenses.Terminal
+namespace AlliedDefenses.UI
 {
     /// <summary>
     /// Builds the English text shown by the terminal commands. Kept here (not hard
