@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.1.4
+## 0.1.5
 - Allied mines now glow green (in-world) so you can tell they're hijacked.
 - Allied turrets idle-sweep instead of freezing when no enemy is in range.
-- Added a one-time turret hierarchy log to pinpoint the real rotation pivot
-  (tuning aid for the aiming).
+- One-time turret hierarchy log (when a turret is hijacked) to pinpoint the real
+  rotation pivot — a tuning aid for the aiming.
 
 ## 0.1.3
 - Ships the network handler fix (missing class-level [HarmonyPatch] on
