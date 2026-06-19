@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+- Manual control reworked: the turret now follows where you LOOK (no more buggy
+  monitor gun-cam). LMB fires. The ship monitor keeps its normal radar view.
+
 ## 0.1.9
 - `ally control` with no id now takes over the NEAREST turret (handy for solo/testing
   where you can't read a turret's terminal code).

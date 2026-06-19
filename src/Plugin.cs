@@ -27,7 +27,7 @@ namespace AlliedDefenses
         public const string Author = "Remilulz_91";
         public const string Guid = "Remilulz_91.AlliedDefenses";
         public const string Name = "AlliedDefenses";
-        public const string Version = "0.1.9";
+        public const string Version = "0.2.0";
 
         /// <summary>Singleton instance, accessible anywhere via Plugin.Instance.</summary>
         public static Plugin Instance { get; private set; } = null!;

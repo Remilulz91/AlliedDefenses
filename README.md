@@ -42,9 +42,9 @@ Original colours are restored when a defense turns hostile again. Everything liv
 
 ### Manual remote control
 
-`ally control <id>` lets you take over an allied turret yourself: the ship monitor switches to the turret's gun-cam, you aim with the mouse and fire with LMB (it hits **anything**, players included), and `ally release` (or the release key, default `V`) hands it back. Your aim and shots are streamed to all players so everyone sees the turret move and fire.
+`ally control` (or `ally control <id>`) lets you take over a turret yourself: the turret then **follows where you look** — turn your view to aim it — and **LMB fires** (it hits **anything**, players included). `ally release` (or the release key, default `V`) hands it back. Your aim and shots are streamed to all players so everyone sees the turret move and fire. With no id, the nearest turret is taken (handy solo).
 
-This is the most engine-heavy feature, split into clear parts: `TurretControlSession` (state), networker RPCs (begin/end/aim), `ManualControlInput` (local mouse/key), `TurretHijack.DriveManually` (aim + fire), and `TurretMonitorFeed` (the gun-cam on the monitor). The camera-to-monitor rendering and a couple of input details (freezing movement, cursor) are marked `TODO` because they genuinely need tuning in-engine — see the notes in `TurretMonitorFeed.cs`.
+Parts: `TurretControlSession` (state), networker RPCs (begin/end/aim), `ManualControlInput` (reads your look direction + LMB), `TurretHijack.DriveManually` (aims the rotating rod + fires). An earlier experiment piped a gun-cam to the ship monitor; that path is shelved (see the placeholder `Monitor/TurretMonitorFeed.cs`) because a clean camera→monitor feed is a project of its own (OpenBodyCams-style).
 
 ---
 

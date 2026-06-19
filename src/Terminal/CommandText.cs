@@ -55,8 +55,8 @@ namespace AlliedDefenses.UI
             sb.AppendLine("MANUAL CONTROL (turrets):");
             sb.AppendLine($"  {k} control        take over the NEAREST turret (no id needed).");
             sb.AppendLine($"  {k} control <id>   take over a specific turret.");
-            sb.AppendLine("  The ship monitor switches to the turret's gun-cam. Aim with the");
-            sb.AppendLine("  mouse, LMB to fire (hits ANYTHING, players included).");
+            sb.AppendLine("  The turret follows where you LOOK; LMB to fire (hits ANYTHING,");
+            sb.AppendLine("  players included). Watch it turn and shoot in the world.");
             sb.AppendLine($"  Press the release key or '{k} release' to hand it back.");
             sb.AppendLine("");
             sb.AppendLine("All hijacks last for a set time, then the defense turns hostile");
