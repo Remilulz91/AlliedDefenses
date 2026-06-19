@@ -41,8 +41,7 @@ namespace AlliedDefenses.Monitor
                 return;
             }
 
-            var pivot = ResolvePivot(turretNetId);
-            if (pivot == null) return;
+            if (!ResolveTurret(turretNetId, out var rod, out var pivot, out var muzzle)) return;
 
             if (_camObject == null)
             {
@@ -58,10 +57,11 @@ namespace AlliedDefenses.Monitor
             _turretCam.farClipPlane = 100f;
             _turretCam.fieldOfView = 65f;
 
-            // Sit on the barrel and look down its forward axis.
-            _camObject.transform.SetParent(pivot, false);
-            _camObject.transform.localPosition = new Vector3(0f, 0.2f, 0.5f); // TODO: tune offset
-            _camObject.transform.localRotation = Quaternion.identity;
+            // Parent to the ROTATING rod so the camera follows the aim, sit at the muzzle
+            // and look along the barrel direction (pivot -> muzzle).
+            _camObject.transform.SetParent(rod, true);
+            _camObject.transform.position = muzzle.position - (muzzle.position - pivot.position).normalized * 0.4f;
+            _camObject.transform.rotation = Quaternion.LookRotation((muzzle.position - pivot.position).normalized);
 
             _turretCam.enabled = true;
             _radarCam = radarCam;
@@ -100,14 +100,19 @@ namespace AlliedDefenses.Monitor
             return null;
         }
 
-        private static Transform? ResolvePivot(ulong netId)
+        private static bool ResolveTurret(ulong netId, out Transform rod, out Transform pivot, out Transform muzzle)
         {
+            rod = pivot = muzzle = null!;
             var sm = Unity.Netcode.NetworkManager.Singleton?.SpawnManager;
-            if (sm == null || !sm.SpawnedObjects.TryGetValue(netId, out var no) || no == null) return null;
+            if (sm == null || !sm.SpawnedObjects.TryGetValue(netId, out var no) || no == null) return false;
 
             var turret = no.GetComponentInChildren<Turret>();
-            if (turret == null) return null;
-            return turret.centerPoint != null ? turret.centerPoint : turret.transform;
+            if (turret == null) return false;
+
+            rod = turret.turretRod;
+            pivot = turret.centerPoint;
+            muzzle = turret.aimPoint;
+            return rod != null && pivot != null && muzzle != null;
         }
     }
 }

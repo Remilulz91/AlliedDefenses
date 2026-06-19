@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.8
+- Turrets now actually aim: rotate the real `turretRod` (RotatingRodContainer) toward
+  the target instead of the non-rotating centerPoint. Beam and shots come from the
+  muzzle (`aimPoint`). Fixes the "stares at the wall / frozen" behaviour.
+- Manual control and the monitor gun-cam follow the rotating rod too.
+
 ## 0.1.7
 - Better turret diagnostic: logs the full prefab tree and the Turret's Transform
   fields (reflection) once, to identify the real rotation node.

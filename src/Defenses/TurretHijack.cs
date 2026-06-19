@@ -33,8 +33,8 @@ namespace AlliedDefenses.Defenses
 
         // Allied fire cadence, per turret (key = Unity instanceID).
         private static readonly Dictionary<int, float> _nextFire = new();
-        // Facing captured when the turret becomes allied, used as the idle-scan centre.
-        private static readonly Dictionary<int, Quaternion> _baseRotation = new();
+        // Barrel direction captured when the turret becomes allied (idle-scan centre).
+        private static readonly Dictionary<int, Vector3> _baseDir = new();
         private const float FireInterval = 0.21f;   // matches the vanilla fire rate
         private const int EnemyDamagePerShot = 1;   // damage dealt to monsters per shot (tune to taste)
         private const float AlignToleranceDeg = 10f; // max angle to consider the target "on aim"
@@ -66,17 +66,18 @@ namespace AlliedDefenses.Defenses
 
                 TurretVisuals.SetAllied(turret, true);  // green laser/light cue
 
-                // Remember the current facing as the centre of the idle scan, and log
-                // the turret's transform hierarchy once (helps pick the real rotation node).
-                Transform pivot0 = turret.centerPoint != null ? turret.centerPoint : turret.transform;
-                _baseRotation[turret.GetInstanceID()] = pivot0.rotation;
+                // Remember the current barrel direction as the centre of the idle scan,
+                // and log the turret structure once (diagnostic).
+                if (turret.aimPoint != null && turret.centerPoint != null)
+                    _baseDir[turret.GetInstanceID()] =
+                        (turret.aimPoint.position - turret.centerPoint.position).normalized;
                 LogHierarchyOnce(turret);
             }
             else
             {
                 int id = turret.GetInstanceID();
                 _nextFire.Remove(id);
-                _baseRotation.Remove(id);
+                _baseDir.Remove(id);
                 TurretVisuals.SetAllied(turret, false); // restore original red/orange
                 // Vanilla Update resumes on its own next frame (patch stops bypassing).
             }
@@ -99,61 +100,90 @@ namespace AlliedDefenses.Defenses
         /// </summary>
         public void DriveAlliedTurret(Turret turret)
         {
-            Transform pivot = turret.centerPoint != null ? turret.centerPoint : turret.transform;
-            Vector3 origin = pivot.position;
+            // Real nodes (confirmed from the prefab diagnostic):
+            //   turretRod  = RotatingRodContainer  -> the part that actually rotates
+            //   centerPoint= CenterTurretPos       -> rotation pivot (reference point)
+            //   aimPoint   = GunBarrelPos          -> the muzzle
+            if (!GetNodes(turret, out var rod, out var pivot, out var muzzle))
+                return; // can't safely drive this turret
 
             // If a player is manually driving this turret, obey their aim/fire instead
             // of auto-targeting enemies.
             ulong? netId = HijackManager.ResolveNetworkId(turret);
             if (netId.HasValue && TurretControlSession.Get(netId.Value) is ControlInfo ctrl)
             {
-                DriveManually(turret, pivot, ctrl);
+                DriveManually(turret, rod, pivot, muzzle, ctrl);
                 return;
             }
 
+            Vector3 barrelDir = (muzzle.position - pivot.position).normalized;
             var enemy = TargetingHelper.FindBestEnemy(
-                origin, pivot.forward,
+                muzzle.position, barrelDir,
                 range: ModConfig.EnemyDetectionRange.Value,
-                coneHalfAngle: 180f,        // an allied turret may swivel 360° toward the threat
+                coneHalfAngle: 180f,        // an allied turret may swivel toward the threat
                 requireLineOfSight: true);
 
             if (enemy == null)
             {
-                IdleScan(turret, pivot);        // gently sweep so it looks alive, not frozen
-                TurretVisuals.HideBeam(turret); // no target -> no beam
+                IdleScan(turret, rod, pivot, muzzle); // gentle sweep so it looks alive
+                TurretVisuals.HideBeam(turret);       // no target -> no beam
                 return;
             }
 
-            Vector3 toEnemy = (enemy.transform.position + Vector3.up * 0.5f) - origin;
+            Vector3 targetPoint = enemy.transform.position + Vector3.up * 0.5f;
 
-            // 1) Rotate the turret toward the enemy (visual, all clients).
-            Quaternion target = Quaternion.LookRotation(toEnemy.normalized);
-            float speed = Mathf.Max(turret.rotationSpeed, 90f); // never feel sluggish
-            pivot.rotation = Quaternion.RotateTowards(pivot.rotation, target, speed * Time.deltaTime);
+            // Rotate the rotating rod toward the enemy (visual, all clients).
+            float speed = Mathf.Max(turret.rotationSpeed, 90f);
+            AimRodAt(rod, pivot.position, muzzle.position, targetPoint, speed);
 
-            // 2) Permanent green beam from the barrel along where it's aiming.
-            UpdateBeam(turret, pivot);
+            // Permanent green beam from the muzzle.
+            UpdateBeam(turret, pivot, muzzle);
 
-            // 3) Fire if aligned (host applies the damage).
+            // Fire if aligned (host applies the damage).
             bool isServer = NetworkManager.Singleton == null || NetworkManager.Singleton.IsServer;
-            if (isServer && Vector3.Angle(pivot.forward, toEnemy) <= AlignToleranceDeg)
+            float ang = Vector3.Angle(muzzle.position - pivot.position, targetPoint - pivot.position);
+            if (isServer && ang <= AlignToleranceDeg)
                 TryFireAtEnemy(turret, enemy);
         }
 
+        /// <summary>Resolve the rotating rod, pivot and muzzle (publicized fields).</summary>
+        private static bool GetNodes(Turret turret, out Transform rod, out Transform pivot, out Transform muzzle)
+        {
+            rod = turret.turretRod;
+            pivot = turret.centerPoint;
+            muzzle = turret.aimPoint;
+            return rod != null && pivot != null && muzzle != null;
+        }
+
         /// <summary>
-        /// Gentle left-right sweep around the facing captured when the turret was
-        /// hijacked, so an allied turret with no target looks alive instead of frozen.
-        /// NOTE: this rotates `centerPoint`. If the turret model does NOT visibly turn
-        /// in-game, centerPoint is not the rotation pivot — the one-time hierarchy log
-        /// (see LogHierarchyOnce) tells us which child transform to rotate instead.
+        /// Rotate the rod so the barrel direction (pivot -> muzzle) points at targetPoint.
+        /// Uses FromToRotation, so it works regardless of the rod's local axes, and steps
+        /// at most degPerSec per second for a smooth turn.
         /// </summary>
-        private static void IdleScan(Turret turret, Transform pivot)
+        private static void AimRodAt(Transform rod, Vector3 pivotPos, Vector3 muzzlePos,
+                                     Vector3 targetPoint, float degPerSec)
+        {
+            Vector3 cur = muzzlePos - pivotPos;
+            Vector3 des = targetPoint - pivotPos;
+            if (cur.sqrMagnitude < 1e-5f || des.sqrMagnitude < 1e-5f) return;
+
+            Quaternion targetRot = Quaternion.FromToRotation(cur.normalized, des.normalized) * rod.rotation;
+            rod.rotation = Quaternion.RotateTowards(rod.rotation, targetRot, degPerSec * Time.deltaTime);
+        }
+
+        /// <summary>
+        /// Gentle left-right sweep around the barrel direction captured when the turret
+        /// was hijacked, so an allied turret with no target looks alive instead of frozen.
+        /// </summary>
+        private static void IdleScan(Turret turret, Transform rod, Transform pivot, Transform muzzle)
         {
             int id = turret.GetInstanceID();
-            Quaternion baseRot = _baseRotation.TryGetValue(id, out var b) ? b : pivot.rotation;
-            float yaw = Mathf.Sin(Time.time * 0.6f) * 50f;     // +/- 50 degrees sweep
-            Quaternion target = baseRot * Quaternion.Euler(0f, yaw, 0f);
-            pivot.rotation = Quaternion.Slerp(pivot.rotation, target, Time.deltaTime * 2.5f);
+            Vector3 baseDir = _baseDir.TryGetValue(id, out var d)
+                ? d : (muzzle.position - pivot.position).normalized;
+
+            float yaw = Mathf.Sin(Time.time * 0.6f) * 50f;            // +/- 50 deg sweep
+            Vector3 des = Quaternion.AngleAxis(yaw, Vector3.up) * baseDir;
+            AimRodAt(rod, pivot.position, muzzle.position, pivot.position + des * 5f, 60f);
         }
 
         private static bool _diagLogged;
@@ -210,14 +240,15 @@ namespace AlliedDefenses.Defenses
         /// first surface it hits (or at detection range). Gives a clear green laser
         /// while the turret is on our side.
         /// </summary>
-        private static void UpdateBeam(Turret turret, Transform pivot)
+        private static void UpdateBeam(Turret turret, Transform pivot, Transform muzzle)
         {
             float range = ModConfig.EnemyDetectionRange.Value;
-            Vector3 start = pivot.position + pivot.forward * 0.5f;
-            Vector3 end = Physics.Raycast(start, pivot.forward, out RaycastHit hit, range, ~0,
+            Vector3 dir = (muzzle.position - pivot.position).normalized;
+            Vector3 start = muzzle.position;
+            Vector3 end = Physics.Raycast(start, dir, out RaycastHit hit, range, ~0,
                                           QueryTriggerInteraction.Ignore)
                 ? hit.point
-                : start + pivot.forward * range;
+                : start + dir * range;
 
             TurretVisuals.DrawBeam(turret, start, end);
         }
@@ -247,20 +278,23 @@ namespace AlliedDefenses.Defenses
         /// ANYTHING, players included) while they hold fire. Aim is applied on every
         /// client for a consistent visual; damage is resolved on the host only.
         /// </summary>
-        private void DriveManually(Turret turret, Transform pivot, ControlInfo ctrl)
+        private void DriveManually(Turret turret, Transform rod, Transform pivot, Transform muzzle, ControlInfo ctrl)
         {
             if (ctrl.AimDirection.sqrMagnitude > 0.001f)
-                pivot.rotation = Quaternion.LookRotation(ctrl.AimDirection.normalized);
+            {
+                Vector3 targetPoint = pivot.position + ctrl.AimDirection.normalized * 10f;
+                AimRodAt(rod, pivot.position, muzzle.position, targetPoint, 720f); // snappy
+            }
 
             // Always show the green beam while manually aiming.
-            UpdateBeam(turret, pivot);
+            UpdateBeam(turret, pivot, muzzle);
 
             bool isServer = NetworkManager.Singleton == null || NetworkManager.Singleton.IsServer;
             if (ctrl.Firing && isServer)
-                ManualFire(turret, pivot);
+                ManualFire(turret, pivot, muzzle);
         }
 
-        private void ManualFire(Turret turret, Transform pivot)
+        private void ManualFire(Turret turret, Transform pivot, Transform muzzle)
         {
             int id = turret.GetInstanceID();
             float now = Time.time;
@@ -268,10 +302,11 @@ namespace AlliedDefenses.Defenses
             _nextFire[id] = now + FireInterval;
 
             int damage = ModConfig.ManualControlDamage.Value;
-            Vector3 origin = pivot.position + pivot.forward * 0.5f;
+            Vector3 dir = (muzzle.position - pivot.position).normalized;
+            Vector3 origin = muzzle.position;
 
             // Hit the first thing in the line of fire (broad mask; we filter by what we hit).
-            if (Physics.Raycast(origin, pivot.forward, out RaycastHit hit, 60f, ~0, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(origin, dir, out RaycastHit hit, 60f, ~0, QueryTriggerInteraction.Ignore))
             {
                 var enemy = hit.collider.GetComponentInParent<EnemyAI>();
                 if (enemy != null && !enemy.isEnemyDead)

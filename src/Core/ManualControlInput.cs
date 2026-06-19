@@ -83,14 +83,14 @@ namespace AlliedDefenses.Core
             if (sm == null || !sm.SpawnedObjects.TryGetValue(netId, out var no) || no == null) return;
 
             var turret = no.GetComponentInChildren<Turret>();
-            Transform? pivot = turret != null
-                ? (turret.centerPoint != null ? turret.centerPoint : turret.transform)
-                : null;
-            if (pivot == null) return;
+            if (turret == null || turret.aimPoint == null || turret.centerPoint == null) return;
 
-            Vector3 e = pivot.rotation.eulerAngles;
-            _yaw = e.y;
-            _pitch = NormalizePitch(e.x);
+            // Seed yaw/pitch from the current barrel direction (pivot -> muzzle), so taking
+            // control doesn't snap the aim.
+            Vector3 dir = (turret.aimPoint.position - turret.centerPoint.position).normalized;
+            if (dir.sqrMagnitude < 1e-5f) return;
+            _yaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+            _pitch = -Mathf.Asin(Mathf.Clamp(dir.y, -1f, 1f)) * Mathf.Rad2Deg;
         }
 
         private static float NormalizePitch(float x) => x > 180f ? x - 360f : x;
