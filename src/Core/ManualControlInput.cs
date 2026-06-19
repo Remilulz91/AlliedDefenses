@@ -69,7 +69,7 @@ namespace AlliedDefenses.Core
                 if (Time.time >= _nextSend)
                 {
                     _nextSend = Time.time + SendInterval;
-                    try { HijackNetworker.Instance?.SendAim(netId.Value, dir, firing); }
+                    try { HijackNetworker.Active?.SendAim(netId.Value, dir, firing); }
                     catch (System.Exception e) { Plugin.Log.LogWarning($"SendAim failed: {e.Message}"); }
                 }
             }
@@ -77,7 +77,7 @@ namespace AlliedDefenses.Core
             if (TryGetReleaseKey(out var key) && Keyboard.current != null &&
                 Keyboard.current[key].wasPressedThisFrame)
             {
-                HijackNetworker.Instance?.RequestRelease(netId.Value);
+                HijackNetworker.Active?.RequestRelease(netId.Value);
             }
         }
 

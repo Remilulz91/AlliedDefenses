@@ -19,11 +19,32 @@ namespace AlliedDefenses.Networking
         public static HijackNetworker? Instance { get; private set; }
         private static bool _warnedRpc;
 
+        /// <summary>
+        /// The live networker. Re-acquires it if the cached reference was destroyed
+        /// (e.g. after a player disconnects and reconnects, the old object is gone), so
+        /// terminal commands keep working on reconnect instead of saying "not ready".
+        /// </summary>
+        public static HijackNetworker? Active
+        {
+            get
+            {
+                if (Instance != null) return Instance; // Unity-null: destroyed -> re-find below
+                Instance = UnityEngine.Object.FindObjectOfType<HijackNetworker>();
+                return Instance;
+            }
+        }
+
         public override void OnNetworkSpawn()
         {
             Instance = this;
             base.OnNetworkSpawn();
             Plugin.Log.LogInfo("HijackNetworker ready (network active).");
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            if (Instance == this) Instance = null;
+            base.OnNetworkDespawn();
         }
 
         private static void Safe(Action rpc)

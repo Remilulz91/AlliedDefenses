@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.5
+- Fix terminal commands failing for a player after they disconnect and reconnect: the
+  network handler reference is now re-acquired if the old one was destroyed (and cleared
+  on despawn) instead of staying stale.
+
 ## 0.3.4
 - Updated required dependencies to their latest versions: BepInExPack 5.4.2305,
   OpenBodyCams 3.0.12.

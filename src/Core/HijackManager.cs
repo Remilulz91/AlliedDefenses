@@ -61,11 +61,12 @@ namespace AlliedDefenses.Core
             if (!netId.HasValue)
                 return "This defense has no network identity (cannot be hijacked).";
 
-            if (HijackNetworker.Instance == null)
+            var net = HijackNetworker.Active;
+            if (net == null)
                 return "Network handler not ready yet. Try again in a moment.";
 
             // Delegate to the networker, which travels server -> all clients.
-            HijackNetworker.Instance.RequestHijack(netId.Value, module.TypeId);
+            net.RequestHijack(netId.Value, module.TypeId);
 
             float dur = ModConfig.HijackDuration.Value;
             string durText = dur > 0f ? $"for {dur:0} seconds" : "until end of round";
@@ -112,18 +113,19 @@ namespace AlliedDefenses.Core
             if (!netId.HasValue)
                 return "This turret has no network identity (cannot be controlled).";
 
-            if (HijackNetworker.Instance == null)
+            var net = HijackNetworker.Active;
+            if (net == null)
                 return "Network handler not ready yet. Try again in a moment.";
 
             // Release any turret we're already controlling, so switching works without
             // pressing the release key first.
             var current = TurretControlSession.TurretControlledByLocal();
             if (current.HasValue && current.Value != netId.Value)
-                HijackNetworker.Instance.RequestRelease(current.Value);
+                net.RequestRelease(current.Value);
 
             // Always (re)hijack so the 60s timer is fresh, then take control.
-            HijackNetworker.Instance.RequestHijack(netId.Value, "turret");
-            HijackNetworker.Instance.RequestControl(netId.Value);
+            net.RequestHijack(netId.Value, "turret");
+            net.RequestControl(netId.Value);
 
             string releaseKey = ModConfig.ManualControlReleaseKey.Value;
             return $"Taking manual control of turret '{code}'.\n" +
@@ -137,7 +139,7 @@ namespace AlliedDefenses.Core
             if (!netId.HasValue)
                 return "You are not controlling any turret.";
 
-            HijackNetworker.Instance?.RequestRelease(netId.Value);
+            HijackNetworker.Active?.RequestRelease(netId.Value);
             return "Released turret control.";
         }
 
@@ -232,7 +234,7 @@ namespace AlliedDefenses.Core
 
             if (toExpire != null)
                 foreach (var entry in toExpire)
-                    HijackNetworker.Instance?.RequestUnhijack(entry.NetworkId, entry.TypeId);
+                    HijackNetworker.Active?.RequestUnhijack(entry.NetworkId, entry.TypeId);
         }
 
         public static void ClearAll()
