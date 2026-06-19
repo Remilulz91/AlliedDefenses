@@ -1,11 +1,11 @@
 {
   "name": "AlliedDefenses",
   "author": "Remilulz_91",
-  "version_number": "0.3.3",
+  "version_number": "0.3.4",
   "website_url": "https://github.com/Remilulz91/AlliedDefenses",
   "description": "Hijack turrets & mines from the terminal: they fight enemies, not you. Manual turret control, colour cues, timers. ALL players must install (same version).",
   "dependencies": [
-    "BepInEx-BepInExPack-5.4.2100",
-    "Zaggy1024-OpenBodyCams-3.0.6"
+    "BepInEx-BepInExPack-5.4.2305",
+    "Zaggy1024-OpenBodyCams-3.0.12"
   ]
 }

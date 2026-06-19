@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.4
+- Updated required dependencies to their latest versions: BepInExPack 5.4.2305,
+  OpenBodyCams 3.0.12.
+
 ## 0.3.3
 - Fixed the GitHub website link (Remilulz91, no underscore).
 
