@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.0
+- Automatic Thunderstore publishing from GitHub on each version tag (see PUBLISH_THUNDERSTORE.md).
+
 ## 0.2.9
 - Reduce "see through walls" in the turret view: the camera now sits on a mount placed a
   bit behind the muzzle (in open space) instead of inside the wall the turret is bolted to.
