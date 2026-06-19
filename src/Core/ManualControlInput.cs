@@ -87,7 +87,8 @@ namespace AlliedDefenses.Core
             if (sm == null || !sm.SpawnedObjects.TryGetValue(netId, out var no) || no == null) return;
 
             var turret = no.GetComponentInChildren<Turret>();
-            if (turret == null || turret.aimPoint == null || turret.centerPoint == null) return;
+            if (turret == null || turret.turretRod == null ||
+                turret.aimPoint == null || turret.centerPoint == null) return;
 
             // Seed yaw/pitch from the current barrel direction so the aim doesn't snap.
             Vector3 dir = (turret.aimPoint.position - turret.centerPoint.position).normalized;
@@ -98,7 +99,7 @@ namespace AlliedDefenses.Core
             }
 
             // Show the turret's view on the ship monitor (via OpenBodyCams, if installed).
-            TurretBodyCam.Show(turret.aimPoint);
+            TurretBodyCam.Show(turret.turretRod, turret.centerPoint, turret.aimPoint);
         }
 
         private static bool TryGetReleaseKey(out Key key)

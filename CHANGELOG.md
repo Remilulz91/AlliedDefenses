@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.9
+- Reduce "see through walls" in the turret view: the camera now sits on a mount placed a
+  bit behind the muzzle (in open space) instead of inside the wall the turret is bolted to.
+
 ## 0.2.8
 - Fix tilted/rolling turret view: aiming now keeps "up" toward world up (no roll drift),
   so the body-cam image stays level.

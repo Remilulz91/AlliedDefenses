@@ -23,11 +23,17 @@ namespace AlliedDefenses.Monitor
     {
         private static bool _active;
         private static object? _mainCam; // OpenBodyCams.BodyCamComponent (a MonoBehaviour)
+        private static GameObject? _mount;
 
         public static bool ObcAvailable => GetMainCam() != null;
 
-        /// <summary>Point OBC's main body cam at the turret muzzle.</summary>
-        public static void Show(Transform aimPoint)
+        /// <summary>
+        /// Point OBC's main body cam at the turret. We attach it to a mount placed a bit
+        /// BEHIND the muzzle (in open space, not inside the wall the turret is bolted to),
+        /// which removes most of the "see through walls" near-clipping. The mount is
+        /// parented to the rotating rod, so the view follows the aim.
+        /// </summary>
+        public static void Show(Transform rod, Transform pivot, Transform muzzle)
         {
             var cam = GetMainCam();
             if (cam == null)
@@ -38,9 +44,16 @@ namespace AlliedDefenses.Monitor
 
             try
             {
+                Vector3 barrelDir = (muzzle.position - pivot.position).normalized;
+
+                if (_mount == null) _mount = new GameObject("AlliedDefenses_CamMount");
+                _mount.transform.SetParent(rod, true);
+                _mount.transform.position = muzzle.position - barrelDir * 0.8f + Vector3.up * 0.15f;
+                _mount.transform.rotation = Quaternion.LookRotation(barrelDir, Vector3.up);
+
                 var m = cam.GetType().GetMethod("SetTargetToTransform", new[] { typeof(Transform) });
                 if (m == null) { Plugin.Log.LogWarning("TurretBodyCam: SetTargetToTransform not found."); return; }
-                m.Invoke(cam, new object[] { aimPoint });
+                m.Invoke(cam, new object[] { _mount.transform });
                 _mainCam = cam;
                 _active = true;
                 Plugin.Log.LogInfo("TurretBodyCam: OBC main body cam retargeted to the turret.");
@@ -54,6 +67,7 @@ namespace AlliedDefenses.Monitor
         /// <summary>Restore OBC's main body cam to the local player.</summary>
         public static void Hide()
         {
+            if (_mount != null) { UnityEngine.Object.Destroy(_mount); _mount = null; }
             if (!_active) return;
             _active = false;
 
