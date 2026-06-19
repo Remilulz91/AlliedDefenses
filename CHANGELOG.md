@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.8
+- Fix tilted/rolling turret view: aiming now keeps "up" toward world up (no roll drift),
+  so the body-cam image stays level.
+- Brief one-shot muzzle flash per shot (left-click to fire) for clear feedback.
+- "ally control <id>" now auto-releases the turret you were controlling, so you can
+  switch turrets without pressing the release key first.
+
 ## 0.2.7
 - Removed the control light entirely (it caused the white-out and stayed enabled via the
   saved config even after the default was flipped). The turret view now always uses the

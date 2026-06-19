@@ -156,18 +156,25 @@ namespace AlliedDefenses.Defenses
         }
 
         /// <summary>
-        /// Rotate the rod so the barrel direction (pivot -> muzzle) points at targetPoint.
-        /// Uses FromToRotation, so it works regardless of the rod's local axes, and steps
-        /// at most degPerSec per second for a smooth turn.
+        /// Rotate the rod so the barrel direction (pivot -> muzzle) points at targetPoint,
+        /// keeping "up" toward world up so the view never rolls/tilts. Computes an absolute
+        /// target rotation each frame (no incremental drift), then steps toward it.
         /// </summary>
         private static void AimRodAt(Transform rod, Vector3 pivotPos, Vector3 muzzlePos,
                                      Vector3 targetPoint, float degPerSec)
         {
-            Vector3 cur = muzzlePos - pivotPos;
             Vector3 des = targetPoint - pivotPos;
-            if (cur.sqrMagnitude < 1e-5f || des.sqrMagnitude < 1e-5f) return;
+            Vector3 barrel = muzzlePos - pivotPos;
+            if (des.sqrMagnitude < 1e-5f || barrel.sqrMagnitude < 1e-5f) return;
+            des.Normalize();
+            barrel.Normalize();
 
-            Quaternion targetRot = Quaternion.FromToRotation(cur.normalized, des.normalized) * rod.rotation;
+            // The barrel direction in the ROD's local frame is constant (rigidly attached),
+            // so we can map it onto the desired world direction with a fixed up vector.
+            Vector3 localBarrel = rod.InverseTransformDirection(barrel);
+            Quaternion targetRot = Quaternion.LookRotation(des, Vector3.up)
+                                 * Quaternion.Inverse(Quaternion.LookRotation(localBarrel, Vector3.up));
+
             rod.rotation = Quaternion.RotateTowards(rod.rotation, targetRot, degPerSec * Time.deltaTime);
         }
 
@@ -263,8 +270,17 @@ namespace AlliedDefenses.Defenses
             // Confirmed signature: HitEnemy(int force, PlayerControllerB playerWhoHit,
             //                               bool playHitSFX, int hitID).
             enemy.HitEnemy(EnemyDamagePerShot, null, false, -1);
-            // NOTE: no bulletParticles.Play() — that system loops and never stops, which
-            // looked like endless firing. The green beam is the fire indicator.
+            MuzzleFlash(turret);
+        }
+
+        /// <summary>
+        /// Brief one-shot muzzle flash. Uses Emit (a one-time burst), NOT Play (which
+        /// loops forever and caused the "endless firing" bug).
+        /// </summary>
+        private static void MuzzleFlash(Turret turret)
+        {
+            if (turret.bulletParticles != null)
+                turret.bulletParticles.Emit(2);
         }
 
         // ================================================================
@@ -318,7 +334,7 @@ namespace AlliedDefenses.Defenses
                         DamagePlayer(player, damage);
                 }
             }
-            // No bulletParticles.Play() here either (see TryFireAtEnemy note).
+            MuzzleFlash(turret);
         }
 
         /// <summary>

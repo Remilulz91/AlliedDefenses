@@ -115,6 +115,12 @@ namespace AlliedDefenses.Core
             if (HijackNetworker.Instance == null)
                 return "Network handler not ready yet. Try again in a moment.";
 
+            // Release any turret we're already controlling, so switching works without
+            // pressing the release key first.
+            var current = TurretControlSession.TurretControlledByLocal();
+            if (current.HasValue && current.Value != netId.Value)
+                HijackNetworker.Instance.RequestRelease(current.Value);
+
             // Always (re)hijack so the 60s timer is fresh, then take control.
             HijackNetworker.Instance.RequestHijack(netId.Value, "turret");
             HijackNetworker.Instance.RequestControl(netId.Value);
