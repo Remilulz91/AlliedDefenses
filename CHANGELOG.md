@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.9
+- `ally control` with no id now takes over the NEAREST turret (handy for solo/testing
+  where you can't read a turret's terminal code).
+
 ## 0.1.8
 - Turrets now actually aim: rotate the real `turretRod` (RotatingRodContainer) toward
   the target instead of the non-rotating centerPoint. Beam and shots come from the

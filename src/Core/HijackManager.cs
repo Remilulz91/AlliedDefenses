@@ -133,6 +133,39 @@ namespace AlliedDefenses.Core
                    $"Press {releaseKey} or type '{ModConfig.HijackCommand.Value} release' to stop.";
         }
 
+        /// <summary>
+        /// Take control of the turret NEAREST to the local player (no id needed). Handy
+        /// for solo play / testing, where you can't easily read a turret's terminal code.
+        /// </summary>
+        public static string RequestControlNearest()
+        {
+            var player = StartOfRound.Instance != null ? StartOfRound.Instance.localPlayerController : null;
+            Vector3 origin = player != null ? player.transform.position : Vector3.zero;
+
+            Turret? nearest = null;
+            float best = float.MaxValue;
+            foreach (var t in UnityEngine.Object.FindObjectsOfType<Turret>())
+            {
+                float d = (t.transform.position - origin).sqrMagnitude;
+                if (d < best) { best = d; nearest = t; }
+            }
+
+            if (nearest == null) return "No turret found on this level.";
+
+            var netId = ResolveNetworkId(nearest);
+            if (!netId.HasValue) return "Nearest turret has no network identity.";
+            if (HijackNetworker.Instance == null) return "Network handler not ready yet. Try again in a moment.";
+
+            if (!IsAllied(netId.Value))
+                HijackNetworker.Instance.RequestHijack(netId.Value, "turret");
+            HijackNetworker.Instance.RequestControl(netId.Value);
+
+            string releaseKey = ModConfig.ManualControlReleaseKey.Value;
+            return "Taking manual control of the NEAREST turret.\n" +
+                   "Watch the monitor, aim with the mouse, LMB to fire.\n" +
+                   $"Press {releaseKey} or type '{ModConfig.HijackCommand.Value} release' to stop.";
+        }
+
         public static string RequestRelease()
         {
             var netId = TurretControlSession.TurretControlledByLocal();
