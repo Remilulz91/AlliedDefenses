@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.6
+- Fix: NullReferenceException spam after a mine exploded. Destroyed defenses are now
+  detected (Unity-null) and dropped from the active list instead of being ticked.
+- Per-defense tick is wrapped in try/catch so one bad object can't flood the logs.
+
 ## 0.1.5
 - Allied mines now glow green (in-world) so you can tell they're hijacked.
 - Allied turrets idle-sweep instead of freezing when no enemy is in range.

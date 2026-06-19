@@ -191,24 +191,48 @@ namespace AlliedDefenses.Core
             // Only the host decides expiry, then broadcasts the return to hostile.
             bool isServer = NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer;
 
-            List<ulong>? toExpire = null;
+            List<HijackEntry>? toExpire = null;
+            List<ulong>? toRemove = null;
+
             foreach (var kv in _active)
             {
                 var entry = kv.Value;
 
-                // Active targeting for defenses without a native loop (e.g. mine).
-                DefenseRegistry.FindModule(entry.TypeId)?.TickAlliedTargeting(entry.Defense);
+                // Drop defenses whose Unity object was destroyed (e.g. a mine that
+                // exploded). The "== null" here uses Unity's overload, which is true for
+                // destroyed objects, so we stop ticking them (was causing NRE spam).
+                if (entry.Defense == null)
+                {
+                    (toRemove ??= new List<ulong>()).Add(entry.NetworkId);
+                    continue;
+                }
 
-                // Live countdown on the radar map, next to the code box.
-                RadarTimerDisplay.Update(entry);
+                try
+                {
+                    // Active targeting for defenses without a native loop (e.g. mine).
+                    DefenseRegistry.FindModule(entry.TypeId)?.TickAlliedTargeting(entry.Defense);
+
+                    // Live countdown on the radar map, next to the code box.
+                    RadarTimerDisplay.Update(entry);
+                }
+                catch (System.Exception e)
+                {
+                    Plugin.Log.LogWarning($"Tick error for {entry.TypeId} (net {entry.NetworkId}); dropping it: {e.Message}");
+                    (toRemove ??= new List<ulong>()).Add(entry.NetworkId);
+                    continue;
+                }
 
                 if (isServer && entry.ExpireTime > 0f && Time.time >= entry.ExpireTime)
-                    (toExpire ??= new List<ulong>()).Add(entry.NetworkId);
+                    (toExpire ??= new List<HijackEntry>()).Add(entry);
             }
 
+            if (toRemove != null)
+                foreach (var id in toRemove)
+                    _active.Remove(id);
+
             if (toExpire != null)
-                foreach (var id in toExpire)
-                    HijackNetworker.Instance?.RequestUnhijack(id, _active[id].TypeId);
+                foreach (var entry in toExpire)
+                    HijackNetworker.Instance?.RequestUnhijack(entry.NetworkId, entry.TypeId);
         }
 
         public static void ClearAll()

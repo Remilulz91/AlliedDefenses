@@ -98,9 +98,12 @@ namespace AlliedDefenses.Core
         }
 
         // ---- reflective access to TerminalAccessibleObject.mapRadarText (a TMP text) ----
-        private static TerminalAccessibleObject? FindAccessible(Component defense) =>
-            defense.GetComponentInParent<TerminalAccessibleObject>()
-            ?? defense.GetComponentInChildren<TerminalAccessibleObject>();
+        private static TerminalAccessibleObject? FindAccessible(Component defense)
+        {
+            if (defense == null) return null; // Unity-null: destroyed defense
+            return defense.GetComponentInParent<TerminalAccessibleObject>()
+                ?? defense.GetComponentInChildren<TerminalAccessibleObject>();
+        }
 
         private static Component? GetRadarText(TerminalAccessibleObject tao)
         {

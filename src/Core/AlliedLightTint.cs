@@ -26,6 +26,7 @@ namespace AlliedDefenses.Core
         public static void Apply(Component defense, bool allied)
         {
             if (!ModConfig.ColorAlliedDefenses.Value) return;
+            if (defense == null) return; // Unity-null: skip destroyed objects (e.g. exploded mine)
             int id = defense.GetInstanceID();
 
             if (allied)

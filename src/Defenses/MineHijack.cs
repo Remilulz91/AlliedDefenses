@@ -56,6 +56,7 @@ namespace AlliedDefenses.Defenses
 
         public void TickAlliedTargeting(Component defense)
         {
+            if (defense == null) return; // Unity-null: exploded/destroyed mine
             if (defense is not Landmine mine || mine.hasExploded) return;
 
             // Keep the mine's light green so you can SEE it's hijacked (re-asserted each
