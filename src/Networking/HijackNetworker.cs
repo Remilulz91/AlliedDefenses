@@ -1,3 +1,4 @@
+using System;
 using AlliedDefenses.Core;
 using Unity.Netcode;
 using UnityEngine;
@@ -5,18 +6,18 @@ using UnityEngine;
 namespace AlliedDefenses.Networking
 {
     /// <summary>
-    /// The mod's shared network component. A single instance exists in game (spawned
-    /// by the host). It is the "pipe" through which every state change travels: a
-    /// client requests a hijack -> the host validates -> all clients apply it. This
-    /// keeps the defense state identical for everyone.
+    /// The mod's shared network component (one instance, spawned by the host).
     ///
-    /// ⚠️ IMPORTANT: for the RPCs below to work, the .dll must be run through the
-    /// "Netcode Patcher" after compilation (see README, NETWORKING section). Without
-    /// it, the RPCs are not wired up and will do nothing.
+    /// Design note (robustness): the host applies every state change DIRECTLY (locally),
+    /// and only uses RPCs to mirror it to REMOTE clients. RPC calls are wrapped so a
+    /// failure (e.g. an incompletely netcode-patched build) is non-fatal — solo/host play
+    /// works no matter what, and multiplayer sync is best-effort. This avoids the
+    /// "RPC hash not found" crashes that came from the host invoking RPCs on itself.
     /// </summary>
     public class HijackNetworker : NetworkBehaviour
     {
         public static HijackNetworker? Instance { get; private set; }
+        private static bool _warnedRpc;
 
         public override void OnNetworkSpawn()
         {
@@ -25,79 +26,122 @@ namespace AlliedDefenses.Networking
             Plugin.Log.LogInfo("HijackNetworker ready (network active).");
         }
 
-        // -------- API called locally by HijackManager --------
+        private static void Safe(Action rpc)
+        {
+            try { rpc(); }
+            catch (Exception e)
+            {
+                if (_warnedRpc) return;
+                _warnedRpc = true;
+                Plugin.Log.LogWarning(
+                    "Networking note: an RPC could not be sent. This is harmless in solo " +
+                    "and if the build isn't fully netcode-patched; multiplayer sync may be " +
+                    $"limited. ({e.Message})");
+            }
+        }
 
-        public void RequestHijack(ulong netId, string typeId) =>
-            RequestHijackServerRpc(netId, typeId, true);
+        // ===================== HIJACK =====================
 
-        public void RequestUnhijack(ulong netId, string typeId) =>
-            RequestHijackServerRpc(netId, typeId, false);
+        public void RequestHijack(ulong netId, string typeId) => ApplyHijack(netId, typeId, true);
+        public void RequestUnhijack(ulong netId, string typeId) => ApplyHijack(netId, typeId, false);
 
-        // -------- Network round trip --------
+        private void ApplyHijack(ulong netId, string typeId, bool allied)
+        {
+            if (IsServer)
+            {
+                HijackManager.ApplyHijack(netId, typeId, allied);          // local (always works)
+                Safe(() => ApplyHijackClientRpc(netId, typeId, allied));   // mirror to clients
+            }
+            else
+            {
+                Safe(() => RequestHijackServerRpc(netId, typeId, allied)); // ask the host
+            }
+        }
 
-        // Client -> Server. RequireOwnership=false because any player may request it.
         [ServerRpc(RequireOwnership = false)]
         private void RequestHijackServerRpc(ulong netId, string typeId, bool allied)
         {
-            // Extension point: server-side validation (credits, global cooldown,
-            // anti-abuse...). If rejected -> do not re-broadcast. For now we accept.
-            ApplyHijackClientRpc(netId, typeId, allied);
+            HijackManager.ApplyHijack(netId, typeId, allied);
+            Safe(() => ApplyHijackClientRpc(netId, typeId, allied));
         }
 
-        // Server -> ALL clients (host included). This is where state changes everywhere.
         [ClientRpc]
         private void ApplyHijackClientRpc(ulong netId, string typeId, bool allied)
         {
+            if (IsServer) return; // host already applied locally
             HijackManager.ApplyHijack(netId, typeId, allied);
         }
 
-        // =====================================================================
-        //  MANUAL REMOTE CONTROL
-        //  Same client -> server -> all pattern. Begin/End set who is driving;
-        //  Aim streams the controller's look direction + fire state to everyone so
-        //  the turret moves and shoots identically on all screens.
-        // =====================================================================
+        // ===================== MANUAL CONTROL =====================
 
         public void RequestControl(ulong netId) =>
-            BeginControlServerRpc(netId, NetworkManager.Singleton.LocalClientId);
+            SetControl(netId, NetworkManager.Singleton.LocalClientId, true);
 
-        public void RequestRelease(ulong netId) => EndControlServerRpc(netId);
+        public void RequestRelease(ulong netId) =>
+            SetControl(netId, NetworkManager.Singleton.LocalClientId, false);
+
+        private void SetControl(ulong netId, ulong clientId, bool begin)
+        {
+            if (IsServer)
+            {
+                ApplyControlLocal(netId, clientId, begin);
+                Safe(() => ControlClientRpc(netId, clientId, begin));
+            }
+            else
+            {
+                Safe(() => RequestControlServerRpc(netId, clientId, begin));
+            }
+        }
+
+        private static void ApplyControlLocal(ulong netId, ulong clientId, bool begin)
+        {
+            if (begin)
+            {
+                if (TurretControlSession.IsControlled(netId)) return; // one controller at a time
+                TurretControlSession.Begin(netId, clientId);
+            }
+            else
+            {
+                TurretControlSession.End(netId);
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RequestControlServerRpc(ulong netId, ulong clientId, bool begin)
+        {
+            ApplyControlLocal(netId, clientId, begin);
+            Safe(() => ControlClientRpc(netId, clientId, begin));
+        }
+
+        [ClientRpc]
+        private void ControlClientRpc(ulong netId, ulong clientId, bool begin)
+        {
+            if (IsServer) return; // host already applied locally
+            ApplyControlLocal(netId, clientId, begin);
+        }
+
+        // ===================== AIM STREAM =====================
+        // The controller applies its own aim locally every frame (ManualControlInput),
+        // so this only needs to mirror it to the OTHER players.
 
         public void SendAim(ulong netId, Vector3 dir, bool firing)
         {
-            // The host broadcasts directly via ClientRpc (the working path, same as the
-            // hijack). Only a non-host client needs the Server->Client round trip.
-            // Calling a ServerRpc on the host-as-server was throwing "RPC hash not found".
-            if (IsServer) AimClientRpc(netId, dir, firing);
-            else AimServerRpc(netId, dir, firing);
+            if (IsServer) Safe(() => AimClientRpc(netId, dir, firing));
+            else Safe(() => AimServerRpc(netId, dir, firing));
         }
 
         [ServerRpc(RequireOwnership = false)]
-        private void BeginControlServerRpc(ulong netId, ulong clientId)
+        private void AimServerRpc(ulong netId, Vector3 dir, bool firing)
         {
-            // Only one controller per turret: ignore if already taken.
-            if (TurretControlSession.IsControlled(netId)) return;
-            BeginControlClientRpc(netId, clientId);
+            TurretControlSession.SetAim(netId, dir, firing);
+            Safe(() => AimClientRpc(netId, dir, firing));
         }
 
         [ClientRpc]
-        private void BeginControlClientRpc(ulong netId, ulong clientId) =>
-            TurretControlSession.Begin(netId, clientId);
-
-        [ServerRpc(RequireOwnership = false)]
-        private void EndControlServerRpc(ulong netId) => EndControlClientRpc(netId);
-
-        [ClientRpc]
-        private void EndControlClientRpc(ulong netId) => TurretControlSession.End(netId);
-
-        // Streamed every frame by the controller. Cheap payload (vector + bool).
-        // TODO (optimization): throttle to ~20-30 Hz if bandwidth becomes a concern.
-        [ServerRpc(RequireOwnership = false)]
-        private void AimServerRpc(ulong netId, Vector3 dir, bool firing) =>
-            AimClientRpc(netId, dir, firing);
-
-        [ClientRpc]
-        private void AimClientRpc(ulong netId, Vector3 dir, bool firing) =>
+        private void AimClientRpc(ulong netId, Vector3 dir, bool firing)
+        {
+            if (IsServer) return; // host already applied locally
             TurretControlSession.SetAim(netId, dir, firing);
+        }
     }
 }

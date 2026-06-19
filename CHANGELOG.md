@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4
+- Robust networking: the host now applies hijack/control/aim DIRECTLY (locally) and only
+  uses RPCs to mirror to remote clients, wrapped so a failure is non-fatal. Fixes the
+  "RPC hash not found" crashes that blocked control in solo, regardless of netcode-patch
+  reliability.
+
 ## 0.2.3
 - Fix endless firing: removed the looping muzzle particle Play() that never stopped.
 - Add a control light on the turret while driving it, so its dark facility view is
