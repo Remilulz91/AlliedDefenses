@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.7
+- Better turret diagnostic: logs the full prefab tree and the Turret's Transform
+  fields (reflection) once, to identify the real rotation node.
+
 ## 0.1.6
 - Fix: NullReferenceException spam after a mine exploded. Destroyed defenses are now
   detected (Unity-null) and dropped from the active list instead of being ticked.

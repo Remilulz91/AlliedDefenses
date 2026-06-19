@@ -35,8 +35,6 @@ namespace AlliedDefenses.Defenses
         private static readonly Dictionary<int, float> _nextFire = new();
         // Facing captured when the turret becomes allied, used as the idle-scan centre.
         private static readonly Dictionary<int, Quaternion> _baseRotation = new();
-        // Turrets whose transform hierarchy we've already logged (diagnostic).
-        private static readonly HashSet<int> _loggedHierarchy = new();
         private const float FireInterval = 0.21f;   // matches the vanilla fire rate
         private const int EnemyDamagePerShot = 1;   // damage dealt to monsters per shot (tune to taste)
         private const float AlignToleranceDeg = 10f; // max angle to consider the target "on aim"
@@ -158,28 +156,53 @@ namespace AlliedDefenses.Defenses
             pivot.rotation = Quaternion.Slerp(pivot.rotation, target, Time.deltaTime * 2.5f);
         }
 
+        private static bool _diagLogged;
+
         /// <summary>
-        /// One-time diagnostic: dumps the turret's child transforms (and which carry a
-        /// Renderer / Light / LineRenderer) so we can identify the exact node the game
-        /// rotates, and drive that instead of centerPoint if needed.
+        /// One-time diagnostic (first hijacked turret only): dumps the whole turret
+        /// PREFAB tree (starting a couple of parents up) and, crucially, every Transform
+        /// field on the Turret component via reflection — that tells us exactly which
+        /// node the game rotates so we can drive the same one.
         /// </summary>
         private static void LogHierarchyOnce(Turret turret)
         {
-            int id = turret.GetInstanceID();
-            if (!_loggedHierarchy.Add(id)) return;
+            if (_diagLogged) return;
+            _diagLogged = true;
 
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine($"[Turret hierarchy {id}] (R=Renderer L=Light Ln=LineRenderer)");
-            foreach (var t in turret.GetComponentsInChildren<Transform>(true))
+            sb.AppendLine("[Turret diagnostic] PREFAB TREE (R=Renderer L=Light Ln=LineRenderer T=Turret):");
+
+            // Start a couple of parents up to capture the prefab root (the mesh is a
+            // sibling of TurretScript), but cap depth/count so we never dump the whole level.
+            Transform start = turret.transform;
+            for (int i = 0; i < 2 && start.parent != null; i++) start = start.parent;
+            int count = 0;
+            DumpTree(start, 0, sb, ref count);
+
+            sb.AppendLine("[Turret diagnostic] Transform fields on Turret:");
+            foreach (var f in typeof(Turret).GetFields(
+                         System.Reflection.BindingFlags.Instance |
+                         System.Reflection.BindingFlags.Public |
+                         System.Reflection.BindingFlags.NonPublic))
             {
-                string tags = "";
-                if (t.GetComponent<Renderer>() != null) tags += "R";
-                if (t.GetComponent<Light>() != null) tags += "L";
-                if (t.GetComponent<LineRenderer>() != null) tags += "Ln";
-                string centre = (turret.centerPoint == t) ? "  <== centerPoint" : "";
-                sb.AppendLine($"  {t.name} [{tags}]{centre}");
+                if (!typeof(Transform).IsAssignableFrom(f.FieldType)) continue;
+                var val = f.GetValue(turret) as Transform;
+                sb.AppendLine($"  {f.Name} -> {(val != null ? val.name : "null")}");
             }
+
             Plugin.Log.LogInfo(sb.ToString());
+        }
+
+        private static void DumpTree(Transform t, int depth, System.Text.StringBuilder sb, ref int count)
+        {
+            if (count++ > 80 || depth > 5) return; // safety caps
+            string tags = "";
+            if (t.GetComponent<Renderer>() != null) tags += "R";
+            if (t.GetComponent<Light>() != null) tags += "L";
+            if (t.GetComponent<LineRenderer>() != null) tags += "Ln";
+            if (t.GetComponent<Turret>() != null) tags += "T";
+            sb.AppendLine($"{new string(' ', depth * 2)}{t.name} [{tags}]");
+            foreach (Transform child in t) DumpTree(child, depth + 1, sb, ref count);
         }
 
         /// <summary>
