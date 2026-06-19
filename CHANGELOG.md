@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.2
+- Workflow: the Thunderstore publish step is skipped cleanly when no TS_TOKEN is set
+  (so the build stays green); set the secret to enable auto-publish.
+- Added website_url to the manifest.
+
 ## 0.3.1
 - OpenBodyCams added as a required dependency (for the manual-control monitor view).
 - README rewritten for players (what the mod does + how to use it); dev/build details moved
