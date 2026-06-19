@@ -63,8 +63,14 @@ namespace AlliedDefenses.Networking
 
         public void RequestRelease(ulong netId) => EndControlServerRpc(netId);
 
-        public void SendAim(ulong netId, Vector3 dir, bool firing) =>
-            AimServerRpc(netId, dir, firing);
+        public void SendAim(ulong netId, Vector3 dir, bool firing)
+        {
+            // The host broadcasts directly via ClientRpc (the working path, same as the
+            // hijack). Only a non-host client needs the Server->Client round trip.
+            // Calling a ServerRpc on the host-as-server was throwing "RPC hash not found".
+            if (IsServer) AimClientRpc(netId, dir, firing);
+            else AimServerRpc(netId, dir, firing);
+        }
 
         [ServerRpc(RequireOwnership = false)]
         private void BeginControlServerRpc(ulong netId, ulong clientId)

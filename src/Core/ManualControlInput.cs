@@ -21,6 +21,13 @@ namespace AlliedDefenses.Core
         private ulong? _current;
         private float _yaw;
         private float _pitch;
+        private float _nextSend;
+
+        // Mouse delta is already per-frame (pixels), so we do NOT multiply by deltaTime.
+        // 0.08 * sensitivity(default 2) ~= 0.16 deg per pixel; raise sensitivity in the
+        // config if you want faster aiming.
+        private const float MouseScale = 0.08f;
+        private const float SendInterval = 0.05f; // broadcast aim to other players at ~20 Hz
 
         private void Update()
         {
@@ -47,12 +54,24 @@ namespace AlliedDefenses.Core
             {
                 float sens = ModConfig.ManualControlSensitivity.Value;
                 Vector2 d = mouse.delta.ReadValue();
-                _yaw += d.x * sens * Time.deltaTime;
-                _pitch = Mathf.Clamp(_pitch - d.y * sens * Time.deltaTime, -80f, 80f);
+                _yaw += d.x * sens * MouseScale;
+                _pitch = Mathf.Clamp(_pitch - d.y * sens * MouseScale, -80f, 80f);
 
                 Vector3 dir = Quaternion.Euler(_pitch, _yaw, 0f) * Vector3.forward;
                 bool firing = mouse.leftButton.isPressed;
-                HijackNetworker.Instance?.SendAim(netId.Value, dir, firing);
+
+                // Apply locally right away: responsive aim + correct fire on/off, and it
+                // works in solo even if the network broadcast hiccups.
+                TurretControlSession.SetAim(netId.Value, dir, firing);
+
+                // Broadcast to the other players, throttled, and never let a network
+                // hiccup spam the log or break control.
+                if (Time.time >= _nextSend)
+                {
+                    _nextSend = Time.time + SendInterval;
+                    try { HijackNetworker.Instance?.SendAim(netId.Value, dir, firing); }
+                    catch (System.Exception e) { Plugin.Log.LogWarning($"SendAim failed: {e.Message}"); }
+                }
             }
 
             if (TryGetReleaseKey(out var key) && Keyboard.current != null &&

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+- Fix RPC "hash not found" spam: aim is now applied locally and broadcast at ~20 Hz via
+  the working host->ClientRpc path (host no longer calls a ServerRpc on itself).
+- Fix mouse sensitivity (was multiplied by deltaTime, making it crawl).
+- Fix fire that wouldn't stop (firing state now updates locally every frame).
+
 ## 0.2.1
 - Remote turret control via OpenBodyCams (soft dependency): the ship monitor shows the
   turret's view, you aim with the mouse and fire with LMB. Restored to the player on
