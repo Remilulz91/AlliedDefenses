@@ -100,8 +100,9 @@ namespace AlliedDefenses.Config
                 "Damage dealt per shot while manually controlling a turret (vanilla turret = 50).");
 
             ManualControlLight = cfg.Bind(
-                "Manual Control", "ManualControlLight", true,
-                "Add a light on the turret while you control it, so its (dark) view is visible.");
+                "Manual Control", "ManualControlLight", false,
+                "Add a light on the turret while controlling it. OFF by default: the body cam's " +
+                "HDRP auto-exposure tends to blow any added light out to pure white. Experimental.");
 
             ManualControlLightIntensity = cfg.Bind(
                 "Manual Control", "ManualControlLightIntensity", 200f,

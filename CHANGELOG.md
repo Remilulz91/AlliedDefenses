@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.6
+- Control now respects the 60s hijack timer (it expires and control ends with it).
+- Removed "ally control" (nearest); use "ally control <id>" (find ids with "ally turrets").
+- Control light OFF by default (HDRP auto-exposure was blowing it out to white); the body
+  cam's natural auto-exposed view is used instead. Still tunable in the config.
+
 ## 0.2.5
 - "ally turrets" / "ally mines" now LIST the defenses and their ids (instead of hijacking
   all of them), so you can pick one to hijack/control.

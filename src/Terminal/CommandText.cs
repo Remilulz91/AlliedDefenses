@@ -23,7 +23,6 @@ namespace AlliedDefenses.UI
                 $"{k} <id>        : hijack one defense by its id (turret or mine, e.g. {k} U9)\n" +
                 $"{k} turrets     : list all turrets and their ids\n" +
                 $"{k} mines       : list all mines and their ids\n" +
-                $"{k} control     : control the NEAREST turret (no id needed)\n" +
                 $"{k} control <id>: take manual remote control of a turret\n" +
                 $"{k} release     : give back control of the turret you are driving\n" +
                 $"{k} help        : how the mod works\n" +
@@ -53,8 +52,7 @@ namespace AlliedDefenses.UI
             sb.AppendLine("  only when an enemy steps close to it.");
             sb.AppendLine("");
             sb.AppendLine("MANUAL CONTROL (turrets):");
-            sb.AppendLine($"  {k} control        take over the NEAREST turret (no id needed).");
-            sb.AppendLine($"  {k} control <id>   take over a specific turret.");
+            sb.AppendLine($"  {k} control <id>   take over a turret (use '{k} turrets' to find ids).");
             sb.AppendLine("  Watch the turret's view on the ship monitor (needs OpenBodyCams),");
             sb.AppendLine("  aim with the MOUSE, LMB to fire (hits ANYTHING, players included).");
             sb.AppendLine($"  Press the release key or '{k} release' to hand it back.");

@@ -59,8 +59,6 @@ namespace AlliedDefenses.Patches
             else if (arg.Equals("release", StringComparison.OrdinalIgnoreCase) ||
                      arg.Equals("stop", StringComparison.OrdinalIgnoreCase))
                 message = HijackManager.RequestRelease();
-            else if (arg.Equals("control", StringComparison.OrdinalIgnoreCase))
-                message = HijackManager.RequestControlNearest(); // no id -> nearest turret
             else if (arg.StartsWith("control ", StringComparison.OrdinalIgnoreCase))
                 message = HijackManager.RequestControl(arg.Substring("control ".Length).Trim());
             else if (TryMatchGroup(arg, out string typeId))
