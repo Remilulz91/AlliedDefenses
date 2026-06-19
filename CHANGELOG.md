@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3
+- Fix endless firing: removed the looping muzzle particle Play() that never stopped.
+- Add a control light on the turret while driving it, so its dark facility view is
+  visible on the monitor (configurable intensity, HDRP-aware).
+
 ## 0.2.2
 - Fix RPC "hash not found" spam: aim is now applied locally and broadcast at ~20 Hz via
   the working host->ClientRpc path (host no longer calls a ServerRpc on itself).

@@ -263,10 +263,8 @@ namespace AlliedDefenses.Defenses
             // Confirmed signature: HitEnemy(int force, PlayerControllerB playerWhoHit,
             //                               bool playHitSFX, int hitID).
             enemy.HitEnemy(EnemyDamagePerShot, null, false, -1);
-
-            // Cosmetic muzzle flash if the particle system is present.
-            if (turret.bulletParticles != null)
-                turret.bulletParticles.Play();
+            // NOTE: no bulletParticles.Play() — that system loops and never stops, which
+            // looked like endless firing. The green beam is the fire indicator.
         }
 
         // ================================================================
@@ -320,9 +318,7 @@ namespace AlliedDefenses.Defenses
                         DamagePlayer(player, damage);
                 }
             }
-
-            if (turret.bulletParticles != null)
-                turret.bulletParticles.Play();
+            // No bulletParticles.Play() here either (see TryFireAtEnemy note).
         }
 
         /// <summary>
