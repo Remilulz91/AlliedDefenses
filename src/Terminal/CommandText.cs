@@ -21,8 +21,8 @@ namespace AlliedDefenses.UI
                 "ALLIED DEFENSES\n" +
                 "-------------------------\n" +
                 $"{k} <id>        : hijack one defense by its id (turret or mine, e.g. {k} U9)\n" +
-                $"{k} turrets     : hijack every turret on the level\n" +
-                $"{k} mines       : hijack every mine on the level\n" +
+                $"{k} turrets     : list all turrets and their ids\n" +
+                $"{k} mines       : list all mines and their ids\n" +
                 $"{k} control     : control the NEAREST turret (no id needed)\n" +
                 $"{k} control <id>: take manual remote control of a turret\n" +
                 $"{k} release     : give back control of the turret you are driving\n" +
@@ -41,14 +41,14 @@ namespace AlliedDefenses.UI
             sb.AppendLine("ignore the monsters. This mod lets you flip that.");
             sb.AppendLine("");
             sb.AppendLine("TURRETS:");
+            sb.AppendLine($"  {k} turrets  list all turrets and their ids.");
             sb.AppendLine($"  {k} <id>   hijack one turret (same id you'd use to disable it).");
-            sb.AppendLine($"  {k} turrets  hijack all turrets at once.");
             sb.AppendLine("  An allied turret stops shooting players and instead aims at");
             sb.AppendLine("  the nearest visible enemy in range.");
             sb.AppendLine("");
             sb.AppendLine("MINES:");
+            sb.AppendLine($"  {k} mines  list all mines and their ids.");
             sb.AppendLine($"  {k} <id>   hijack one mine (same id you'd use to disable it).");
-            sb.AppendLine($"  {k} mines  hijack all mines at once.");
             sb.AppendLine("  An allied mine no longer explodes under players; it detonates");
             sb.AppendLine("  only when an enemy steps close to it.");
             sb.AppendLine("");

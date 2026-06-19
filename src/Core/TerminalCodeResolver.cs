@@ -35,6 +35,16 @@ namespace AlliedDefenses.Core
             return null;
         }
 
+        /// <summary>The terminal code of a given defense component (or "?" if none).</summary>
+        public static string GetCodeFor(Component c)
+        {
+            if (c == null) return "?";
+            var tao = c.GetComponentInParent<TerminalAccessibleObject>()
+                   ?? c.GetComponentInChildren<TerminalAccessibleObject>();
+            string code = tao != null ? ReadObjectCode(tao) : "";
+            return string.IsNullOrEmpty(code) ? "?" : code;
+        }
+
         /// <summary>
         /// Defensive read of TerminalAccessibleObject's code string. Tries the known
         /// field name first, then a couple of fallbacks, so it keeps working if the

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.5
+- "ally turrets" / "ally mines" now LIST the defenses and their ids (instead of hijacking
+  all of them), so you can pick one to hijack/control.
+- Fix control ending instantly on an already-allied turret: taking control now refreshes
+  the timer, and a turret won't expire while it's being controlled.
+- Fix white-out monitor: control light intensity lowered (default 200) and pushed ahead
+  of the muzzle so it lights the scene, not the camera.
+
 ## 0.2.4
 - Robust networking: the host now applies hijack/control/aim DIRECTLY (locally) and only
   uses RPCs to mirror to remote clients, wrapped so a failure is non-fatal. Fixes the

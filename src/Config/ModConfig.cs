@@ -104,8 +104,8 @@ namespace AlliedDefenses.Config
                 "Add a light on the turret while you control it, so its (dark) view is visible.");
 
             ManualControlLightIntensity = cfg.Bind(
-                "Manual Control", "ManualControlLightIntensity", 5000f,
-                "Control light intensity (HDRP lumens). Raise if too dark, lower if washed out.");
+                "Manual Control", "ManualControlLightIntensity", 200f,
+                "Control light intensity (HDRP lumens). Raise if too dark, lower if washed out white.");
 
             ColorAlliedDefenses = cfg.Bind(
                 "Visuals", "ColorAlliedDefenses", true,

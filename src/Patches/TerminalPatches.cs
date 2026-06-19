@@ -64,7 +64,7 @@ namespace AlliedDefenses.Patches
             else if (arg.StartsWith("control ", StringComparison.OrdinalIgnoreCase))
                 message = HijackManager.RequestControl(arg.Substring("control ".Length).Trim());
             else if (TryMatchGroup(arg, out string typeId))
-                message = HijackManager.RequestHijackAllOfType(typeId); // e.g. "ally mines"
+                message = HijackManager.ListDefenses(typeId); // "ally mines" / "ally turrets" -> list ids
             else
                 message = HijackManager.RequestHijack(arg); // treat the argument as a defense id
 

@@ -90,13 +90,17 @@ namespace AlliedDefenses.Monitor
             {
                 _lightObj = new GameObject("AlliedDefenses_ControlLight");
                 _lightObj.transform.SetParent(aimPoint, false);
-                _lightObj.transform.localPosition = Vector3.zero;
+                // Push the light a couple of metres AHEAD of the muzzle so it lights the
+                // scene the camera sees, not the camera's own position (which blew out
+                // to pure white). Local +Z is the barrel's forward.
+                _lightObj.transform.localPosition = new Vector3(0f, 0f, 2f);
+                _lightObj.transform.localRotation = Quaternion.identity;
 
                 var light = _lightObj.AddComponent<Light>();
                 light.type = LightType.Point;
-                light.range = 40f;
+                light.range = 20f;
                 light.color = Color.white;
-                light.intensity = 3f; // legacy fallback if HDRP data is absent
+                light.intensity = 1f; // legacy fallback if HDRP data is absent
 
                 float lumens = ModConfig.ManualControlLightIntensity.Value;
                 var hdType = AccessTools.TypeByName("UnityEngine.Rendering.HighDefinition.HDAdditionalLightData");
@@ -104,7 +108,7 @@ namespace AlliedDefenses.Monitor
                 {
                     var hd = _lightObj.GetComponent(hdType) ?? _lightObj.AddComponent(hdType);
                     TrySet(hdType, hd, "intensity", lumens);
-                    TrySet(hdType, hd, "range", 40f);
+                    TrySet(hdType, hd, "range", 20f);
                 }
             }
             catch (Exception e)

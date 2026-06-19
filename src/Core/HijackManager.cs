@@ -73,36 +73,29 @@ namespace AlliedDefenses.Core
         }
 
         // ----------------------------------------------------------------
-        // GROUP hijack: flip EVERY defense of a given type at once. Used for
-        // weapons that have no individual terminal code (e.g. mines): "ally mines".
-        // Also works for turrets ("ally turrets").
+        // LIST every defense of a given type with its terminal id, so you can pick
+        // one to hijack/control. Used by "ally turrets" and "ally mines".
         // ----------------------------------------------------------------
-        public static string RequestHijackAllOfType(string typeId)
+        public static string ListDefenses(string typeId)
         {
             var module = DefenseRegistry.FindModule(typeId);
             if (module == null)
                 return $"Unknown defense type '{typeId}'.";
 
-            if (HijackNetworker.Instance == null)
-                return "Network handler not ready yet. Try again in a moment.";
-
-            int count = 0;
+            var codes = new List<string>();
             foreach (var obj in UnityEngine.Object.FindObjectsOfType(module.ComponentType))
             {
                 if (obj is not Component c) continue;
-                var netId = ResolveNetworkId(c);
-                if (!netId.HasValue) continue;
-
-                HijackNetworker.Instance.RequestHijack(netId.Value, typeId);
-                count++;
+                codes.Add(TerminalCodeResolver.GetCodeFor(c));
             }
+            codes.Sort(System.StringComparer.OrdinalIgnoreCase);
 
-            if (count == 0)
-                return $"No {module.DisplayName.ToLower()} found on this level.";
+            string name = module.DisplayName.ToLower();
+            if (codes.Count == 0)
+                return $"No {name}s on this level.";
 
-            float dur = ModConfig.HijackDuration.Value;
-            string durText = dur > 0f ? $"for {dur:0} seconds" : "until end of round";
-            return $"Hijacking {count} {module.DisplayName.ToLower()}(s) {durText}...";
+            return $"{codes.Count} {name}(s) on this level:\n  {string.Join(", ", codes)}\n" +
+                   $"Use '{ModConfig.HijackCommand.Value} <id>' to hijack one.";
         }
 
         // ----------------------------------------------------------------
@@ -122,9 +115,8 @@ namespace AlliedDefenses.Core
             if (HijackNetworker.Instance == null)
                 return "Network handler not ready yet. Try again in a moment.";
 
-            // Make sure it is allied (so our driving logic runs), then take control.
-            if (!IsAllied(netId.Value))
-                HijackNetworker.Instance.RequestHijack(netId.Value, "turret");
+            // Always (re)hijack so the 60s timer is fresh, then take control.
+            HijackNetworker.Instance.RequestHijack(netId.Value, "turret");
             HijackNetworker.Instance.RequestControl(netId.Value);
 
             string releaseKey = ModConfig.ManualControlReleaseKey.Value;
@@ -156,8 +148,8 @@ namespace AlliedDefenses.Core
             if (!netId.HasValue) return "Nearest turret has no network identity.";
             if (HijackNetworker.Instance == null) return "Network handler not ready yet. Try again in a moment.";
 
-            if (!IsAllied(netId.Value))
-                HijackNetworker.Instance.RequestHijack(netId.Value, "turret");
+            // Always (re)hijack so the 60s timer is fresh, then take control.
+            HijackNetworker.Instance.RequestHijack(netId.Value, "turret");
             HijackNetworker.Instance.RequestControl(netId.Value);
 
             string releaseKey = ModConfig.ManualControlReleaseKey.Value;
@@ -255,7 +247,9 @@ namespace AlliedDefenses.Core
                     continue;
                 }
 
-                if (isServer && entry.ExpireTime > 0f && Time.time >= entry.ExpireTime)
+                // Don't let a turret expire while someone is actively controlling it.
+                if (isServer && entry.ExpireTime > 0f && Time.time >= entry.ExpireTime
+                    && !TurretControlSession.IsControlled(entry.NetworkId))
                     (toExpire ??= new List<HijackEntry>()).Add(entry);
             }
 
