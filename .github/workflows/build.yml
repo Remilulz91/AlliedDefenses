@@ -94,7 +94,7 @@ jobs:
           name: AlliedDefenses
           version: ${{ steps.ver.outputs.version }}
           description: "Hijack turrets & mines from the terminal so they fight enemies, not you. Manual turret control, colour cues, live timers. ALL players must install."
-          website: https://github.com/Remilulz_91/AlliedDefenses
+          website: https://github.com/Remilulz91/AlliedDefenses
           categories: tools
           token: ${{ secrets.TS_TOKEN }}
           file: AlliedDefenses.zip

@@ -20,11 +20,11 @@ git init
 git add .
 git commit -m "AlliedDefenses initial"
 git branch -M main
-git remote add origin https://github.com/Remilulz_91/AlliedDefenses.git
+git remote add origin https://github.com/Remilulz91/AlliedDefenses.git
 git push -u origin main
 ```
 
-(Remplace `Remilulz_91` par ton pseudo GitHub si différent.)
+(Pseudo GitHub : `Remilulz91`. La team Thunderstore, elle, reste `Remilulz_91`.)
 
 ---
 

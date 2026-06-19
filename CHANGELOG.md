@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.3
+- Fixed the GitHub website link (Remilulz91, no underscore).
+
 ## 0.3.2
 - Workflow: the Thunderstore publish step is skipped cleanly when no TS_TOKEN is set
   (so the build stays green); set the secret to enable auto-publish.
