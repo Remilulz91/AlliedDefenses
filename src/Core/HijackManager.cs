@@ -129,7 +129,7 @@ namespace AlliedDefenses.Core
 
             string releaseKey = ModConfig.ManualControlReleaseKey.Value;
             return $"Taking manual control of turret '{code}'.\n" +
-                   $"The turret follows where you LOOK; LMB to fire.\n" +
+                   $"Watch the ship monitor; aim with the MOUSE, LMB to fire.\n" +
                    $"Press {releaseKey} or type '{ModConfig.HijackCommand.Value} release' to stop.";
         }
 
@@ -162,7 +162,7 @@ namespace AlliedDefenses.Core
 
             string releaseKey = ModConfig.ManualControlReleaseKey.Value;
             return "Taking manual control of the NEAREST turret.\n" +
-                   "The turret follows where you LOOK; LMB to fire.\n" +
+                   "Watch the ship monitor; aim with the MOUSE, LMB to fire.\n" +
                    $"Press {releaseKey} or type '{ModConfig.HijackCommand.Value} release' to stop.";
         }
 

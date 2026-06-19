@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+- Remote turret control via OpenBodyCams (soft dependency): the ship monitor shows the
+  turret's view, you aim with the mouse and fire with LMB. Restored to the player on
+  release. Without OpenBodyCams the turret still obeys the mouse (no remote view).
+
 ## 0.2.0
 - Manual control reworked: the turret now follows where you LOOK (no more buggy
   monitor gun-cam). LMB fires. The ship monitor keeps its normal radar view.

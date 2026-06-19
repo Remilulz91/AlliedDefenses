@@ -42,9 +42,11 @@ Original colours are restored when a defense turns hostile again. Everything liv
 
 ### Manual remote control
 
-`ally control` (or `ally control <id>`) lets you take over a turret yourself: the turret then **follows where you look** — turn your view to aim it — and **LMB fires** (it hits **anything**, players included). `ally release` (or the release key, default `V`) hands it back. Your aim and shots are streamed to all players so everyone sees the turret move and fire. With no id, the nearest turret is taken (handy solo).
+`ally control` (or `ally control <id>`) lets you take over a turret **remotely from the ship**: the ship monitor shows the turret's view, you aim with the **mouse** and **LMB fires** (it hits **anything**, players included). `ally release` (or the release key, default `V`) hands it back. Your aim and shots are streamed to all players. With no id, the nearest turret is taken (handy solo).
 
-Parts: `TurretControlSession` (state), networker RPCs (begin/end/aim), `ManualControlInput` (reads your look direction + LMB), `TurretHijack.DriveManually` (aims the rotating rod + fires). An earlier experiment piped a gun-cam to the ship monitor; that path is shelved (see the placeholder `Monitor/TurretMonitorFeed.cs`) because a clean camera→monitor feed is a project of its own (OpenBodyCams-style).
+The remote view is provided by **[OpenBodyCams](https://thunderstore.io/c/lethal-company/p/Zaggy1024/OpenBodyCams/)**: while you control a turret we retarget OBC's main body cam (bottom-right monitor) to the turret's muzzle, and restore it to you on release. It's a **soft dependency** (called via reflection): without OpenBodyCams the turret still obeys the mouse, but you get no remote view. Install OpenBodyCams (and have the body cam available in the ship) for the monitor feed.
+
+Parts: `TurretControlSession` (state), networker RPCs (begin/end/aim), `ManualControlInput` (mouse aim + LMB), `TurretHijack.DriveManually` (aims the rotating rod + fires), `Monitor/TurretBodyCam.cs` (OBC integration).
 
 ---
 
