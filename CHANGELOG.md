@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.7
+- Removed the control light entirely (it caused the white-out and stayed enabled via the
+  saved config even after the default was flipped). The turret view now always uses the
+  body cam's natural auto-exposed image.
+
 ## 0.2.6
 - Control now respects the 60s hijack timer (it expires and control ends with it).
 - Removed "ally control" (nearest); use "ally control <id>" (find ids with "ally turrets").

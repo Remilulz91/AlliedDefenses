@@ -41,12 +41,6 @@ namespace AlliedDefenses.Config
         /// <summary>Damage dealt per shot while a turret is manually controlled.</summary>
         public static ConfigEntry<int> ManualControlDamage = null!;
 
-        /// <summary>Add a light on the turret while controlling it (the facility is dark).</summary>
-        public static ConfigEntry<bool> ManualControlLight = null!;
-
-        /// <summary>Intensity of the control light (HDRP lumens). Tune if too dark/bright.</summary>
-        public static ConfigEntry<float> ManualControlLightIntensity = null!;
-
         // --- Visual feedback ---
 
         /// <summary>Tint allied defenses (laser, light, radar code) to show they're ours.</summary>
@@ -98,15 +92,6 @@ namespace AlliedDefenses.Config
             ManualControlDamage = cfg.Bind(
                 "Manual Control", "ManualControlDamage", 50,
                 "Damage dealt per shot while manually controlling a turret (vanilla turret = 50).");
-
-            ManualControlLight = cfg.Bind(
-                "Manual Control", "ManualControlLight", false,
-                "Add a light on the turret while controlling it. OFF by default: the body cam's " +
-                "HDRP auto-exposure tends to blow any added light out to pure white. Experimental.");
-
-            ManualControlLightIntensity = cfg.Bind(
-                "Manual Control", "ManualControlLightIntensity", 200f,
-                "Control light intensity (HDRP lumens). Raise if too dark, lower if washed out white.");
 
             ColorAlliedDefenses = cfg.Bind(
                 "Visuals", "ColorAlliedDefenses", true,
