@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+- Removed the manual remote turret control system entirely: the `ally control` / `ally release`
+  commands, the mouse-aim / left-click-to-fire, and the OpenBodyCams dependency are gone.
+- The mod now focuses on the allied turrets & mines features (hijack by id, auto-target enemies,
+  colour cues, radar timer).
+
 ## 0.3.5
 - Fix terminal commands failing for a player after they disconnect and reconnect: the
   network handler reference is now re-acquired if the old one was destroyed (and cleared

@@ -2,7 +2,7 @@
 
 Hijack the facility's defenses from the ship terminal and turn them against the monsters.
 A hijacked turret or mine becomes **allied**: it stops targeting players and goes after the
-**enemies** instead — and you can even take **manual remote control** of a turret from the ship.
+**enemies** instead.
 
 Author: **Remilulz_91** — © 2026 Remilulz_91, all rights reserved.
 
@@ -11,26 +11,16 @@ Author: **Remilulz_91** — © 2026 Remilulz_91, all rights reserved.
 
 ---
 
-## Requirements
-
-- **BepInExPack**
-- **OpenBodyCams** — used to show the turret's view on the ship monitor when you take
-  manual control. (Installed automatically as a dependency.)
-
----
-
 ## Terminal commands
 
 At the ship computer, type:
 
 ```
-ally <id>          hijack one defense by its id (turret or mine), e.g. ally U9
-ally turrets       list all turrets on the level and their ids
-ally mines         list all mines on the level and their ids
-ally control <id>  take manual remote control of a turret
-ally release       give back the turret you are controlling
-ally help          explain how the mod works
-ally config        show the current settings
+ally <id>     hijack one defense by its id (turret or mine), e.g. ally U9
+ally turrets  list all turrets on the level and their ids
+ally mines    list all mines on the level and their ids
+ally help     explain how the mod works
+ally config   show the current settings
 ```
 
 The `<id>` is the same code you'd use to disable a turret/mine (the one shown on the radar
@@ -51,21 +41,16 @@ light turns green so you can spot it in the dungeon.
 confused with the game's green "active" / red "disabled"), with a live **countdown** showing
 how long it stays allied.
 
-**Manual remote control.** `ally control <id>` lets you drive a turret yourself from the ship:
-the **ship monitor shows the turret's view**, you **aim with the mouse**, and **left-click
-fires** (it can hit anything, players included). Press the release key (default **V**) or type
-`ally release` to hand it back. The view is provided by OpenBodyCams.
-
 Hijacks last a set time (60s by default), then the defense turns hostile again. Everything
-(duration, detection range, colours, friendly-fire, manual-control settings) is adjustable in
-the config — `ally config` shows the current values in-game.
+(duration, detection range, colours, friendly-fire) is adjustable in the config — `ally config`
+shows the current values in-game.
 
 ---
 
 ## Install
 
 Easiest with **r2modman** (or any mod manager): select Lethal Company, install AlliedDefenses,
-and its dependencies (BepInEx, OpenBodyCams) come along. Launch with **Start modded**.
+and BepInEx comes along. Launch with **Start modded**.
 
 Make sure **every player in the lobby** has the mod, same version.
 

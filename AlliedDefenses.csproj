@@ -22,7 +22,7 @@
     <AssemblyName>AlliedDefenses</AssemblyName>
     <Product>AlliedDefenses</Product>
     <!-- Garde ce numéro synchronisé avec manifest.json -->
-    <Version>0.3.5</Version>
+    <Version>0.4.0</Version>
     <LangVersion>latest</LangVersion>
     <Nullable>annotations</Nullable>
 

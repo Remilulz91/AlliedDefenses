@@ -22,9 +22,6 @@ namespace AlliedDefenses.Core
             Object.DontDestroyOnLoad(go);
             go.hideFlags = HideFlags.HideAndDontSave;
             Instance = go.AddComponent<HijackTicker>();
-
-            // Local-player input for manual turret control lives on the same object.
-            go.AddComponent<ManualControlInput>();
         }
 
         private void Update() => HijackManager.Tick();

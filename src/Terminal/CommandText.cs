@@ -20,13 +20,11 @@ namespace AlliedDefenses.UI
             return
                 "ALLIED DEFENSES\n" +
                 "-------------------------\n" +
-                $"{k} <id>        : hijack one defense by its id (turret or mine, e.g. {k} U9)\n" +
-                $"{k} turrets     : list all turrets and their ids\n" +
-                $"{k} mines       : list all mines and their ids\n" +
-                $"{k} control <id>: take manual remote control of a turret\n" +
-                $"{k} release     : give back control of the turret you are driving\n" +
-                $"{k} help        : how the mod works\n" +
-                $"{k} config      : show the current settings\n";
+                $"{k} <id>     : hijack one defense by its id (turret or mine, e.g. {k} U9)\n" +
+                $"{k} turrets  : list all turrets and their ids\n" +
+                $"{k} mines    : list all mines and their ids\n" +
+                $"{k} help     : how the mod works\n" +
+                $"{k} config   : show the current settings\n";
         }
 
         /// <summary>Full explanation of how the mod works.</summary>
@@ -50,12 +48,6 @@ namespace AlliedDefenses.UI
             sb.AppendLine($"  {k} <id>   hijack one mine (same id you'd use to disable it).");
             sb.AppendLine("  An allied mine no longer explodes under players; it detonates");
             sb.AppendLine("  only when an enemy steps close to it.");
-            sb.AppendLine("");
-            sb.AppendLine("MANUAL CONTROL (turrets):");
-            sb.AppendLine($"  {k} control <id>   take over a turret (use '{k} turrets' to find ids).");
-            sb.AppendLine("  Watch the turret's view on the ship monitor (needs OpenBodyCams),");
-            sb.AppendLine("  aim with the MOUSE, LMB to fire (hits ANYTHING, players included).");
-            sb.AppendLine($"  Press the release key or '{k} release' to hand it back.");
             sb.AppendLine("");
             sb.AppendLine("All hijacks last for a set time, then the defense turns hostile");
             sb.AppendLine("again. Everyone in the lobby must have the mod; effects are synced.");

@@ -56,11 +56,6 @@ namespace AlliedDefenses.Patches
             else if (arg.Equals("config", StringComparison.OrdinalIgnoreCase) ||
                      arg.Equals("settings", StringComparison.OrdinalIgnoreCase))
                 message = CommandText.CurrentConfig();
-            else if (arg.Equals("release", StringComparison.OrdinalIgnoreCase) ||
-                     arg.Equals("stop", StringComparison.OrdinalIgnoreCase))
-                message = HijackManager.RequestRelease();
-            else if (arg.StartsWith("control ", StringComparison.OrdinalIgnoreCase))
-                message = HijackManager.RequestControl(arg.Substring("control ".Length).Trim());
             else if (TryMatchGroup(arg, out string typeId))
                 message = HijackManager.ListDefenses(typeId); // "ally mines" / "ally turrets" -> list ids
             else

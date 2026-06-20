@@ -100,50 +100,6 @@ namespace AlliedDefenses.Core
         }
 
         // ----------------------------------------------------------------
-        // MANUAL CONTROL: take over a turret by id (it gets hijacked first so the
-        // auto-targeting bypass is active), then release it.
-        // ----------------------------------------------------------------
-        public static string RequestControl(string code)
-        {
-            var defense = TerminalCodeResolver.Resolve(code, typeof(Turret));
-            if (defense == null)
-                return $"No turret found for code '{code}'. Only turrets can be remote-controlled.";
-
-            var netId = ResolveNetworkId(defense);
-            if (!netId.HasValue)
-                return "This turret has no network identity (cannot be controlled).";
-
-            var net = HijackNetworker.Active;
-            if (net == null)
-                return "Network handler not ready yet. Try again in a moment.";
-
-            // Release any turret we're already controlling, so switching works without
-            // pressing the release key first.
-            var current = TurretControlSession.TurretControlledByLocal();
-            if (current.HasValue && current.Value != netId.Value)
-                net.RequestRelease(current.Value);
-
-            // Always (re)hijack so the 60s timer is fresh, then take control.
-            net.RequestHijack(netId.Value, "turret");
-            net.RequestControl(netId.Value);
-
-            string releaseKey = ModConfig.ManualControlReleaseKey.Value;
-            return $"Taking manual control of turret '{code}'.\n" +
-                   $"Watch the ship monitor; aim with the MOUSE, LMB to fire.\n" +
-                   $"Press {releaseKey} or type '{ModConfig.HijackCommand.Value} release' to stop.";
-        }
-
-        public static string RequestRelease()
-        {
-            var netId = TurretControlSession.TurretControlledByLocal();
-            if (!netId.HasValue)
-                return "You are not controlling any turret.";
-
-            HijackNetworker.Active?.RequestRelease(netId.Value);
-            return "Released turret control.";
-        }
-
-        // ----------------------------------------------------------------
         // STEP 2: called on EACH machine via ClientRpc. This is where the
         // state actually changes, identically everywhere.
         // ----------------------------------------------------------------
@@ -173,7 +129,6 @@ namespace AlliedDefenses.Core
             }
             else
             {
-                TurretControlSession.End(networkId);  // stop any manual control when it expires
                 RadarTimerDisplay.Restore(defense);   // put the plain code back on the map
                 _active.Remove(networkId);
                 Plugin.Log.LogInfo($"{module.DisplayName} (net {networkId}) is hostile again.");

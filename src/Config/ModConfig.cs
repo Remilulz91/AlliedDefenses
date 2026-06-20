@@ -30,17 +30,6 @@ namespace AlliedDefenses.Config
         /// <summary>Credit cost to hijack a defense (0 = free).</summary>
         public static ConfigEntry<int> HijackCreditCost = null!;
 
-        // --- Manual remote control ---
-
-        /// <summary>Mouse look sensitivity while remote-controlling a turret.</summary>
-        public static ConfigEntry<float> ManualControlSensitivity = null!;
-
-        /// <summary>Key (Input System name) to release manual control. Default V.</summary>
-        public static ConfigEntry<string> ManualControlReleaseKey = null!;
-
-        /// <summary>Damage dealt per shot while a turret is manually controlled.</summary>
-        public static ConfigEntry<int> ManualControlDamage = null!;
-
         // --- Visual feedback ---
 
         /// <summary>Tint allied defenses (laser, light, radar code) to show they're ours.</summary>
@@ -80,18 +69,6 @@ namespace AlliedDefenses.Config
             HijackCreditCost = cfg.Bind(
                 "Economy", "HijackCreditCost", 0,
                 "Credit cost to hijack a defense. 0 = free.");
-
-            ManualControlSensitivity = cfg.Bind(
-                "Manual Control", "ManualControlSensitivity", 2f,
-                "Mouse look sensitivity while remote-controlling a turret.");
-
-            ManualControlReleaseKey = cfg.Bind(
-                "Manual Control", "ManualControlReleaseKey", "V",
-                "Key to release manual control (Unity Input System key name, e.g. V, B, Escape).");
-
-            ManualControlDamage = cfg.Bind(
-                "Manual Control", "ManualControlDamage", 50,
-                "Damage dealt per shot while manually controlling a turret (vanilla turret = 50).");
 
             ColorAlliedDefenses = cfg.Bind(
                 "Visuals", "ColorAlliedDefenses", true,

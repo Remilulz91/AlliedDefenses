@@ -107,15 +107,6 @@ namespace AlliedDefenses.Defenses
             if (!GetNodes(turret, out var rod, out var pivot, out var muzzle))
                 return; // can't safely drive this turret
 
-            // If a player is manually driving this turret, obey their aim/fire instead
-            // of auto-targeting enemies.
-            ulong? netId = HijackManager.ResolveNetworkId(turret);
-            if (netId.HasValue && TurretControlSession.Get(netId.Value) is ControlInfo ctrl)
-            {
-                DriveManually(turret, rod, pivot, muzzle, ctrl);
-                return;
-            }
-
             Vector3 barrelDir = (muzzle.position - pivot.position).normalized;
             var enemy = TargetingHelper.FindBestEnemy(
                 muzzle.position, barrelDir,
@@ -283,80 +274,5 @@ namespace AlliedDefenses.Defenses
                 turret.bulletParticles.Emit(2);
         }
 
-        // ================================================================
-        //  MANUAL REMOTE CONTROL DRIVING
-        // ================================================================
-
-        /// <summary>
-        /// Point the turret exactly where the controlling player aims, and fire (at
-        /// ANYTHING, players included) while they hold fire. Aim is applied on every
-        /// client for a consistent visual; damage is resolved on the host only.
-        /// </summary>
-        private void DriveManually(Turret turret, Transform rod, Transform pivot, Transform muzzle, ControlInfo ctrl)
-        {
-            if (ctrl.AimDirection.sqrMagnitude > 0.001f)
-            {
-                Vector3 targetPoint = pivot.position + ctrl.AimDirection.normalized * 10f;
-                AimRodAt(rod, pivot.position, muzzle.position, targetPoint, 720f); // snappy
-            }
-
-            // Always show the green beam while manually aiming.
-            UpdateBeam(turret, pivot, muzzle);
-
-            bool isServer = NetworkManager.Singleton == null || NetworkManager.Singleton.IsServer;
-            if (ctrl.Firing && isServer)
-                ManualFire(turret, pivot, muzzle);
-        }
-
-        private void ManualFire(Turret turret, Transform pivot, Transform muzzle)
-        {
-            int id = turret.GetInstanceID();
-            float now = Time.time;
-            if (_nextFire.TryGetValue(id, out float next) && now < next) return;
-            _nextFire[id] = now + FireInterval;
-
-            int damage = ModConfig.ManualControlDamage.Value;
-            Vector3 dir = (muzzle.position - pivot.position).normalized;
-            Vector3 origin = muzzle.position;
-
-            // Hit the first thing in the line of fire (broad mask; we filter by what we hit).
-            if (Physics.Raycast(origin, dir, out RaycastHit hit, 60f, ~0, QueryTriggerInteraction.Ignore))
-            {
-                var enemy = hit.collider.GetComponentInParent<EnemyAI>();
-                if (enemy != null && !enemy.isEnemyDead)
-                {
-                    enemy.HitEnemy(damage, null, false, -1);
-                }
-                else
-                {
-                    var player = hit.collider.GetComponentInParent<GameNetcodeStuff.PlayerControllerB>();
-                    if (player != null)
-                        DamagePlayer(player, damage);
-                }
-            }
-            MuzzleFlash(turret);
-        }
-
-        /// <summary>
-        /// Deal damage to a player. PlayerControllerB.DamagePlayer has a long optional
-        /// signature that has shifted between game versions, so we call it defensively
-        /// by reflection and fall back to other known damage methods.
-        /// TODO: confirm the exact signature in your decompiler and switch to a direct call.
-        /// </summary>
-        private static void DamagePlayer(GameNetcodeStuff.PlayerControllerB player, int damage)
-        {
-            try
-            {
-                // Common signature: DamagePlayer(int damageNumber, bool hasDamageSFX,
-                //   bool callRPC, int causeOfDeath, int deathAnimation, bool fallDamage, Vector3 force)
-                HarmonyLib.Traverse.Create(player).Method("DamagePlayer",
-                    damage, true, true, 0, 0, false, Vector3.zero).GetValue();
-            }
-            catch
-            {
-                try { HarmonyLib.Traverse.Create(player).Method("DamagePlayer", damage).GetValue(); }
-                catch (System.Exception e) { Plugin.Log.LogWarning($"DamagePlayer failed: {e.Message}"); }
-            }
-        }
     }
 }
