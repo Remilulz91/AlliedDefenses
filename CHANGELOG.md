@@ -1,13 +1,15 @@
 # Changelog
 
-## 0.6.0
-- Upgrade system (foundation): buy upgrades with ship credits via the terminal
-  (`ally upgrades`, `ally upgrade <id>`, `ally upgrade reset`). First two upgrades:
-  hijack duration and turret damage.
+## 0.6.1
 - Configurable save mode (`UpgradePersistence`):
   - Persistent (default): upgrades kept forever on this install, even through a game over.
   - PerSave: upgrades tied to the current save slot (per slot), wiped on a game over —
     stored in the game save via ES3, with a guarded game-over hook.
+
+## 0.6.0
+- Upgrade system (foundation): buy upgrades with ship credits via the terminal
+  (`ally upgrades`, `ally upgrade <id>`, `ally upgrade reset`). First two upgrades:
+  hijack duration and turret damage.
 
 ## 0.5.0
 - New allied defense: SPIKE TRAPS. `ally <id>` / `ally spikes`. An allied spike trap no
