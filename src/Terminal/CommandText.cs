@@ -25,6 +25,7 @@ namespace AlliedDefenses.UI
                 $"{k} mines    : list all mines and their ids\n" +
                 $"{k} spikes   : list all spike traps and their ids\n" +
                 $"{k} upgrades : buy upgrades with ship credits\n" +
+                $"{k} beacon   : buy/deliver the carryable Defense Beacon\n" +
                 $"{k} help     : how the mod works\n" +
                 $"{k} config   : show the current settings\n";
         }
@@ -65,11 +66,26 @@ namespace AlliedDefenses.UI
             sb.AppendLine("   - Persistent: kept forever, even through a game over (default).");
             sb.AppendLine("   - PerSave: tied to the save slot, wiped on a game over.");
             sb.AppendLine("");
-            sb.AppendLine("UNKILLABLE ENEMIES (counter-play upgrades):");
-            sb.AppendLine("  sanity     : allied defenses calm your mind nearby, so the");
-            sb.AppendLine("               Ghost Girl targets/escalates on you less.");
+            sb.AppendLine("DEFENSE BEACON (protection outside, near the ship):");
+            sb.AppendLine($"  {k} beacon  buy it once, then it is delivered to the ship.");
+            sb.AppendLine("  It is a heavy TWO-HANDED prop: carry it out (no loot while");
+            sb.AppendLine("  carrying, you move slower) and set it down anywhere. Wherever");
+            sb.AppendLine("  it sits it anchors the counter-play auras below, so they work");
+            sb.AppendLine("  out in the field where there are no turrets or mines.");
+            sb.AppendLine("  Bought once - re-delivered free if lost. 'haul' upgrade makes");
+            sb.AppendLine("  it lighter to carry.");
+            sb.AppendLine("");
+            sb.AppendLine("UNKILLABLE ENEMIES (counter-play auras, near a defense OR beacon):");
+            sb.AppendLine("  sanity     : calms your mind nearby, so the Ghost Girl targets");
+            sb.AppendLine("               and escalates on you less.");
             sb.AppendLine("  neutralize : an allied turret watching a Coil-Head freezes it");
-            sb.AppendLine("               in place (it can't be killed). Buy to enable.");
+            sb.AppendLine("               in place (it can't be killed).");
+            sb.AppendLine("  seismic    : the Earth Leviathan (sand worm) can't target you");
+            sb.AppendLine("               while you stand in the radius (it hunts by proximity,");
+            sb.AppendLine("               not sound, and is unkillable).");
+            sb.AppendLine("  muffle     : Eyeless Dogs are blind and hunt by sound; noises");
+            sb.AppendLine("               made in the radius are silenced, so they don't hear");
+            sb.AppendLine("               you. Each is a separate upgrade (level 0 = off).");
             sb.AppendLine("");
             sb.AppendLine("All hijacks last for a set time, then the defense turns hostile");
             sb.AppendLine("again. Everyone in the lobby must have the mod; effects are synced.");
@@ -100,6 +116,9 @@ namespace AlliedDefenses.UI
             sb.AppendLine($"Players can be hit    : {(noFriendlyFire ? "NO - allied defenses never hurt players" : "yes - friendly fire is ON")}");
             sb.AppendLine($"Hijack cost           : {costText}");
             sb.AppendLine($"Allied colour cue     : {(ModConfig.ColorAlliedDefenses.Value ? "ON (green laser/light in dungeon, blue code on radar)" : "off")}");
+            string beaconText = !ModConfig.EnableBeacon.Value ? "disabled"
+                : UpgradeManager.BeaconOwned ? "owned" : $"available for {ModConfig.BeaconPrice.Value} credits";
+            sb.AppendLine($"Defense Beacon        : {beaconText}");
             sb.AppendLine("");
             sb.AppendLine($"Defense types supported : {DefenseRegistry.Count}");
             sb.AppendLine($"Currently hijacked      : {HijackManager.ActiveCount}");

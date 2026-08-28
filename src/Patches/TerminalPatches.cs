@@ -60,6 +60,8 @@ namespace AlliedDefenses.Patches
                 message = UpgradeManager.ListText(GetCredits(__instance));
             else if (arg.StartsWith("upgrade ", StringComparison.OrdinalIgnoreCase))
                 message = HandleUpgrade(__instance, arg.Substring("upgrade ".Length).Trim());
+            else if (arg.Equals("beacon", StringComparison.OrdinalIgnoreCase))
+                message = HandleBeacon(__instance);
             else if (TryMatchGroup(arg, out string typeId))
                 message = HijackManager.ListDefenses(typeId); // "ally mines" / "ally turrets" -> list ids
             else
@@ -77,6 +79,16 @@ namespace AlliedDefenses.Patches
 
             int credits = GetCredits(terminal);
             var (msg, spent) = UpgradeManager.Buy(sub, credits);
+            if (spent > 0)
+                SetCredits(terminal, credits - spent);
+            return msg;
+        }
+
+        /// <summary>Handles "ally beacon": buy the beacon once, or re-deliver a missing one for free.</summary>
+        private static string HandleBeacon(Terminal terminal)
+        {
+            int credits = GetCredits(terminal);
+            var (msg, spent) = Beacon.BeaconManager.Purchase(credits);
             if (spent > 0)
                 SetCredits(terminal, credits - spent);
             return msg;

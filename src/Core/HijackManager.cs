@@ -139,7 +139,11 @@ namespace AlliedDefenses.Core
         // Called every frame (from HijackTicker). Handles expiry and the
         // targeting logic of "passive" defenses (e.g. mines).
         // ----------------------------------------------------------------
-        /// <summary>True if any allied defense is within <paramref name="radius"/> of a point.</summary>
+        /// <summary>
+        /// True if any allied defense is within <paramref name="radius"/> of a point.
+        /// Counts both hijacked in-facility defenses AND placed outdoor beacons, so the
+        /// protective auras work near the ship as well as inside.
+        /// </summary>
         public static bool AnyAlliedWithin(Vector3 point, float radius)
         {
             float r2 = radius * radius;
@@ -148,7 +152,8 @@ namespace AlliedDefenses.Core
                 if (e.Defense == null) continue;
                 if ((e.Defense.transform.position - point).sqrMagnitude <= r2) return true;
             }
-            return false;
+            // Placed defense beacons (outside, around the ship) count as allied anchors too.
+            return BeaconRegistry.AnyBeaconWithin(point, radius);
         }
 
         public static void Tick()

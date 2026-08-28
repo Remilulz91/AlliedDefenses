@@ -45,6 +45,12 @@ namespace AlliedDefenses.Config
         /// <summary>Enable the buy-with-credits upgrade system.</summary>
         public static ConfigEntry<bool> EnableUpgrades = null!;
 
+        /// <summary>Enable the carryable Defense Beacon (bought once from the terminal).</summary>
+        public static ConfigEntry<bool> EnableBeacon = null!;
+
+        /// <summary>One-time credit cost of the Defense Beacon.</summary>
+        public static ConfigEntry<int> BeaconPrice = null!;
+
         /// <summary>Whether upgrades are kept forever (Persistent) or reset on game over (PerSave).</summary>
         public static ConfigEntry<UpgradeSaveMode> UpgradePersistence = null!;
 
@@ -100,6 +106,16 @@ namespace AlliedDefenses.Config
                 "Economy", "UpgradePersistence", UpgradeSaveMode.Persistent,
                 "Persistent = upgrades are kept forever on this install (survive death AND game over). " +
                 "PerSave = upgrades are tied to the current save slot: kept through deaths, but wiped on a game over.");
+
+            EnableBeacon = cfg.Bind(
+                "Beacon", "EnableBeacon", true,
+                "Enable the carryable Defense Beacon (two-handed prop bought once with 'ally beacon'). " +
+                "It anchors the protective auras (sanity/seismic/muffle) wherever you set it down.");
+
+            BeaconPrice = cfg.Bind(
+                "Beacon", "BeaconPrice", 175,
+                "One-time credit cost of the Defense Beacon. Owned/paid state follows the same " +
+                "Persistent/PerSave rule as the upgrades. Re-delivering a lost beacon is free.");
 
             ColorAlliedDefenses = cfg.Bind(
                 "Visuals", "ColorAlliedDefenses", true,

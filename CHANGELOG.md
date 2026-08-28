@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.8.0
+- DEFENSE BEACON: a carryable, two-handed heavy prop bought once with `ally beacon`
+  (price configurable, default 175 cr). Delivered to the ship, carried out into the
+  field (no loot while carrying, slower move), and set down anywhere to anchor the
+  counter-play auras where there are no turrets or mines — near the ship, by the worm,
+  wherever. Bought once and re-delivered free if lost. Built entirely at runtime (no
+  asset bundle) and spawned via the mod's own networking — no new dependency.
+- Two new counter-play auras, now usable outdoors thanks to the beacon:
+  - `seismic`: the Earth Leviathan (SandWormAI) hunts by proximity, not sound, and is
+    unkillable. While you stand in the radius, EnemyAI.PlayerIsTargetable is forced false
+    for the worm only, so it can't pick you (and drops you if already chasing).
+  - `muffle`: Eyeless Dogs (MouthDogAI) are blind and hunt by sound. Noises made inside
+    the radius are dropped in MouthDogAI.DetectNoise, so the dogs never hear you there.
+- `haul` upgrade: lowers the beacon's carry weight (~47 lb down to ~16 lb) so you move
+  faster while carrying it (floored, never weightless).
+- The `sanity`/`seismic`/`muffle` auras now trigger near a placed beacon as well as near
+  a hijacked in-facility defense (AnyAlliedWithin also checks the beacon registry).
+
 ## 0.7.0
 - Counter-play against the "unkillable" enemies, via two new upgrades (both off by default):
   - `sanity`: while you stand near an allied defense, your hidden insanity bleeds down, so

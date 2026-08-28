@@ -94,6 +94,29 @@ namespace AlliedDefenses.Core
         public static float NeutralizeLinger() => NeutralizeLingerFor(LevelOf("neutralize"));
         private static float NeutralizeLingerFor(int lvl) => lvl <= 0 ? 0f : 0.5f + lvl * 0.5f; // 1.0s..3.0s
 
+        // --- Earth Leviathan "seismic cloak": while near an allied defense (a placed beacon),
+        //     the sand-worm can no longer target the player (EnemyAI.PlayerIsTargetable is
+        //     forced false for SandWormAI). Level 0 = off; each level widens the radius. ---
+        public static bool SeismicEnabled => ModConfig.EnableUpgrades.Value && LevelOf("seismic") > 0;
+        public static float SeismicRadius() => SeismicRadiusFor(LevelOf("seismic"));
+        private static float SeismicRadiusFor(int lvl) => lvl <= 0 ? 0f : 8f + lvl * 3f; // 11m..23m
+
+        // --- Eyeless Dog "sound muffle": the (blind) dogs hunt purely by noise. While a noise
+        //     is emitted inside an allied-defense radius, MouthDogAI.DetectNoise ignores it, so
+        //     the player is effectively silent in the beacon's quiet zone. Level 0 = off. ---
+        public static bool MuffleEnabled => ModConfig.EnableUpgrades.Value && LevelOf("muffle") > 0;
+        public static float MuffleRadius() => MuffleRadiusFor(LevelOf("muffle"));
+        private static float MuffleRadiusFor(int lvl) => lvl <= 0 ? 0f : 6f + lvl * 2f; // 8m..16m
+
+        // --- Defense Beacon ownership + "haul" (carry weight). The beacon is bought once via the
+        //     'beacon' pseudo-upgrade (max level 1), so all the persistence / reset plumbing is
+        //     shared. 'haul' lowers the beacon's weight so you carry it faster (floored so it is
+        //     never weightless). ---
+        public static bool BeaconOwned => LevelOf("beacon") > 0;
+        public static float BeaconWeight() => BeaconWeightFor(LevelOf("haul"));
+        private static float BeaconWeightFor(int lvl) => Mathf.Max(1.15f, 1.45f - lvl * 0.06f); // ~47lb -> ~16lb
+        private static int WeightToLb(float w) => Mathf.RoundToInt((w - 1f) * 105f);
+
         // ----------------------------------------------------------------
 
         public static void Init(ConfigFile cfg)
@@ -118,6 +141,22 @@ namespace AlliedDefenses.Core
 
             Add(cfg, "neutralize", "Neutralize", maxLevel: 5, baseCost: 200, growth: 1.5f,
                 describe: lvl => lvl == 0 ? "off (Coil-Head)" : $"freeze, +{NeutralizeLingerFor(lvl):0.0}s linger");
+
+            Add(cfg, "seismic", "Seismic cloak", maxLevel: 5, baseCost: 180, growth: 1.5f,
+                describe: lvl => lvl == 0 ? "off (Earth Leviathan)" : $"{SeismicRadiusFor(lvl):0}m untargetable");
+
+            Add(cfg, "muffle", "Sound muffle", maxLevel: 5, baseCost: 160, growth: 1.5f,
+                describe: lvl => lvl == 0 ? "off (Eyeless Dog)" : $"{MuffleRadiusFor(lvl):0}m quiet zone");
+
+            if (ModConfig.EnableBeacon.Value)
+            {
+                // Bought once via 'ally beacon'; BaseCost mirrors the configurable price.
+                Add(cfg, "beacon", "Defense Beacon", maxLevel: 1, baseCost: ModConfig.BeaconPrice.Value, growth: 1f,
+                    describe: lvl => lvl == 0 ? "not owned" : "owned (carry with two hands)");
+
+                Add(cfg, "haul", "Beacon haul", maxLevel: 5, baseCost: 90, growth: 1.4f,
+                    describe: lvl => $"{WeightToLb(BeaconWeightFor(lvl))} lb carry");
+            }
         }
 
         private static void Add(ConfigFile cfg, string id, string name, int maxLevel, int baseCost,
