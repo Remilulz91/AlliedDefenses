@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0
+- Upgrade system (foundation): buy upgrades with ship credits via the terminal
+  (`ally upgrades`, `ally upgrade <id>`, `ally upgrade reset`). First two upgrades:
+  hijack duration and turret damage. Levels are saved and KEPT through game overs.
+
 ## 0.5.0
 - New allied defense: SPIKE TRAPS. `ally <id>` / `ally spikes`. An allied spike trap no
   longer crushes players but still slams down on enemies caught underneath.

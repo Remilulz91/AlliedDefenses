@@ -56,6 +56,10 @@ namespace AlliedDefenses.Patches
             else if (arg.Equals("config", StringComparison.OrdinalIgnoreCase) ||
                      arg.Equals("settings", StringComparison.OrdinalIgnoreCase))
                 message = CommandText.CurrentConfig();
+            else if (arg.Equals("upgrades", StringComparison.OrdinalIgnoreCase))
+                message = UpgradeManager.ListText(GetCredits(__instance));
+            else if (arg.StartsWith("upgrade ", StringComparison.OrdinalIgnoreCase))
+                message = HandleUpgrade(__instance, arg.Substring("upgrade ".Length).Trim());
             else if (TryMatchGroup(arg, out string typeId))
                 message = HijackManager.ListDefenses(typeId); // "ally mines" / "ally turrets" -> list ids
             else
@@ -63,6 +67,40 @@ namespace AlliedDefenses.Patches
 
             __result = MakeNode(message);
             return false; // skip the vanilla parser entirely for our commands
+        }
+
+        /// <summary>Handles "ally upgrade &lt;id&gt;" and "ally upgrade reset".</summary>
+        private static string HandleUpgrade(Terminal terminal, string sub)
+        {
+            if (sub.Equals("reset", StringComparison.OrdinalIgnoreCase))
+                return UpgradeManager.Reset();
+
+            int credits = GetCredits(terminal);
+            var (msg, spent) = UpgradeManager.Buy(sub, credits);
+            if (spent > 0)
+                SetCredits(terminal, credits - spent);
+            return msg;
+        }
+
+        // Ship credits via reflection (build-safe against member renames).
+        private static int GetCredits(Terminal terminal)
+        {
+            try { return Traverse.Create(terminal).Field("groupCredits").GetValue<int>(); }
+            catch { return 0; }
+        }
+
+        private static void SetCredits(Terminal terminal, int value)
+        {
+            value = Mathf.Max(0, value);
+            try
+            {
+                Traverse.Create(terminal).Field("groupCredits").SetValue(value);
+                int items = 0;
+                try { items = Traverse.Create(terminal).Field("numberOfItemsInDropship").GetValue<int>(); } catch { }
+                // Best-effort network sync so all players see the new balance.
+                try { Traverse.Create(terminal).Method("SyncGroupCreditsServerRpc", value, items).GetValue(); } catch { }
+            }
+            catch (System.Exception e) { Plugin.Log.LogWarning($"SetCredits failed: {e.Message}"); }
         }
 
         /// <summary>

@@ -27,7 +27,7 @@ namespace AlliedDefenses
         public const string Author = "Remilulz_91";
         public const string Guid = "Remilulz_91.AlliedDefenses";
         public const string Name = "AlliedDefenses";
-        public const string Version = "0.5.0";
+        public const string Version = "0.6.0";
 
         /// <summary>Singleton instance, accessible anywhere via Plugin.Instance.</summary>
         public static Plugin Instance { get; private set; } = null!;
@@ -46,6 +46,7 @@ namespace AlliedDefenses
             //    base.Config is BepInEx's ConfigFile (qualified to avoid any clash
             //    with the AlliedDefenses.Config namespace).
             ModConfig.Init(base.Config);
+            Core.UpgradeManager.Init(base.Config); // upgrade levels (persisted in config)
 
             // 2) Apply ALL Harmony patches found in this assembly.
             //    Harmony automatically scans classes marked with [HarmonyPatch].

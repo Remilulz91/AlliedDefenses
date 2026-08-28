@@ -24,6 +24,7 @@ namespace AlliedDefenses.UI
                 $"{k} turrets  : list all turrets and their ids\n" +
                 $"{k} mines    : list all mines and their ids\n" +
                 $"{k} spikes   : list all spike traps and their ids\n" +
+                $"{k} upgrades : buy upgrades with ship credits\n" +
                 $"{k} help     : how the mod works\n" +
                 $"{k} config   : show the current settings\n";
         }
@@ -55,6 +56,12 @@ namespace AlliedDefenses.UI
             sb.AppendLine($"  {k} <id>   hijack one spike trap.");
             sb.AppendLine("  An allied spike trap no longer crushes players; it still");
             sb.AppendLine("  slams down on enemies caught underneath.");
+            sb.AppendLine("");
+            sb.AppendLine("UPGRADES:");
+            sb.AppendLine($"  {k} upgrades       see upgrades, levels and costs.");
+            sb.AppendLine($"  {k} upgrade <id>   buy the next level with ship credits.");
+            sb.AppendLine($"  {k} upgrade reset  reset all upgrades to level 0.");
+            sb.AppendLine("  Upgrades are saved and KEPT even through a game over.");
             sb.AppendLine("");
             sb.AppendLine("All hijacks last for a set time, then the defense turns hostile");
             sb.AppendLine("again. Everyone in the lobby must have the mod; effects are synced.");

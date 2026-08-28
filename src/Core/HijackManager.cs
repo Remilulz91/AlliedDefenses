@@ -68,7 +68,7 @@ namespace AlliedDefenses.Core
             // Delegate to the networker, which travels server -> all clients.
             net.RequestHijack(netId.Value, module.TypeId);
 
-            float dur = ModConfig.HijackDuration.Value;
+            float dur = UpgradeManager.EffectiveDuration();
             string durText = dur > 0f ? $"for {dur:0} seconds" : "until end of round";
             return $"Hijacking {module.DisplayName} '{code}' {durText}...";
         }
@@ -117,7 +117,7 @@ namespace AlliedDefenses.Core
 
             if (allied)
             {
-                float duration = ModConfig.HijackDuration.Value;
+                float duration = UpgradeManager.EffectiveDuration();
                 _active[networkId] = new HijackEntry
                 {
                     NetworkId = networkId,

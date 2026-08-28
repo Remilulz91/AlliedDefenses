@@ -36,7 +36,6 @@ namespace AlliedDefenses.Defenses
         // Barrel direction captured when the turret becomes allied (idle-scan centre).
         private static readonly Dictionary<int, Vector3> _baseDir = new();
         private const float FireInterval = 0.21f;   // matches the vanilla fire rate
-        private const int EnemyDamagePerShot = 1;   // damage dealt to monsters per shot (tune to taste)
         private const float AlignToleranceDeg = 10f; // max angle to consider the target "on aim"
 
         // ----------------------------------------------------------------
@@ -260,7 +259,7 @@ namespace AlliedDefenses.Defenses
 
             // Confirmed signature: HitEnemy(int force, PlayerControllerB playerWhoHit,
             //                               bool playHitSFX, int hitID).
-            enemy.HitEnemy(EnemyDamagePerShot, null, false, -1);
+            enemy.HitEnemy(UpgradeManager.EffectiveTurretDamage(), null, false, -1);
             MuzzleFlash(turret);
         }
 

@@ -30,6 +30,12 @@ namespace AlliedDefenses.Config
         /// <summary>Credit cost to hijack a defense (0 = free).</summary>
         public static ConfigEntry<int> HijackCreditCost = null!;
 
+        /// <summary>Base turret damage per shot to enemies (before upgrades).</summary>
+        public static ConfigEntry<int> TurretEnemyDamage = null!;
+
+        /// <summary>Enable the buy-with-credits upgrade system.</summary>
+        public static ConfigEntry<bool> EnableUpgrades = null!;
+
         // --- Visual feedback ---
 
         /// <summary>Tint allied defenses (laser, light, radar code) to show they're ours.</summary>
@@ -69,6 +75,14 @@ namespace AlliedDefenses.Config
             HijackCreditCost = cfg.Bind(
                 "Economy", "HijackCreditCost", 0,
                 "Credit cost to hijack a defense. 0 = free.");
+
+            TurretEnemyDamage = cfg.Bind(
+                "Economy", "TurretEnemyDamage", 1,
+                "Base turret damage per shot to enemies (before upgrades).");
+
+            EnableUpgrades = cfg.Bind(
+                "Economy", "EnableUpgrades", true,
+                "Enable the buy-with-credits upgrade system (ally upgrades / ally upgrade <id>).");
 
             ColorAlliedDefenses = cfg.Bind(
                 "Visuals", "ColorAlliedDefenses", true,
