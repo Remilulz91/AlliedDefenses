@@ -16,9 +16,10 @@ Author: **Remilulz_91** — © 2026 Remilulz_91, all rights reserved.
 At the ship computer, type:
 
 ```
-ally <id>     hijack one defense by its id (turret or mine), e.g. ally U9
+ally <id>     hijack one defense by its id (turret, mine or spike), e.g. ally U9
 ally turrets  list all turrets on the level and their ids
 ally mines    list all mines on the level and their ids
+ally spikes   list all spike traps on the level and their ids
 ally help     explain how the mod works
 ally config   show the current settings
 ```
@@ -36,6 +37,9 @@ light turns green so you can spot it in the dungeon.
 
 **Allied mines.** A hijacked mine no longer explodes under players — it only detonates when an
 **enemy** steps close. Its light turns green while it's on your side.
+
+**Allied spike traps.** A hijacked ceiling spike trap no longer crushes players; it still
+slams down on **enemies** caught underneath.
 
 **On the radar.** An allied turret/mine's code on the ship map turns **blue** (so it's not
 confused with the game's green "active" / red "disabled"), with a live **countdown** showing

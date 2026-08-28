@@ -22,6 +22,7 @@ namespace AlliedDefenses.Core
         {
             Register(new TurretHijack());
             Register(new MineHijack());
+            Register(new SpikeHijack());
         }
 
         public static void Register(IHijackableDefense defense)

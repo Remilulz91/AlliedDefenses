@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.0
+- New allied defense: SPIKE TRAPS. `ally <id>` / `ally spikes`. An allied spike trap no
+  longer crushes players but still slams down on enemies caught underneath.
+
 ## 0.4.0
 - Removed the manual remote turret control system entirely: the `ally control` / `ally release`
   commands, the mouse-aim / left-click-to-fire, and the OpenBodyCams dependency are gone.

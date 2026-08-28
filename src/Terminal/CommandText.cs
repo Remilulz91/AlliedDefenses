@@ -20,9 +20,10 @@ namespace AlliedDefenses.UI
             return
                 "ALLIED DEFENSES\n" +
                 "-------------------------\n" +
-                $"{k} <id>     : hijack one defense by its id (turret or mine, e.g. {k} U9)\n" +
+                $"{k} <id>     : hijack one defense by its id (turret, mine or spike, e.g. {k} U9)\n" +
                 $"{k} turrets  : list all turrets and their ids\n" +
                 $"{k} mines    : list all mines and their ids\n" +
+                $"{k} spikes   : list all spike traps and their ids\n" +
                 $"{k} help     : how the mod works\n" +
                 $"{k} config   : show the current settings\n";
         }
@@ -48,6 +49,12 @@ namespace AlliedDefenses.UI
             sb.AppendLine($"  {k} <id>   hijack one mine (same id you'd use to disable it).");
             sb.AppendLine("  An allied mine no longer explodes under players; it detonates");
             sb.AppendLine("  only when an enemy steps close to it.");
+            sb.AppendLine("");
+            sb.AppendLine("SPIKE TRAPS:");
+            sb.AppendLine($"  {k} spikes list all spike traps and their ids.");
+            sb.AppendLine($"  {k} <id>   hijack one spike trap.");
+            sb.AppendLine("  An allied spike trap no longer crushes players; it still");
+            sb.AppendLine("  slams down on enemies caught underneath.");
             sb.AppendLine("");
             sb.AppendLine("All hijacks last for a set time, then the defense turns hostile");
             sb.AppendLine("again. Everyone in the lobby must have the mod; effects are synced.");
