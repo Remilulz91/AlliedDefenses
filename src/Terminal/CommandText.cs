@@ -75,7 +75,7 @@ namespace AlliedDefenses.UI
         /// <summary>Current configuration, read live from the config values.</summary>
         public static string CurrentConfig()
         {
-            float duration = ModConfig.HijackDuration.Value;
+            float duration = UpgradeManager.EffectiveDuration();
             string durationText = duration > 0f
                 ? $"{duration:0} seconds, then it turns hostile again"
                 : "unlimited (stays allied until end of round)";
@@ -89,8 +89,8 @@ namespace AlliedDefenses.UI
             sb.AppendLine("------------------------------------");
             sb.AppendLine($"Command keyword       : {Keyword}");
             sb.AppendLine($"Allied duration       : {durationText}");
-            sb.AppendLine($"Turret detect range   : {ModConfig.EnemyDetectionRange.Value:0} meters");
-            sb.AppendLine($"Mine trigger radius   : {ModConfig.MineTriggerRadius.Value:0} meters");
+            sb.AppendLine($"Turret detect range   : {UpgradeManager.EffectiveDetectionRange():0} meters");
+            sb.AppendLine($"Mine trigger radius   : {UpgradeManager.EffectiveMineRadius():0} meters");
             sb.AppendLine($"Players can be hit    : {(noFriendlyFire ? "NO - allied defenses never hurt players" : "yes - friendly fire is ON")}");
             sb.AppendLine($"Hijack cost           : {costText}");
             sb.AppendLine($"Allied colour cue     : {(ModConfig.ColorAlliedDefenses.Value ? "ON (green laser/light in dungeon, blue code on radar)" : "off")}");

@@ -109,7 +109,7 @@ namespace AlliedDefenses.Defenses
             Vector3 barrelDir = (muzzle.position - pivot.position).normalized;
             var enemy = TargetingHelper.FindBestEnemy(
                 muzzle.position, barrelDir,
-                range: ModConfig.EnemyDetectionRange.Value,
+                range: UpgradeManager.EffectiveDetectionRange(),
                 coneHalfAngle: 180f,        // an allied turret may swivel toward the threat
                 requireLineOfSight: true);
 
@@ -239,7 +239,7 @@ namespace AlliedDefenses.Defenses
         /// </summary>
         private static void UpdateBeam(Turret turret, Transform pivot, Transform muzzle)
         {
-            float range = ModConfig.EnemyDetectionRange.Value;
+            float range = UpgradeManager.EffectiveDetectionRange();
             Vector3 dir = (muzzle.position - pivot.position).normalized;
             Vector3 start = muzzle.position;
             Vector3 end = Physics.Raycast(start, dir, out RaycastHit hit, range, ~0,

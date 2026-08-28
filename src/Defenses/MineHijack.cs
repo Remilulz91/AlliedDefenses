@@ -69,7 +69,7 @@ namespace AlliedDefenses.Defenses
 
             var enemy = TargetingHelper.FindBestEnemy(
                 mine.transform.position, Vector3.up,
-                range: ModConfig.MineTriggerRadius.Value,
+                range: UpgradeManager.EffectiveMineRadius(),
                 coneHalfAngle: 180f,
                 requireLineOfSight: false); // a mine doesn't need line of sight to its target
 

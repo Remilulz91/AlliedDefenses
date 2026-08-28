@@ -72,7 +72,7 @@ namespace AlliedDefenses.Core
                                     QueryTriggerInteraction.Ignore);
         }
 
-        /// <summary>User-configured detection range.</summary>
-        public static float Range => ModConfig.EnemyDetectionRange.Value;
+        /// <summary>Detection range: config value plus the turret-range upgrade.</summary>
+        public static float Range => UpgradeManager.EffectiveDetectionRange();
     }
 }

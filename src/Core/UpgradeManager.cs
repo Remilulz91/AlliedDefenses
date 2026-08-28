@@ -63,6 +63,22 @@ namespace AlliedDefenses.Core
             return baseDmg + LevelOf("turretdamage"); // +1 per level
         }
 
+        /// <summary>Turret enemy-detection range (m) with the range upgrade applied.</summary>
+        public static float EffectiveDetectionRange()
+        {
+            float baseRange = ModConfig.EnemyDetectionRange.Value;
+            if (!ModConfig.EnableUpgrades.Value) return baseRange;
+            return baseRange + LevelOf("turretrange") * 5f; // +5m per level
+        }
+
+        /// <summary>Allied-mine trigger radius (m) with the radius upgrade applied.</summary>
+        public static float EffectiveMineRadius()
+        {
+            float baseRadius = ModConfig.MineTriggerRadius.Value;
+            if (!ModConfig.EnableUpgrades.Value) return baseRadius;
+            return baseRadius + LevelOf("mineradius"); // +1m per level
+        }
+
         // ----------------------------------------------------------------
 
         public static void Init(ConfigFile cfg)
@@ -75,6 +91,12 @@ namespace AlliedDefenses.Core
 
             Add(cfg, "turretdamage", "Turret damage", maxLevel: 15, baseCost: 100, growth: 1.4f,
                 describe: lvl => $"{ModConfig.TurretEnemyDamage.Value + lvl} dmg/shot");
+
+            Add(cfg, "turretrange", "Turret range", maxLevel: 8, baseCost: 100, growth: 1.4f,
+                describe: lvl => $"{ModConfig.EnemyDetectionRange.Value + lvl * 5:0}m detect");
+
+            Add(cfg, "mineradius", "Mine radius", maxLevel: 6, baseCost: 90, growth: 1.4f,
+                describe: lvl => $"{ModConfig.MineTriggerRadius.Value + lvl:0}m radius");
         }
 
         private static void Add(ConfigFile cfg, string id, string name, int maxLevel, int baseCost,

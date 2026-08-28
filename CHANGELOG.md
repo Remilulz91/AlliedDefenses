@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.2
+- Two more upgrades: turret range (+5m/level) and allied-mine radius (+1m/level).
+  `ally config` now shows the effective (upgraded) duration, range and mine radius.
+
 ## 0.6.1
 - Configurable save mode (`UpgradePersistence`):
   - Persistent (default): upgrades kept forever on this install, even through a game over.
