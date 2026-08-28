@@ -120,6 +120,12 @@ namespace AlliedDefenses.Defenses
                 return;
             }
 
+            // Coil-Head counter-play: the turret can't kill it, but watching it freezes it.
+            // Enemy movement is host-authoritative, so only the host applies the freeze.
+            bool hostAuthoritative = NetworkManager.Singleton == null || NetworkManager.Singleton.IsServer;
+            if (hostAuthoritative && enemy is SpringManAI coil && UpgradeManager.NeutralizeEnabled)
+                CoilheadNeutralizer.Neutralize(coil, UpgradeManager.NeutralizeLinger());
+
             Vector3 targetPoint = enemy.transform.position + Vector3.up * 0.5f;
 
             // Rotate the rotating rod toward the enemy (visual, all clients).

@@ -65,6 +65,12 @@ namespace AlliedDefenses.UI
             sb.AppendLine("   - Persistent: kept forever, even through a game over (default).");
             sb.AppendLine("   - PerSave: tied to the save slot, wiped on a game over.");
             sb.AppendLine("");
+            sb.AppendLine("UNKILLABLE ENEMIES (counter-play upgrades):");
+            sb.AppendLine("  sanity     : allied defenses calm your mind nearby, so the");
+            sb.AppendLine("               Ghost Girl targets/escalates on you less.");
+            sb.AppendLine("  neutralize : an allied turret watching a Coil-Head freezes it");
+            sb.AppendLine("               in place (it can't be killed). Buy to enable.");
+            sb.AppendLine("");
             sb.AppendLine("All hijacks last for a set time, then the defense turns hostile");
             sb.AppendLine("again. Everyone in the lobby must have the mod; effects are synced.");
             sb.AppendLine("");

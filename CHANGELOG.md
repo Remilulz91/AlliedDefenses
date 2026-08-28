@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.0
+- Counter-play against the "unkillable" enemies, via two new upgrades (both off by default):
+  - `sanity`: while you stand near an allied defense, your hidden insanity bleeds down, so
+    the Ghost Girl targets and escalates on you less (suppress/delay, not an off switch).
+  - `neutralize`: an allied turret watching a Coil-Head freezes it in place (host-side;
+    the freeze lingers a moment after the turret loses sight, scaling with the level).
+
 ## 0.6.2
 - Two more upgrades: turret range (+5m/level) and allied-mine radius (+1m/level).
   `ally config` now shows the effective (upgraded) duration, range and mine radius.

@@ -79,6 +79,21 @@ namespace AlliedDefenses.Core
             return baseRadius + LevelOf("mineradius"); // +1m per level
         }
 
+        // --- Ghost Girl "sanity aura": allied defenses lower a nearby player's hidden
+        //     insanity, which is what the Ghost Girl feeds on. Level 0 = off. ---
+        public static bool SanityAuraEnabled => ModConfig.EnableUpgrades.Value && LevelOf("sanity") > 0;
+        public static float SanityAuraRadius() => SanityRadiusFor(LevelOf("sanity"));
+        public static float SanityAuraRate() => SanityRateFor(LevelOf("sanity"));
+        private static float SanityRadiusFor(int lvl) => lvl <= 0 ? 0f : 6f + lvl * 2f;  // 8m..16m
+        private static float SanityRateFor(int lvl) => lvl <= 0 ? 0f : lvl * 2f;          // 2..10 insanity/sec
+
+        // --- Coil-Head neutralize: an allied turret watching a Coil-Head freezes it.
+        //     Level 0 = off; each level extends how long the freeze lingers after the
+        //     turret loses sight. ---
+        public static bool NeutralizeEnabled => ModConfig.EnableUpgrades.Value && LevelOf("neutralize") > 0;
+        public static float NeutralizeLinger() => NeutralizeLingerFor(LevelOf("neutralize"));
+        private static float NeutralizeLingerFor(int lvl) => lvl <= 0 ? 0f : 0.5f + lvl * 0.5f; // 1.0s..3.0s
+
         // ----------------------------------------------------------------
 
         public static void Init(ConfigFile cfg)
@@ -97,6 +112,12 @@ namespace AlliedDefenses.Core
 
             Add(cfg, "mineradius", "Mine radius", maxLevel: 6, baseCost: 90, growth: 1.4f,
                 describe: lvl => $"{ModConfig.MineTriggerRadius.Value + lvl:0}m radius");
+
+            Add(cfg, "sanity", "Sanity aura", maxLevel: 5, baseCost: 150, growth: 1.5f,
+                describe: lvl => lvl == 0 ? "off (Ghost Girl)" : $"{SanityRadiusFor(lvl):0}m, -{SanityRateFor(lvl):0}/s insanity");
+
+            Add(cfg, "neutralize", "Neutralize", maxLevel: 5, baseCost: 200, growth: 1.5f,
+                describe: lvl => lvl == 0 ? "off (Coil-Head)" : $"freeze, +{NeutralizeLingerFor(lvl):0.0}s linger");
         }
 
         private static void Add(ConfigFile cfg, string id, string name, int maxLevel, int baseCost,

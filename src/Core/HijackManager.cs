@@ -139,8 +139,23 @@ namespace AlliedDefenses.Core
         // Called every frame (from HijackTicker). Handles expiry and the
         // targeting logic of "passive" defenses (e.g. mines).
         // ----------------------------------------------------------------
+        /// <summary>True if any allied defense is within <paramref name="radius"/> of a point.</summary>
+        public static bool AnyAlliedWithin(Vector3 point, float radius)
+        {
+            float r2 = radius * radius;
+            foreach (var e in _active.Values)
+            {
+                if (e.Defense == null) continue;
+                if ((e.Defense.transform.position - point).sqrMagnitude <= r2) return true;
+            }
+            return false;
+        }
+
         public static void Tick()
         {
+            // Ghost Girl counter-play: bleed the local player's insanity while near an ally.
+            SanityAura.Tick();
+
             if (_active.Count == 0) return;
 
             // Only the host decides expiry, then broadcasts the return to hostile.
