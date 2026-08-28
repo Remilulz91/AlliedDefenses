@@ -10,6 +10,15 @@ namespace AlliedDefenses.Config
     /// across the code. The in-game "config" terminal command reads these same
     /// values, so the players always see the real, current settings.
     /// </summary>
+    /// <summary>Where the upgrade levels are stored (and therefore when they reset).</summary>
+    public enum UpgradeSaveMode
+    {
+        /// <summary>Kept forever on this install; survive death AND game over. Reset only via 'ally upgrade reset'.</summary>
+        Persistent,
+        /// <summary>Tied to the current save slot: kept through deaths, but wiped on a game over (like the game's own progress).</summary>
+        PerSave,
+    }
+
     public static class ModConfig
     {
         /// <summary>Keyword typed in the terminal to hijack a defense.</summary>
@@ -35,6 +44,9 @@ namespace AlliedDefenses.Config
 
         /// <summary>Enable the buy-with-credits upgrade system.</summary>
         public static ConfigEntry<bool> EnableUpgrades = null!;
+
+        /// <summary>Whether upgrades are kept forever (Persistent) or reset on game over (PerSave).</summary>
+        public static ConfigEntry<UpgradeSaveMode> UpgradePersistence = null!;
 
         // --- Visual feedback ---
 
@@ -83,6 +95,11 @@ namespace AlliedDefenses.Config
             EnableUpgrades = cfg.Bind(
                 "Economy", "EnableUpgrades", true,
                 "Enable the buy-with-credits upgrade system (ally upgrades / ally upgrade <id>).");
+
+            UpgradePersistence = cfg.Bind(
+                "Economy", "UpgradePersistence", UpgradeSaveMode.Persistent,
+                "Persistent = upgrades are kept forever on this install (survive death AND game over). " +
+                "PerSave = upgrades are tied to the current save slot: kept through deaths, but wiped on a game over.");
 
             ColorAlliedDefenses = cfg.Bind(
                 "Visuals", "ColorAlliedDefenses", true,

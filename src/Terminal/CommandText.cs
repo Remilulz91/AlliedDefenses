@@ -61,7 +61,9 @@ namespace AlliedDefenses.UI
             sb.AppendLine($"  {k} upgrades       see upgrades, levels and costs.");
             sb.AppendLine($"  {k} upgrade <id>   buy the next level with ship credits.");
             sb.AppendLine($"  {k} upgrade reset  reset all upgrades to level 0.");
-            sb.AppendLine("  Upgrades are saved and KEPT even through a game over.");
+            sb.AppendLine("  Save mode is set in the config (UpgradePersistence):");
+            sb.AppendLine("   - Persistent: kept forever, even through a game over (default).");
+            sb.AppendLine("   - PerSave: tied to the save slot, wiped on a game over.");
             sb.AppendLine("");
             sb.AppendLine("All hijacks last for a set time, then the defense turns hostile");
             sb.AppendLine("again. Everyone in the lobby must have the mod; effects are synced.");

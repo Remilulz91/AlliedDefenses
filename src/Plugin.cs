@@ -57,6 +57,23 @@ namespace AlliedDefenses
                 // 3) Register the available defense modules (turret, +mine later).
                 DefenseRegistry.RegisterDefaults();
 
+                // 3b) Guarded hook for the game-over save wipe (PerSave upgrade mode).
+                //     Patched manually so a renamed method in a future game update logs a
+                //     warning instead of taking the whole mod down with it.
+                try
+                {
+                    var reset = AccessTools.Method(typeof(GameNetworkManager), "ResetSavedGameValues");
+                    if (reset != null)
+                        _harmony.Patch(reset, postfix: new HarmonyMethod(
+                            typeof(Patches.UpgradeGameOverPatch), nameof(Patches.UpgradeGameOverPatch.AfterReset)));
+                    else
+                        Log.LogWarning("ResetSavedGameValues not found; PerSave upgrades will rely on the save-slot lifecycle only.");
+                }
+                catch (Exception ex)
+                {
+                    Log.LogWarning($"Could not hook the game-over reset: {ex.Message}");
+                }
+
                 // 4) Start the ticker (hijack expiry + passive-defense targeting).
                 HijackTicker.EnsureExists();
 
