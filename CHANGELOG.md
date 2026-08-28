@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.1
+- Build fix: removed an invalid `Item.grabbable` assignment in BeaconFactory (grabbable
+  belongs to GrabbableObject, which is already set). No behaviour change from 0.8.0.
+
 ## 0.8.0
 - DEFENSE BEACON: a carryable, two-handed heavy prop bought once with `ally beacon`
   (price configurable, default 175 cr). Delivered to the ship, carried out into the

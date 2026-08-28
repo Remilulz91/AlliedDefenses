@@ -44,7 +44,6 @@ namespace AlliedDefenses.Beacon
                 item.itemName = BeaconName;
                 item.twoHanded = true;
                 item.twoHandedAnimation = true;
-                item.grabbable = true;
                 item.canBeGrabbedBeforeGameStart = true;   // allowed to sit in the ship pre-landing
                 item.itemSpawnsOnGround = true;
                 item.isScrap = false;
