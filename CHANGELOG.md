@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.1
+- Fix the borrowed model being offset from the collider/grab point (and invisible when held):
+  the donor mesh is now aligned to the beacon pivot using the renderer's real world bounds instead
+  of mesh-local maths, so the model sits exactly on the grab point and shows in hand.
+
 ## 0.9.0
 - Beacon now looks like a real item: at runtime it borrows a vanilla item's 3D model AND its
   inventory icon (no asset bundle), so the in-hand view and the inventory slot are no longer empty.

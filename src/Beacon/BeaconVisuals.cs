@@ -41,14 +41,22 @@ namespace AlliedDefenses.Beacon
                 mf.sharedMesh = srcMf.sharedMesh;
                 if (mr != null && srcMr != null) mr.sharedMaterials = srcMr.sharedMaterials;
 
-                // Normalise the donor mesh to ~0.7 m and centre it on the pivot (needed for the
-                // grab line-of-sight and the held offset to keep working).
+                // Normalise the donor mesh to ~0.7 m.
                 var b = srcMf.sharedMesh.bounds;
                 float maxDim = Mathf.Max(b.size.x, Mathf.Max(b.size.y, b.size.z));
                 float s = maxDim > 0.001f ? 0.7f / maxDim : 1f;
-                bodyT.localScale = Vector3.one * s;
-                bodyT.localPosition = -b.center * s;
                 bodyT.localRotation = Quaternion.identity;
+                bodyT.localScale = Vector3.one * s;
+                bodyT.localPosition = Vector3.zero;
+
+                // Align the ACTUAL rendered centre to the beacon pivot using world-space renderer
+                // bounds. This is robust to donor meshes authored with an off-origin pivot (the old
+                // maths-only centring left the model offset from the collider/grab point).
+                if (mr != null)
+                {
+                    Vector3 shift = beacon.transform.position - mr.bounds.center;
+                    bodyT.position += shift;
+                }
 
                 // Hide the primitive lamp sphere; keep the point light for the glow.
                 var lamp = beacon.transform.Find("BeaconLamp");

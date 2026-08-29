@@ -1,7 +1,7 @@
 {
   "name": "AlliedDefenses",
   "author": "Remilulz_91",
-  "version_number": "0.9.0",
+  "version_number": "0.9.1",
   "website_url": "https://github.com/Remilulz91/AlliedDefenses",
   "description": "Hijack turrets & mines from the ship terminal so they fight the monsters instead of you. Colour cues + live timers on the radar. ALL players must install (same version).",
   "dependencies": [
