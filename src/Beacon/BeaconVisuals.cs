@@ -58,10 +58,6 @@ namespace AlliedDefenses.Beacon
                 Vector3 meshCenterWorld = bodyT.TransformPoint(b.center);
                 bodyT.position += beacon.transform.position - meshCenterWorld;
 
-                Plugin.Log.LogInfo(
-                    $"BeaconVisuals: '{src.itemName}' meshCenter={b.center} size={b.size} scale={s:0.00} " +
-                    $"bodyLocalPos={bodyT.localPosition}");
-
                 // Hide the primitive lamp sphere; keep the point light for the glow.
                 var lamp = beacon.transform.Find("BeaconLamp");
                 var lampMr = lamp != null ? lamp.GetComponent<MeshRenderer>() : null;

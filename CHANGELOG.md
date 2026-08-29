@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.5
+- Beacon visuals finished: model (Fancy lamp), inventory icon, held position and ground radius
+  ring all working. Removed the verbose [BeaconVisuals] diagnostic log (kept a one-line note of
+  which donor model is used).
+
 ## 0.9.4
 - Held view: the old positionOffset (0,-0.3,0.6) shoved the beacon off the bottom-right of the
   screen. LateUpdate sets the held item's localPosition to positionOffset relative to the item
