@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.6
+- Fix beacon grab: it spawned ~2.8 m up near a shelf (floating/embedded), so the game's
+  line-of-sight check to the item failed and no grab prompt showed. It now spawns on open ship
+  floor (a player spawn point), raycasts down to rest exactly on the floor, and is marked settled
+  so it skips the falling animation. Layer/tag were already correct (confirmed by [BeaconDiag]).
+
 ## 0.8.5
 - Temporary diagnostic: the beacon logs its runtime layer/tag/position on Start ([BeaconDiag])
   to pin down why grabbing fails. To be removed once grab works.

@@ -94,12 +94,21 @@ namespace AlliedDefenses.Beacon
                 var grab = go.GetComponent<BeaconItem>();
                 if (grab != null)
                 {
-                    // Refresh weight to the current 'haul' level, then let the item settle to the floor.
                     if (grab.itemProperties != null) grab.itemProperties.weight = UpgradeManager.BeaconWeight();
-                    grab.fallTime = 0f;
-                    grab.hasHitGround = false;
-                    grab.reachedFloorTarget = false;
-                    grab.targetFloorPosition = pos;
+
+                    // Rest it exactly on the floor below the spawn point. Raycast down, ignoring the
+                    // beacon's own layer (8), then mark it as already settled so it does not run the
+                    // falling animation (which needs clear conditions and could misbehave).
+                    Vector3 floor = pos;
+                    if (Physics.Raycast(pos + Vector3.up * 1f, Vector3.down, out var hit, 8f,
+                                        ~(1 << 8), QueryTriggerInteraction.Ignore))
+                        floor = hit.point;
+
+                    go.transform.position = floor;
+                    grab.fallTime = 1f;
+                    grab.hasHitGround = true;
+                    grab.reachedFloorTarget = true;
+                    grab.targetFloorPosition = floor;
                 }
 
                 go.GetComponent<NetworkObject>().Spawn(destroyWithScene: false);
@@ -113,7 +122,12 @@ namespace AlliedDefenses.Beacon
             }
         }
 
-        /// <summary>A safe spot inside the ship to drop the beacon.</summary>
+        /// <summary>
+        /// A clear, floor-level spot inside the ship to drop the beacon. This matters: the grab
+        /// only works if the game can trace an unobstructed line from the camera to the item, so
+        /// the beacon must rest on open floor (not floating up near a shelf, which was the bug).
+        /// We use a player spawn point (always on the ship floor in the open).
+        /// </summary>
         private static Vector3 ShipSpawnPoint()
         {
             try
@@ -121,11 +135,11 @@ namespace AlliedDefenses.Beacon
                 var sor = StartOfRound.Instance;
                 if (sor != null)
                 {
-                    // Prefer the ship's interior anchor; fall back to the elevator (ship) transform.
-                    var mid = Traverse.Create(sor).Field("middleOfShipNode").GetValue<Transform>();
-                    if (mid != null) return mid.position + Vector3.up * 0.5f;
+                    var spawns = sor.playerSpawnPositions;
+                    if (spawns != null && spawns.Length > 0 && spawns[0] != null)
+                        return spawns[0].position + Vector3.up * 0.2f;
                     if (sor.elevatorTransform != null)
-                        return sor.elevatorTransform.position + Vector3.up * 0.5f + sor.elevatorTransform.forward * 1.5f;
+                        return sor.elevatorTransform.position + Vector3.up * 0.2f;
                 }
             }
             catch { /* fall through */ }
