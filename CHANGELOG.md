@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.7
+- Placed beacon now stands upright (the donor model otherwise lay on its side when dropped). Only
+  pitch/roll are flattened, yaw is kept. New config 'Beacon/BeaconUpright' (default true) — set it
+  to false to roll back to the vanilla resting behaviour.
+
 ## 0.9.6
 - Radius ring was drawn in the beacon's local space, so it tipped vertical (an arch into the sky)
   when the beacon was rotated. It is now drawn in world space as a flat horizontal circle on the
