@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.5
+- Temporary diagnostic: the beacon logs its runtime layer/tag/position on Start ([BeaconDiag])
+  to pin down why grabbing fails. To be removed once grab works.
+
 ## 0.8.4
 - Fix: the Defense Beacon could not be picked up. PlayerControllerB.BeginGrabObject requires the
   hit collider's GameObject to be on layer 8 AND tagged "PhysicsProp"; the beacon was on the wrong

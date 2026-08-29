@@ -23,6 +23,18 @@ namespace AlliedDefenses.Beacon
         {
             base.Start();
             Register();
+
+            // Diagnostic (temporary): confirm the grab-critical setup actually stuck at runtime.
+            // Grabbing requires layer == 8 and tag == "PhysicsProp".
+            try
+            {
+                Plugin.Log.LogInfo(
+                    $"[BeaconDiag] layer={gameObject.layer} tag={gameObject.tag} " +
+                    $"twoHanded={(itemProperties != null && itemProperties.twoHanded)} " +
+                    $"grabbable={grabbable} colliders={(propColliders != null ? propColliders.Length : 0)} " +
+                    $"pos={transform.position}");
+            }
+            catch { }
         }
 
         // Belt-and-suspenders: if the object is re-enabled after a pool/scene move, make sure
