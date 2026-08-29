@@ -97,11 +97,11 @@ namespace AlliedDefenses.Beacon
                     if (grab.itemProperties != null) grab.itemProperties.weight = UpgradeManager.BeaconWeight();
 
                     // Rest it exactly on the floor below the spawn point. Raycast down, ignoring the
-                    // beacon's own layer (8), then mark it as already settled so it does not run the
+                    // beacon's own layer (6), then mark it as already settled so it does not run the
                     // falling animation (which needs clear conditions and could misbehave).
                     Vector3 floor = pos;
                     if (Physics.Raycast(pos + Vector3.up * 1f, Vector3.down, out var hit, 8f,
-                                        ~(1 << 8), QueryTriggerInteraction.Ignore))
+                                        ~(1 << 6), QueryTriggerInteraction.Ignore))
                         floor = hit.point;
 
                     // The beacon's pivot is at its centre, so lift it half its height off the floor

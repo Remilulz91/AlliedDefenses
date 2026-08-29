@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.9
+- THE grab fix: the beacon was on layer 8, which is the ship's own geometry layer ("ShipInside"
+  is layer 8). The grab code treats layer 8 (and 30) as "not a grabbable" before it ever checks
+  the PhysicsProp tag, so the beacon was classified as a wall. Moved it to layer 6 ("Props", the
+  real grabbable-item layer, still in the interact mask), so the PhysicsProp tag now routes it to
+  the grab path. Bonus: layer 6 no longer blocks the player's movement.
+
 ## 0.8.8
 - Temporary [GrabProbe] diagnostic (dev commands only): replays the game's exact grab ray + LOS
   check while you aim at the beacon and logs what it sees, to find why the prompt never shows.

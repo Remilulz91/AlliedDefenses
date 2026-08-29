@@ -28,8 +28,11 @@ namespace AlliedDefenses.Beacon
 
         private const string BeaconName = "Defense Beacon";
 
-        // Lethal Company's grabbable/interactable layer. BeginGrabObject checks `layer == 8`.
-        private const int GrabbableLayer = 8;
+        // Lethal Company's grabbable-item layer is 6 ("Props"). It is in interactableObjectsMask
+        // (0x40000340) so the interact ray hits it, and it is NOT one of the layers (8 = ship
+        // geometry, 30) that the grab code treats as "not a grabbable" before it ever checks the
+        // "PhysicsProp" tag. Putting the beacon on layer 8 (ship geometry) was why it never grabbed.
+        private const int GrabbableLayer = 6;
 
         /// <summary>Create the Item scriptable + prefab and register it as a network prefab. Idempotent.</summary>
         public static void EnsureBuilt()
@@ -90,9 +93,7 @@ namespace AlliedDefenses.Beacon
             var root = new GameObject("DefenseBeacon");
             UnityEngine.Object.DontDestroyOnLoad(root);
             root.hideFlags = HideFlags.HideAndDontSave;
-            // The grab ray in PlayerControllerB.BeginGrabObject only accepts a collider whose
-            // GameObject is on layer 8 (the grabbable/interactable layer) AND tagged "PhysicsProp".
-            // Both are mandatory or the item cannot be picked up.
+            // Grabbing needs the collider's GameObject on layer 6 ("Props") AND tagged "PhysicsProp".
             root.layer = GrabbableLayer;
             try { root.tag = "PhysicsProp"; }
             catch { Plugin.Log.LogWarning("BeaconFactory: 'PhysicsProp' tag missing; beacon may not be grabbable."); }
