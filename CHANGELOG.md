@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.2
+- Model alignment: switch to deterministic pivot centring (renderer.bounds is cached and lied
+  right after the mesh swap) and log the mesh centre/size/scale to diagnose the remaining offset.
+
 ## 0.9.1
 - Fix the borrowed model being offset from the collider/grab point (and invisible when held):
   the donor mesh is now aligned to the beacon pivot using the renderer's real world bounds instead

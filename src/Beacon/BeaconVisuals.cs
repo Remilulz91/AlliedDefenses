@@ -49,14 +49,16 @@ namespace AlliedDefenses.Beacon
                 bodyT.localScale = Vector3.one * s;
                 bodyT.localPosition = Vector3.zero;
 
-                // Align the ACTUAL rendered centre to the beacon pivot using world-space renderer
-                // bounds. This is robust to donor meshes authored with an off-origin pivot (the old
-                // maths-only centring left the model offset from the collider/grab point).
-                if (mr != null)
-                {
-                    Vector3 shift = beacon.transform.position - mr.bounds.center;
-                    bodyT.position += shift;
-                }
+                // Align the mesh centre to the beacon pivot DETERMINISTICALLY (renderer.bounds is
+                // cached and still reports the old primitive right after swapping the mesh). We ask
+                // the transform where the mesh's bounds-centre currently is in world space, then
+                // shift the body so that point lands exactly on the pivot.
+                Vector3 meshCenterWorld = bodyT.TransformPoint(b.center);
+                bodyT.position += beacon.transform.position - meshCenterWorld;
+
+                Plugin.Log.LogInfo(
+                    $"BeaconVisuals: '{src.itemName}' meshCenter={b.center} size={b.size} scale={s:0.00} " +
+                    $"bodyLocalPos={bodyT.localPosition}");
 
                 // Hide the primitive lamp sphere; keep the point light for the glow.
                 var lamp = beacon.transform.Find("BeaconLamp");
