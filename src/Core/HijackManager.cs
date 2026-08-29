@@ -161,6 +161,9 @@ namespace AlliedDefenses.Core
             // Ghost Girl counter-play: bleed the local player's insanity while near an ally.
             SanityAura.Tick();
 
+            // Cosmetic: tell the local player when they enter an active protection aura.
+            ProtectionIndicator.Tick();
+
             if (_active.Count == 0) return;
 
             // Only the host decides expiry, then broadcasts the return to hostile.

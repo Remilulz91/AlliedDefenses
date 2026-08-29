@@ -35,7 +35,6 @@ namespace AlliedDefenses.Defenses
         private static readonly Dictionary<int, float> _nextFire = new();
         // Barrel direction captured when the turret becomes allied (idle-scan centre).
         private static readonly Dictionary<int, Vector3> _baseDir = new();
-        private const float FireInterval = 0.21f;   // matches the vanilla fire rate
         private const float AlignToleranceDeg = 10f; // max angle to consider the target "on aim"
 
         // ----------------------------------------------------------------
@@ -261,7 +260,7 @@ namespace AlliedDefenses.Defenses
             int id = turret.GetInstanceID();
             float now = Time.time;
             if (_nextFire.TryGetValue(id, out float next) && now < next) return;
-            _nextFire[id] = now + FireInterval;
+            _nextFire[id] = now + UpgradeManager.EffectiveFireInterval();
 
             // Confirmed signature: HitEnemy(int force, PlayerControllerB playerWhoHit,
             //                               bool playHitSFX, int hitID).

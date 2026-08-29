@@ -45,7 +45,8 @@ Credits: 500
 Save mode: kept through game over
 
 duration     Lv 0/10  (60s allied)             next: 120 cr
-turretdamage Lv 0/15  (1 dmg/shot)             next: 100 cr
+turretdamage Lv 0/25  (1 dmg/shot)             next: 100 cr
+firerate     Lv 0/6   (4.8 shots/s)            next: 130 cr
 turretrange  Lv 0/8   (30m detect)             next: 100 cr
 mineradius   Lv 0/6   (4m radius)              next: 90 cr
 sanity       Lv 0/5   (off (Ghost Girl))       next: 150 cr
@@ -72,7 +73,8 @@ The cost of each level **scales up** the more levels you already own.
 | id | Effect per level | Max | Base cost |
 |---|---|---|---|
 | `duration` | +20s to how long a hijack stays allied | 10 | 120 |
-| `turretdamage` | +1 turret damage per shot to enemies | 15 | 100 |
+| `turretdamage` | +1 turret damage per shot to enemies (high cap, to down tough enemies like the Forest Keeper) | 25 | 100 |
+| `firerate` | Faster allied-turret fire rate (≈4.8 → ≈12.5 shots/s) | 6 | 130 |
 | `turretrange` | +5m turret enemy-detection range | 8 | 100 |
 | `mineradius` | +1m allied-mine trigger radius | 6 | 90 |
 | `sanity` | Ghost Girl counter-play: bleeds your hidden insanity while near an allied defense/beacon, so she targets/escalates on you less (radius + rate grow per level) | 5 | 150 |

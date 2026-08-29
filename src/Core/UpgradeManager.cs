@@ -63,6 +63,13 @@ namespace AlliedDefenses.Core
             return baseDmg + LevelOf("turretdamage"); // +1 per level
         }
 
+        /// <summary>Seconds between allied-turret shots, with the fire-rate upgrade applied.</summary>
+        public static float EffectiveFireInterval() =>
+            !ModConfig.EnableUpgrades.Value ? BaseFireInterval : FireIntervalFor(LevelOf("firerate"));
+
+        private const float BaseFireInterval = 0.21f; // vanilla turret cadence
+        private static float FireIntervalFor(int lvl) => Mathf.Max(0.08f, BaseFireInterval - lvl * 0.02f);
+
         /// <summary>Turret enemy-detection range (m) with the range upgrade applied.</summary>
         public static float EffectiveDetectionRange()
         {
@@ -165,8 +172,11 @@ namespace AlliedDefenses.Core
             Add(cfg, "duration", "Hijack duration", maxLevel: 10, baseCost: 120, growth: 1.5f,
                 describe: lvl => $"{ModConfig.HijackDuration.Value + lvl * 20:0}s allied");
 
-            Add(cfg, "turretdamage", "Turret damage", maxLevel: 15, baseCost: 100, growth: 1.4f,
+            Add(cfg, "turretdamage", "Turret damage", maxLevel: 25, baseCost: 100, growth: 1.4f,
                 describe: lvl => $"{ModConfig.TurretEnemyDamage.Value + lvl} dmg/shot");
+
+            Add(cfg, "firerate", "Turret fire rate", maxLevel: 6, baseCost: 130, growth: 1.4f,
+                describe: lvl => $"{1f / FireIntervalFor(lvl):0.0} shots/s");
 
             Add(cfg, "turretrange", "Turret range", maxLevel: 8, baseCost: 100, growth: 1.4f,
                 describe: lvl => $"{ModConfig.EnemyDetectionRange.Value + lvl * 5:0}m detect");

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.0
+- New 'firerate' upgrade: faster allied-turret fire rate (the fire timer is the mod's own, so this
+  is safe — no game internals touched). ~4.8 shots/s up to ~12.5 shots/s.
+- Raised the 'turretdamage' cap from 15 to 25 so you can down tough killable enemies (e.g. the
+  Forest Keeper, 38 HP) by combining damage + fire rate.
+- "Protected" cue: a brief HUD tip when the local player steps into an active counter-play aura
+  (only if you own such an upgrade; cooldown avoids spam). Purely cosmetic and client-side.
+
 ## 0.11.2
 - New counter-play: CIRCUIT BEES (RedLocustBees). Their line-of-sight aggro near the hive can't be
   blocked, but their chase state validates the target via PlayerIsTargetable, so while in an allied
