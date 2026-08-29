@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.8
+- Temporary [GrabProbe] diagnostic (dev commands only): replays the game's exact grab ray + LOS
+  check while you aim at the beacon and logs what it sees, to find why the prompt never shows.
+
 ## 0.8.7
 - Beacon grab, take 2: the item's pivot was at its base (floor level), and the game's grab
   line-of-sight check traces to the pivot — a floor-level pivot is blocked by the floor itself.

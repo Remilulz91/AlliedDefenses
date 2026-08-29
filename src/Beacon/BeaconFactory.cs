@@ -157,6 +157,9 @@ namespace AlliedDefenses.Beacon
             beacon.propColliders = new Collider[] { solid };
             beacon.useCooldown = 0f;
 
+            // Temporary grab diagnostic (only logs when dev commands are enabled).
+            root.AddComponent<BeaconGrabProbe>();
+
             return root;
         }
 
