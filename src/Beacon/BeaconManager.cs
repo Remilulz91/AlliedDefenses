@@ -104,11 +104,14 @@ namespace AlliedDefenses.Beacon
                                         ~(1 << 8), QueryTriggerInteraction.Ignore))
                         floor = hit.point;
 
-                    go.transform.position = floor;
+                    // The beacon's pivot is at its centre, so lift it half its height off the floor
+                    // (matches itemProperties.verticalOffset) — a floor-level pivot breaks the grab.
+                    Vector3 rest = floor + Vector3.up * 0.5f;
+                    go.transform.position = rest;
                     grab.fallTime = 1f;
                     grab.hasHitGround = true;
                     grab.reachedFloorTarget = true;
-                    grab.targetFloorPosition = floor;
+                    grab.targetFloorPosition = rest;
                 }
 
                 go.GetComponent<NetworkObject>().Spawn(destroyWithScene: false);

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.7
+- Beacon grab, take 2: the item's pivot was at its base (floor level), and the game's grab
+  line-of-sight check traces to the pivot — a floor-level pivot is blocked by the floor itself.
+  The beacon's visuals/collider are now centred on the pivot and it rests with the pivot 0.5 m
+  off the floor (verticalOffset 0.5), so the line-of-sight is clear. Diag now also logs the
+  collider enabled/trigger state.
+
 ## 0.8.6
 - Fix beacon grab: it spawned ~2.8 m up near a shelf (floating/embedded), so the game's
   line-of-sight check to the item failed and no grab prompt showed. It now spawns on open ship

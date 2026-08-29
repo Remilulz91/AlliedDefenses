@@ -28,10 +28,12 @@ namespace AlliedDefenses.Beacon
             // Grabbing requires layer == 8 and tag == "PhysicsProp".
             try
             {
+                var col = GetComponent<Collider>();
                 Plugin.Log.LogInfo(
                     $"[BeaconDiag] layer={gameObject.layer} tag={gameObject.tag} " +
                     $"twoHanded={(itemProperties != null && itemProperties.twoHanded)} " +
                     $"grabbable={grabbable} colliders={(propColliders != null ? propColliders.Length : 0)} " +
+                    $"colEnabled={(col != null && col.enabled)} colTrigger={(col != null && col.isTrigger)} " +
                     $"pos={transform.position}");
             }
             catch { }
