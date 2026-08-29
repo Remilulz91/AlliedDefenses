@@ -93,16 +93,16 @@ namespace AlliedDefenses.Beacon
                 _ring.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 _ring.receiveShadows = false;
 
-                var green = ModConfig.AlliedColor;
+                var color = ModConfig.BeaconRingColor;
                 var sh = Shader.Find("HDRP/Unlit") ?? Shader.Find("Sprites/Default") ?? Shader.Find("Unlit/Color");
                 if (sh != null)
                 {
                     var mat = new Material(sh);
-                    TrySetColor(mat, green, "_UnlitColor", "_BaseColor", "_Color");
-                    TrySetColor(mat, green * 4f, "_EmissiveColor");
+                    TrySetColor(mat, color, "_UnlitColor", "_BaseColor", "_Color");
+                    TrySetColor(mat, color * 4f, "_EmissiveColor");
                     _ring.material = mat;
                 }
-                _ring.startColor = _ring.endColor = green;
+                _ring.startColor = _ring.endColor = color;
                 _ring.enabled = false;
             }
             catch (System.Exception e)
@@ -167,8 +167,17 @@ namespace AlliedDefenses.Beacon
                 _mapRing.numCapVertices = 2;
                 _mapRing.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 _mapRing.receiveShadows = false;
-                if (mapMat != null) _mapRing.material = mapMat;
-                _mapRing.startColor = _mapRing.endColor = ModConfig.AlliedColor;
+
+                // Copy the radar line material (so it renders on the map camera) but recolour the
+                // INSTANCE — never the shared material, or we'd repaint the game's own exit line.
+                var color = ModConfig.BeaconRingColor;
+                if (mapMat != null)
+                {
+                    var inst = new Material(mapMat);
+                    TrySetColor(inst, color, "_UnlitColor", "_BaseColor", "_Color", "_EmissiveColor");
+                    _mapRing.material = inst;
+                }
+                _mapRing.startColor = _mapRing.endColor = color;
                 _mapRing.enabled = false;
             }
             catch (System.Exception e)

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.2
+- Beacon ring colour: both rings are now magenta/pink (config Beacon/BeaconRingColorHex, default
+  FF2DD0) so they can't be confused with the game's map colours (green terrain, blue exit line).
+  The monitor ring recolours an INSTANCE of the radar material, so the game's own exit line is
+  untouched. The in-world beacon light stays green (the "allied" glow).
+
 ## 0.10.1
 - Beacon radius on the ship monitor: a second ring is drawn on the radar-map layer (copying the
   layer + material from the game's own map exit-line), so the beacon's radius shows on the ship
