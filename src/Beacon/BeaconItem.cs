@@ -1,3 +1,4 @@
+using HarmonyLib;
 using UnityEngine;
 using AlliedDefenses.Config;
 using AlliedDefenses.Core;
@@ -20,6 +21,8 @@ namespace AlliedDefenses.Beacon
         private bool _lookApplied;
         private Light _light;
         private LineRenderer _ring;
+        private LineRenderer _mapRing; // second ring, on the radar-map layer, shown on the ship monitor
+        private bool _mapRingFailed;
         private float _ringTimer;
 
         private const float PivotHeightAboveFloor = 0.5f; // matches verticalOffset / spawn lift
@@ -111,18 +114,67 @@ namespace AlliedDefenses.Beacon
         private void UpdateRing()
         {
             if (_ring == null) return;
+            EnsureMapRing();
+
             float r = UpgradeManager.MaxAuraRadius();
             bool show = !isHeld && r > 0.1f;
             _ring.enabled = show;
+            if (_mapRing != null) _mapRing.enabled = show;
             if (!show) return;
 
-            // World-space horizontal circle centred under the beacon, just above the floor.
+            // World-space horizontal circle centred under the beacon, just above the floor. Both the
+            // in-world ring and the monitor ring share the same points.
             Vector3 c = transform.position;
             float ringY = c.y - PivotHeightAboveFloor + 0.05f;
             for (int i = 0; i < RingSegments; i++)
             {
                 float a = (i / (float)RingSegments) * Mathf.PI * 2f;
-                _ring.SetPosition(i, new Vector3(c.x + Mathf.Cos(a) * r, ringY, c.z + Mathf.Sin(a) * r));
+                var p = new Vector3(c.x + Mathf.Cos(a) * r, ringY, c.z + Mathf.Sin(a) * r);
+                _ring.SetPosition(i, p);
+                if (_mapRing != null) _mapRing.SetPosition(i, p);
+            }
+        }
+
+        /// <summary>
+        /// Lazily build a second ring that renders on the ship monitor. We copy the layer and
+        /// material from the game's own radar map line (lineFromRadarTargetToExit / radarLineMaterial
+        /// on StartOfRound.mapScreen), which is proof a LineRenderer shows on the map camera. Only
+        /// built once the map screen exists; guarded so a failure just skips the monitor ring.
+        /// </summary>
+        private void EnsureMapRing()
+        {
+            if (_mapRing != null || _mapRingFailed) return;
+            if (!ModConfig.BeaconRingOnMonitor.Value) return;
+
+            var sor = StartOfRound.Instance;
+            var mapScreen = sor != null ? sor.mapScreen : null;
+            if (mapScreen == null) return; // not ready yet; try again next tick
+
+            try
+            {
+                var exitLine = Traverse.Create(mapScreen).Field("lineFromRadarTargetToExit").GetValue<LineRenderer>();
+                var mapMat = Traverse.Create(mapScreen).Field("radarLineMaterial").GetValue<Material>();
+                int mapLayer = exitLine != null ? exitLine.gameObject.layer : gameObject.layer;
+
+                var go = new GameObject("BeaconMapRing");
+                go.transform.SetParent(transform, false);
+                go.layer = mapLayer;
+                _mapRing = go.AddComponent<LineRenderer>();
+                _mapRing.useWorldSpace = true;
+                _mapRing.loop = true;
+                _mapRing.widthMultiplier = 0.6f; // the map is zoomed out, so a thin line is invisible
+                _mapRing.positionCount = RingSegments;
+                _mapRing.numCapVertices = 2;
+                _mapRing.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                _mapRing.receiveShadows = false;
+                if (mapMat != null) _mapRing.material = mapMat;
+                _mapRing.startColor = _mapRing.endColor = ModConfig.AlliedColor;
+                _mapRing.enabled = false;
+            }
+            catch (System.Exception e)
+            {
+                _mapRingFailed = true;
+                Plugin.Log.LogWarning($"BeaconItem: could not build the monitor ring ({e.Message}).");
             }
         }
 

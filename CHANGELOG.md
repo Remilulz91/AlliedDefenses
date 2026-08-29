@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.1
+- Beacon radius on the ship monitor: a second ring is drawn on the radar-map layer (copying the
+  layer + material from the game's own map exit-line), so the beacon's radius shows on the ship
+  monitor too. It only appears when the monitor is looking near the beacon (the camera follows
+  players), as expected. Toggle with config 'Beacon/BeaconRingOnMonitor' (default on).
+
 ## 0.10.0
 - Multiplayer sync (step 3): upgrades are now TEAM-WIDE. When any player buys an upgrade (or the
   beacon) from the shared ship credits, the new level is broadcast to the whole lobby, so every

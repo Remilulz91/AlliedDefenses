@@ -51,6 +51,9 @@ namespace AlliedDefenses.Config
         /// <summary>One-time credit cost of the Defense Beacon.</summary>
         public static ConfigEntry<int> BeaconPrice = null!;
 
+        /// <summary>Also draw the beacon's radius on the ship monitor (radar map).</summary>
+        public static ConfigEntry<bool> BeaconRingOnMonitor = null!;
+
         /// <summary>Whether upgrades are kept forever (Persistent) or reset on game over (PerSave).</summary>
         public static ConfigEntry<UpgradeSaveMode> UpgradePersistence = null!;
 
@@ -116,6 +119,11 @@ namespace AlliedDefenses.Config
                 "Beacon", "BeaconPrice", 175,
                 "One-time credit cost of the Defense Beacon. Owned/paid state follows the same " +
                 "Persistent/PerSave rule as the upgrades. Re-delivering a lost beacon is free.");
+
+            BeaconRingOnMonitor = cfg.Bind(
+                "Beacon", "BeaconRingOnMonitor", true,
+                "Also draw the beacon's radius ring on the ship monitor (radar map). It only shows " +
+                "when the monitor is looking at an area near the beacon (the camera follows players).");
 
             ColorAlliedDefenses = cfg.Bind(
                 "Visuals", "ColorAlliedDefenses", true,
