@@ -12,8 +12,8 @@ namespace AlliedDefenses.Beacon
     ///
     /// Pieces required for a working Lethal Company grabbable:
     ///   - a NetworkObject with a stable GlobalObjectIdHash (so host/clients agree on the prefab),
-    ///   - a Rigidbody + colliders (one non-trigger for resting on the floor, one trigger for the
-    ///     grab ray), on the "Props" layer so the interact ray sees it,
+    ///   - a Rigidbody + a non-trigger collider on layer 8 and tagged "PhysicsProp" (both are
+    ///     mandatory: PlayerControllerB.BeginGrabObject rejects anything else),
     ///   - a MeshRenderer (mainObjectRenderer) and the BeaconItem : GrabbableObject component,
     ///   - an Item ScriptableObject describing weight / two-handedness, assigned to itemProperties.
     ///
@@ -27,6 +27,9 @@ namespace AlliedDefenses.Beacon
         public static Item? ItemDef { get; private set; }
 
         private const string BeaconName = "Defense Beacon";
+
+        // Lethal Company's grabbable/interactable layer. BeginGrabObject checks `layer == 8`.
+        private const int GrabbableLayer = 8;
 
         /// <summary>Create the Item scriptable + prefab and register it as a network prefab. Idempotent.</summary>
         public static void EnsureBuilt()
@@ -87,7 +90,12 @@ namespace AlliedDefenses.Beacon
             var root = new GameObject("DefenseBeacon");
             UnityEngine.Object.DontDestroyOnLoad(root);
             root.hideFlags = HideFlags.HideAndDontSave;
-            SetLayerSafe(root, "Props");
+            // The grab ray in PlayerControllerB.BeginGrabObject only accepts a collider whose
+            // GameObject is on layer 8 (the grabbable/interactable layer) AND tagged "PhysicsProp".
+            // Both are mandatory or the item cannot be picked up.
+            root.layer = GrabbableLayer;
+            try { root.tag = "PhysicsProp"; }
+            catch { Plugin.Log.LogWarning("BeaconFactory: 'PhysicsProp' tag missing; beacon may not be grabbable."); }
 
             // ---- visual: a glowing pylon (cylinder body + emissive top) ----
             var body = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -96,7 +104,6 @@ namespace AlliedDefenses.Beacon
             body.transform.SetParent(root.transform, false);
             body.transform.localScale = new Vector3(0.35f, 0.5f, 0.35f); // ~1m tall
             body.transform.localPosition = new Vector3(0f, 0.5f, 0f);
-            SetLayerSafe(body, "Props");
 
             var top = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             top.name = "BeaconLamp";
@@ -104,34 +111,29 @@ namespace AlliedDefenses.Beacon
             top.transform.SetParent(root.transform, false);
             top.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
             top.transform.localPosition = new Vector3(0f, 1.05f, 0f);
-            SetLayerSafe(top, "Props");
 
             var mainRenderer = body.GetComponent<MeshRenderer>();
             var lampRenderer = top.GetComponent<MeshRenderer>();
-            TintEmissive(mainRenderer, ModConfig.AlliedColor, 0.4f);
-            TintEmissive(lampRenderer, ModConfig.AlliedColor, 2.5f);
+            TintEmissive(mainRenderer, ModConfig.AlliedColor, 0.12f);
+            TintEmissive(lampRenderer, ModConfig.AlliedColor, 0.7f);
 
-            // A soft light so the beacon reads at a glance in the dark.
+            // A soft light so the beacon reads at a glance in the dark (kept dim so it doesn't
+            // wash the whole room green like the first build did).
             var lightGo = new GameObject("BeaconLight");
             lightGo.transform.SetParent(root.transform, false);
             lightGo.transform.localPosition = new Vector3(0f, 1.1f, 0f);
             var light = lightGo.AddComponent<Light>();
             light.type = LightType.Point;
             light.color = ModConfig.AlliedColor;
-            light.range = 6f;
-            light.intensity = 3f;
+            light.range = 4f;
+            light.intensity = 0.6f;
 
-            // ---- physics/interaction colliders ----
-            // Non-trigger box so it rests on the floor when dropped.
+            // ---- physics/interaction collider ----
+            // One non-trigger box: it rests on the floor AND is what the grab ray hits. It lives on
+            // the root, so the ray sees root.layer (8) and root.tag ("PhysicsProp").
             var solid = root.AddComponent<BoxCollider>();
             solid.center = new Vector3(0f, 0.5f, 0f);
             solid.size = new Vector3(0.7f, 1.0f, 0.7f);
-
-            // Trigger box used by the grab ray (GrabbableObject wants a trigger collider).
-            var trigger = root.AddComponent<BoxCollider>();
-            trigger.isTrigger = true;
-            trigger.center = new Vector3(0f, 0.6f, 0f);
-            trigger.size = new Vector3(0.9f, 1.3f, 0.9f);
 
             var body3d = root.AddComponent<Rigidbody>();
             body3d.mass = 1f;
@@ -149,7 +151,7 @@ namespace AlliedDefenses.Beacon
             beacon.grabbable = true;
             beacon.grabbableToEnemies = false;
             beacon.mainObjectRenderer = mainRenderer;
-            beacon.propColliders = new Collider[] { solid, trigger };
+            beacon.propColliders = new Collider[] { solid };
             beacon.useCooldown = 0f;
 
             return root;
@@ -161,12 +163,6 @@ namespace AlliedDefenses.Beacon
         {
             var c = go.GetComponent<Collider>();
             if (c != null) UnityEngine.Object.Destroy(c);
-        }
-
-        private static void SetLayerSafe(GameObject go, string layerName)
-        {
-            int layer = LayerMask.NameToLayer(layerName);
-            if (layer >= 0) go.layer = layer;
         }
 
         private static void TintEmissive(Renderer r, Color color, float emission)

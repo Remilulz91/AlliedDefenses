@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.4
+- Fix: the Defense Beacon could not be picked up. PlayerControllerB.BeginGrabObject requires the
+  hit collider's GameObject to be on layer 8 AND tagged "PhysicsProp"; the beacon was on the wrong
+  layer and had no tag. It now sets layer 8 + "PhysicsProp" and uses a single non-trigger collider.
+- Toned down the beacon light/emission (it was washing the whole room bright green).
+
 ## 0.8.3
 - Testing aid (opt-in, off by default): config 'Dev/EnableDevCommands'. When true, the terminal
   accepts 'ally givecredits <n>' to add ship credits so beacon/upgrade purchases can be tested
