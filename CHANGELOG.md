@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.3
+- Better beacon model: the Apparatus donor was long/thin on one axis (size Z=3.69), so it
+  normalised to a flat object that looked offset from the light and was invisible when held. Now
+  we prefer compact, upright donors (Fancy lamp first) and skip any mesh with a >3:1 aspect ratio.
+  The glow light is moved to the model centre instead of a fixed height above it.
+
 ## 0.9.2
 - Model alignment: switch to deterministic pivot centring (renderer.bounds is cached and lied
   right after the mesh swap) and log the mesh centre/size/scale to diagnose the remaining offset.

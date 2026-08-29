@@ -127,7 +127,7 @@ namespace AlliedDefenses.Beacon
             // wash the whole room green like the first build did).
             var lightGo = new GameObject("BeaconLight");
             lightGo.transform.SetParent(root.transform, false);
-            lightGo.transform.localPosition = new Vector3(0f, 0.6f, 0f);
+            lightGo.transform.localPosition = new Vector3(0f, 0.1f, 0f); // near the pivot / model centre
             var light = lightGo.AddComponent<Light>();
             light.type = LightType.Point;
             light.color = ModConfig.AlliedColor;

@@ -11,9 +11,11 @@ namespace AlliedDefenses.Beacon
     /// </summary>
     public static class BeaconVisuals
     {
-        // Preferred donor items (thematic, glowing/placeable devices), matched by name substring.
+        // Preferred donor items, in PRIORITY order. Compact, upright, beacon-ish props first.
+        // (The Apparatus was dropped: its mesh is long on Z, so it normalised to a thin object
+        // lying down — which looked offset from the light and was near-invisible when held.)
         private static readonly string[] Preferred =
-            { "radar", "lamp", "control", "cash register", "apparatus", "jar" };
+            { "fancy lamp", "lamp", "flask", "jar", "control pad", "cash register", "gift" };
 
         public static void ApplyVanillaLook(GrabbableObject beacon)
         {
@@ -75,18 +77,35 @@ namespace AlliedDefenses.Beacon
 
         private static Item PickSource(List<Item> list)
         {
-            Item fallback = null;
-            foreach (var it in list)
-            {
-                if (it == null || it.spawnPrefab == null) continue;
-                if (it.spawnPrefab.GetComponentInChildren<MeshFilter>() == null) continue;
-                if (fallback == null && it.itemIcon != null) fallback = it;
+            // Try each preferred name in PRIORITY order, so "fancy lamp" wins over later options.
+            foreach (var term in Preferred)
+                foreach (var it in list)
+                    if (IsUsable(it) && (it.itemName ?? "").ToLowerInvariant().Contains(term))
+                        return it;
 
-                string n = (it.itemName ?? "").ToLowerInvariant();
-                foreach (var p in Preferred)
-                    if (n.Contains(p)) return it;
-            }
-            return fallback;
+            // Fallback: the first usable item that has an icon and a reasonably compact mesh.
+            foreach (var it in list)
+                if (IsUsable(it) && it.itemIcon != null && !IsLongMesh(it))
+                    return it;
+            foreach (var it in list)
+                if (IsUsable(it) && it.itemIcon != null)
+                    return it;
+            return null;
+        }
+
+        private static bool IsUsable(Item it) =>
+            it != null && it.spawnPrefab != null &&
+            it.spawnPrefab.GetComponentInChildren<MeshFilter>() != null;
+
+        /// <summary>True if the mesh is very elongated (one axis dominates), which normalises badly.</summary>
+        private static bool IsLongMesh(Item it)
+        {
+            var mf = it.spawnPrefab.GetComponentInChildren<MeshFilter>();
+            if (mf == null || mf.sharedMesh == null) return true;
+            var s = mf.sharedMesh.bounds.size;
+            float max = Mathf.Max(s.x, Mathf.Max(s.y, s.z));
+            float min = Mathf.Min(s.x, Mathf.Min(s.y, s.z));
+            return max > min * 3f; // 3:1 or longer -> skip
         }
     }
 }
