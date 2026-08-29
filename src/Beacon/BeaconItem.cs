@@ -82,7 +82,7 @@ namespace AlliedDefenses.Beacon
                 var go = new GameObject("BeaconRing");
                 go.transform.SetParent(transform, false);
                 _ring = go.AddComponent<LineRenderer>();
-                _ring.useWorldSpace = false;
+                _ring.useWorldSpace = true; // world space so the ring stays flat regardless of beacon rotation
                 _ring.loop = true;
                 _ring.widthMultiplier = 0.08f;
                 _ring.positionCount = RingSegments;
@@ -116,11 +116,13 @@ namespace AlliedDefenses.Beacon
             _ring.enabled = show;
             if (!show) return;
 
-            float y = -PivotHeightAboveFloor + 0.03f; // just above the floor, under the pivot
+            // World-space horizontal circle centred under the beacon, just above the floor.
+            Vector3 c = transform.position;
+            float ringY = c.y - PivotHeightAboveFloor + 0.05f;
             for (int i = 0; i < RingSegments; i++)
             {
                 float a = (i / (float)RingSegments) * Mathf.PI * 2f;
-                _ring.SetPosition(i, new Vector3(Mathf.Cos(a) * r, y, Mathf.Sin(a) * r));
+                _ring.SetPosition(i, new Vector3(c.x + Mathf.Cos(a) * r, ringY, c.z + Mathf.Sin(a) * r));
             }
         }
 

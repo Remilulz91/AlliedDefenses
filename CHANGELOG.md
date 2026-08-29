@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.6
+- Radius ring was drawn in the beacon's local space, so it tipped vertical (an arch into the sky)
+  when the beacon was rotated. It is now drawn in world space as a flat horizontal circle on the
+  ground under the beacon, whatever the beacon's orientation.
+
 ## 0.9.5
 - Beacon visuals finished: model (Fancy lamp), inventory icon, held position and ground radius
   ring all working. Removed the verbose [BeaconVisuals] diagnostic log (kept a one-line note of
