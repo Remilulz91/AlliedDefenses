@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.3
+- Testing aid (opt-in, off by default): config 'Dev/EnableDevCommands'. When true, the terminal
+  accepts 'ally givecredits <n>' to add ship credits so beacon/upgrade purchases can be tested
+  without grinding. Meant to be removed/left disabled for real play.
+
 ## 0.8.2
 - Fix a looping NullReferenceException in the menu (GrabbableObject.FallWithCurve): the beacon
   network-prefab template was left active, so its Update ran every frame with no StartOfRound.
