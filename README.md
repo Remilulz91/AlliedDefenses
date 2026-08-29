@@ -53,6 +53,7 @@ neutralize   Lv 0/5   (off (Coil-Head))        next: 200 cr
 seismic      Lv 0/5   (off (Earth Leviathan))  next: 180 cr
 muffle       Lv 0/5   (off (Eyeless Dog))      next: 160 cr
 barber       Lv 0/5   (off (Barber))           next: 170 cr
+slime        Lv 0/5   (off (Hygrodere))        next: 140 cr
 beacon       Lv 0/1   (not owned)              next: 175 cr
 haul         Lv 0/5   (47 lb carry)            next: 90 cr
 
@@ -78,11 +79,12 @@ The cost of each level **scales up** the more levels you already own.
 | `seismic` | Earth Leviathan (sand worm) counter-play: while near an allied defense/beacon the worm can't target you (radius grows per level) | 5 | 180 |
 | `muffle` | Eyeless Dog counter-play: noises made inside the radius are silenced, so the (blind) dogs don't hear you | 5 | 160 |
 | `barber` | Barber counter-play: while near an allied defense/beacon the Barber can't target you, so it won't dance/lunge toward you (radius grows per level) | 5 | 170 |
+| `slime` | Hygrodere (slime) counter-play: while near an allied defense/beacon the blob can't target you, so it wanders off instead of following (radius grows per level) | 5 | 140 |
 | `beacon` | Unlocks the Defense Beacon (this is what `ally beacon` buys) | 1 | 175 |
 | `haul` | Lowers the beacon's carry weight, so you move faster while carrying it (≈47 lb → ≈16 lb) | 5 | 90 |
 
 Level 0 means **off** for the counter-play auras (`sanity`, `neutralize`, `seismic`, `muffle`,
-`barber`) — buy at least level 1 to enable them.
+`barber`, `slime`) — buy at least level 1 to enable them.
 
 ---
 

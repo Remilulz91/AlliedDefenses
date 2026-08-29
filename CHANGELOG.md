@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.11.1
+- New counter-play: the HYGRODERE / slime (BlobAI). It picks the closest targetable player via
+  TargetClosestPlayer -> PlayerIsTargetable; when no one is targetable it just roams (verified in
+  the DLL - graceful, no null crash). So near an allied defense/beacon the slow blob wanders off
+  instead of following. New 'slime' upgrade (level 0 = off). Added to the shared untargetable patch.
+
 ## 0.11.0
 - New counter-play: the BARBER (ClaySurgeonAI). It dances toward the closest targetable player via
   TargetClosestPlayer -> PlayerIsTargetable, so — like the sand worm — a player standing inside an

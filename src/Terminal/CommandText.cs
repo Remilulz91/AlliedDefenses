@@ -89,6 +89,8 @@ namespace AlliedDefenses.UI
             sb.AppendLine("               made in the radius are silenced, so they don't hear you.");
             sb.AppendLine("  barber     : the Barber can't target you while you stand in the");
             sb.AppendLine("               radius, so it won't dance/lunge toward you (unkillable).");
+            sb.AppendLine("  slime      : the Hygrodere (slime) can't target you in the radius,");
+            sb.AppendLine("               so the slow blob wanders off instead of following.");
             sb.AppendLine("               Each is a separate upgrade (level 0 = off).");
             sb.AppendLine("");
             sb.AppendLine("All hijacks last for a set time, then the defense turns hostile");

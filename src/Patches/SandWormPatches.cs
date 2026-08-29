@@ -17,6 +17,8 @@ namespace AlliedDefenses.Patches
     ///   - Barber (ClaySurgeonAI), gated by the 'barber' upgrade. It "dances" toward the closest
     ///     targetable player via TargetClosestPlayer -> PlayerIsTargetable, so a cloaked player is
     ///     not jumped at.
+    ///   - Hygrodere / slime (BlobAI), gated by the 'slime' upgrade. Same TargetClosestPlayer path;
+    ///     with no targetable player it just roams, so the slow blob wanders off instead of chasing.
     ///
     /// Runs where the targeting decision is made (the enemy's owner / host). Both effects are pure
     /// suppression (they hide you), not an off switch: an enemy already mid-lunge can still connect.
@@ -35,6 +37,8 @@ namespace AlliedDefenses.Patches
                 radius = UpgradeManager.SeismicRadius();
             else if (__instance is ClaySurgeonAI && UpgradeManager.BarberEnabled)
                 radius = UpgradeManager.BarberRadius();
+            else if (__instance is BlobAI && UpgradeManager.SlimeEnabled)
+                radius = UpgradeManager.SlimeRadius();
             else
                 return true; // not a covered enemy, or its upgrade is off -> vanilla targeting
 

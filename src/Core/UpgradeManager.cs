@@ -115,6 +115,14 @@ namespace AlliedDefenses.Core
         public static float BarberRadius() => BarberRadiusFor(LevelOf("barber"));
         private static float BarberRadiusFor(int lvl) => lvl <= 0 ? 0f : 6f + lvl * 2f; // 8m..16m
 
+        // --- Hygrodere / slime (BlobAI) counter-play: it picks the closest targetable player via
+        //     TargetClosestPlayer -> PlayerIsTargetable; if none is targetable it simply roams. So
+        //     while near an allied defense the player is untargetable and the slow blob wanders off
+        //     instead of following. Level 0 = off. ---
+        public static bool SlimeEnabled => ModConfig.EnableUpgrades.Value && LevelOf("slime") > 0;
+        public static float SlimeRadius() => SlimeRadiusFor(LevelOf("slime"));
+        private static float SlimeRadiusFor(int lvl) => lvl <= 0 ? 0f : 6f + lvl * 2f; // 8m..16m
+
         /// <summary>Largest active aura radius (for the beacon's ground ring). 0 if none active.</summary>
         public static float MaxAuraRadius()
         {
@@ -124,6 +132,7 @@ namespace AlliedDefenses.Core
             r = Mathf.Max(r, SeismicRadius());
             r = Mathf.Max(r, MuffleRadius());
             r = Mathf.Max(r, BarberRadius());
+            r = Mathf.Max(r, SlimeRadius());
             return r;
         }
 
@@ -169,6 +178,9 @@ namespace AlliedDefenses.Core
 
             Add(cfg, "barber", "Barber cloak", maxLevel: 5, baseCost: 170, growth: 1.5f,
                 describe: lvl => lvl == 0 ? "off (Barber)" : $"{BarberRadiusFor(lvl):0}m untargetable");
+
+            Add(cfg, "slime", "Slime cloak", maxLevel: 5, baseCost: 140, growth: 1.5f,
+                describe: lvl => lvl == 0 ? "off (Hygrodere)" : $"{SlimeRadiusFor(lvl):0}m untargetable");
 
             if (ModConfig.EnableBeacon.Value)
             {
