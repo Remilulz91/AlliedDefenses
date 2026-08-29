@@ -62,9 +62,10 @@ namespace AlliedDefenses.Beacon
                 item.floorYOffset = 0;
                 item.verticalOffset = 0.5f; // pivot rests 0.5 m above the floor (see BuildPrefab)
                 item.rotationOffset = Vector3.zero;
-                // Pushed forward/down from the hand so the (centre-pivoted) beacon sits IN FRONT of
-                // the camera when held, instead of engulfing it (which made it look invisible).
-                item.positionOffset = new Vector3(0f, -0.3f, 0.6f);
+                // Held offset relative to the player's item holder. The model is centred on its
+                // pivot, so a small forward + slight-up offset makes it sit naturally in view
+                // instead of being shoved off the bottom-right of the screen.
+                item.positionOffset = new Vector3(0f, 0.1f, 0.25f);
                 item.meshVariants = Array.Empty<Mesh>();
                 item.materialVariants = Array.Empty<Material>();
                 item.toolTips = Array.Empty<string>();

@@ -43,7 +43,7 @@ namespace AlliedDefenses.Beacon
                 mf.sharedMesh = srcMf.sharedMesh;
                 if (mr != null && srcMr != null) mr.sharedMaterials = srcMr.sharedMaterials;
 
-                // Normalise the donor mesh to ~0.7 m.
+                // Normalise the donor mesh to ~0.7 m (looks right resting on the floor).
                 var b = srcMf.sharedMesh.bounds;
                 float maxDim = Mathf.Max(b.size.x, Mathf.Max(b.size.y, b.size.z));
                 float s = maxDim > 0.001f ? 0.7f / maxDim : 1f;

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.4
+- Held view: the old positionOffset (0,-0.3,0.6) shoved the beacon off the bottom-right of the
+  screen. LateUpdate sets the held item's localPosition to positionOffset relative to the item
+  holder, so it is now (0, 0.1, 0.25) to sit naturally in view. Placed look (0.7 m) unchanged.
+
 ## 0.9.3
 - Better beacon model: the Apparatus donor was long/thin on one axis (size Z=3.69), so it
   normalised to a flat object that looked offset from the light and was invisible when held. Now
