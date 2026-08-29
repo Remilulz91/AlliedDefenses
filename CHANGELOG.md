@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.10
+- Grabbing works now. Fix the "invisible while carried" look: the centre pivot put the camera
+  inside the mesh when held. The held beacon is now offset forward/down (positionOffset) so it
+  sits in front of the camera, and its light is switched off while carried (glows only when placed).
+
 ## 0.8.9
 - THE grab fix: the beacon was on layer 8, which is the ship's own geometry layer ("ShipInside"
   is layer 8). The grab code treats layer 8 (and 30) as "not a grabbable" before it ever checks

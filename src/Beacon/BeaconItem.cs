@@ -18,11 +18,13 @@ namespace AlliedDefenses.Beacon
     public class BeaconItem : GrabbableObject
     {
         private bool _registered;
+        private Light _light;
 
         public override void Start()
         {
             base.Start();
             Register();
+            _light = GetComponentInChildren<Light>();
 
             // Diagnostic (temporary): confirm the grab-critical setup actually stuck at runtime.
             // Grabbing requires layer == 8 and tag == "PhysicsProp".
@@ -48,6 +50,14 @@ namespace AlliedDefenses.Beacon
             if (_registered) return;
             BeaconRegistry.Register(transform);
             _registered = true;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            // Glow only when placed: kill the light while carried so it doesn't blind the holder.
+            if (_light != null && _light.enabled == isHeld)
+                _light.enabled = !isHeld;
         }
 
         public override void OnDestroy()
