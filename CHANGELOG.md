@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.13.0
+- Localization: the terminal help text (ally / ally help / ally config) is now available in English
+  or French. New config 'General/Language' (default English). Dynamic upgrade list and buy messages
+  stay English for now.
+- Thunderstore polish: updated the (outdated) short description to cover the full feature set, and
+  added a Features section at the top of the README for the mod page.
+
 ## 0.12.0
 - New 'firerate' upgrade: faster allied-turret fire rate (the fire timer is the mod's own, so this
   is safe — no game internals touched). ~4.8 shots/s up to ~12.5 shots/s.

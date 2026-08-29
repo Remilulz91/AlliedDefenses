@@ -19,10 +19,20 @@ namespace AlliedDefenses.Config
         PerSave,
     }
 
+    /// <summary>Language used for the terminal help text (ally / ally help / ally config).</summary>
+    public enum Language
+    {
+        English,
+        Francais,
+    }
+
     public static class ModConfig
     {
         /// <summary>Keyword typed in the terminal to hijack a defense.</summary>
         public static ConfigEntry<string> HijackCommand = null!;
+
+        /// <summary>Language of the terminal help text (English or Francais).</summary>
+        public static ConfigEntry<Language> TerminalLanguage = null!;
 
         /// <summary>Seconds a defense stays allied. 0 = unlimited.</summary>
         public static ConfigEntry<float> HijackDuration = null!;
@@ -79,6 +89,10 @@ namespace AlliedDefenses.Config
             HijackCommand = cfg.Bind(
                 "General", "HijackCommand", "ally",
                 "Keyword typed in the terminal. In-game usage: <command> <id>  (e.g. ally A0)");
+
+            TerminalLanguage = cfg.Bind(
+                "General", "Language", Language.English,
+                "Language of the terminal help text (ally / ally help / ally config): English or Francais.");
 
             HijackDuration = cfg.Bind(
                 "General", "HijackDuration", 60f,

@@ -8,6 +8,20 @@ can't kill.
 
 Author: **Remilulz_91** — © 2026 Remilulz_91, all rights reserved.
 
+## Features
+
+- 🔧 **Hijack the facility's defenses** — turrets, mines and spike traps become **allied** and
+  turn on the monsters instead of you.
+- 💰 **Team-wide upgrades** — bought once from shared credits, everyone benefits: turret damage,
+  fire rate, range, hijack duration, mine radius, and the counter-play auras below.
+- 📡 **Deployable Defense Beacon** — a carryable two-handed prop you set down anywhere to project
+  your protection out in the field, with a radius ring shown in-world **and on the ship monitor**.
+- 🛡️ **Counter-play vs 7 UNKILLABLE enemies** — hide from / disable the things you can't shoot:
+  Ghost Girl, Coil-Head, Earth Leviathan (sand worm), Eyeless Dogs, Barber, Hygrodere, Circuit Bees.
+- 🤝 **Co-op synced** — upgrade levels and the beacon are shared across the lobby, including
+  players who join mid-game.
+- 🌍 **English & French** terminal help, plus a fully configurable `.cfg`.
+
 > ⚠️ **Multiplayer: EVERY player must install this mod (same version).** It adds synced
 > behaviour, so it won't work if only the host has it. Playing solo/host is fine.
 
@@ -132,6 +146,7 @@ Settings live in `BepInEx/config/Remilulz_91.AlliedDefenses.cfg` (created on fir
 
 **[General]**
 - `HijackCommand` = `ally` — the terminal keyword.
+- `Language` = `English` — terminal help language (`English` or `Francais`).
 - `HijackDuration` = `60` — seconds a defense stays allied (`0` = unlimited).
 
 **[Targeting]**

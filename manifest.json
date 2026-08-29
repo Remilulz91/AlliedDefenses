@@ -1,9 +1,9 @@
 {
   "name": "AlliedDefenses",
   "author": "Remilulz_91",
-  "version_number": "0.12.0",
+  "version_number": "0.13.0",
   "website_url": "https://github.com/Remilulz91/AlliedDefenses",
-  "description": "Hijack turrets & mines from the ship terminal so they fight the monsters instead of you. Colour cues + live timers on the radar. ALL players must install (same version).",
+  "description": "Hijack turrets, mines & spikes from the terminal to fight the monsters for you. Team-wide upgrades, a deployable Defense Beacon, and counter-play vs 7 UNKILLABLE enemies. Co-op synced. ALL players need the mod (same version).",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2305"
   ]
