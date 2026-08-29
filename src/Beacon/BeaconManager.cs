@@ -89,6 +89,7 @@ namespace AlliedDefenses.Beacon
                 Vector3 pos = ShipSpawnPoint();
                 var go = UnityEngine.Object.Instantiate(BeaconFactory.Prefab, pos, Quaternion.identity);
                 go.hideFlags = HideFlags.None;
+                go.SetActive(true); // the template is kept inactive; the live copy must be active
 
                 var grab = go.GetComponent<BeaconItem>();
                 if (grab != null)

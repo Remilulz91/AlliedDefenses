@@ -66,6 +66,12 @@ namespace AlliedDefenses.Beacon
                 item.spawnPrefab = root;
                 Prefab = root;
 
+                // CRITICAL: keep the template INACTIVE. If it stays active its GrabbableObject.Update
+                // runs every frame even in the menu (no StartOfRound / no floor), which throws a
+                // NullReference in FallWithCurve on a loop. Spawned copies are re-activated in
+                // BeaconManager.SpawnIfMissing before NetworkObject.Spawn.
+                root.SetActive(false);
+
                 NetworkManager.Singleton.AddNetworkPrefab(root);
                 Plugin.Log.LogInfo("BeaconFactory: Defense Beacon prefab built and registered.");
             }

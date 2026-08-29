@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.2
+- Fix a looping NullReferenceException in the menu (GrabbableObject.FallWithCurve): the beacon
+  network-prefab template was left active, so its Update ran every frame with no StartOfRound.
+  The template is now kept inactive and only the spawned copy is activated (before its Spawn).
+
 ## 0.8.1
 - Build fix: removed an invalid `Item.grabbable` assignment in BeaconFactory (grabbable
   belongs to GrabbableObject, which is already set). No behaviour change from 0.8.0.
