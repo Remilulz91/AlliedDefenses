@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.0
+- Beacon now looks like a real item: at runtime it borrows a vanilla item's 3D model AND its
+  inventory icon (no asset bundle), so the in-hand view and the inventory slot are no longer empty.
+- Aura radius indicator: a green ring is drawn on the ground around a placed beacon, sized to the
+  largest active aura radius (sanity/seismic/muffle) and updating with your upgrades. Hidden while
+  carried. Visible in-world and through the ship's monitor camera.
+- Removed the temporary [GrabProbe] grab-detection diagnostic (grabbing works). [BeaconDiag] on
+  Start also removed.
+
 ## 0.8.10
 - Grabbing works now. Fix the "invisible while carried" look: the centre pivot put the camera
   inside the mesh when held. The held beacon is now offset forward/down (positionOffset) so it

@@ -108,6 +108,17 @@ namespace AlliedDefenses.Core
         public static float MuffleRadius() => MuffleRadiusFor(LevelOf("muffle"));
         private static float MuffleRadiusFor(int lvl) => lvl <= 0 ? 0f : 6f + lvl * 2f; // 8m..16m
 
+        /// <summary>Largest active aura radius (for the beacon's ground ring). 0 if none active.</summary>
+        public static float MaxAuraRadius()
+        {
+            if (!ModConfig.EnableUpgrades.Value) return 0f;
+            float r = 0f;
+            r = Mathf.Max(r, SanityAuraRadius());
+            r = Mathf.Max(r, SeismicRadius());
+            r = Mathf.Max(r, MuffleRadius());
+            return r;
+        }
+
         // --- Defense Beacon ownership + "haul" (carry weight). The beacon is bought once via the
         //     'beacon' pseudo-upgrade (max level 1), so all the persistence / reset plumbing is
         //     shared. 'haul' lowers the beacon's weight so you carry it faster (floored so it is

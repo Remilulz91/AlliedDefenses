@@ -1,24 +1,29 @@
 using UnityEngine;
+using AlliedDefenses.Config;
 using AlliedDefenses.Core;
 
 namespace AlliedDefenses.Beacon
 {
     /// <summary>
     /// The carryable "Defense Beacon": a two-handed heavy prop (a <see cref="GrabbableObject"/>)
-    /// you buy once, haul out of the ship, and set down anywhere in the field. Wherever it is —
-    /// held or on the ground — it registers its position in <see cref="BeaconRegistry"/>, which is
-    /// the anchor the protective auras key off (Ghost Girl sanity drain, sand-worm untargetable,
-    /// Eyeless-Dog muffle). So dropping it near the ship or out by the worm creates a safe bubble.
+    /// you buy once, haul out of the ship, and set down anywhere. Wherever it is — held or on the
+    /// ground — it registers its position in <see cref="BeaconRegistry"/>, the anchor the protective
+    /// auras key off (Ghost Girl sanity drain, sand-worm untargetable, Eyeless-Dog muffle).
     ///
-    /// It carries no battery and has no "use" action — it is inert on purpose (the balance choice
-    /// from the design: it hides/deters, it does not shoot). We only override Start/OnDestroy to
-    /// register and unregister with the beacon directory; everything else is vanilla grab/drop
-    /// physics handled by the base class, which the game already networks.
+    /// It is inert on purpose (it hides/deters, it does not shoot). At runtime it borrows a vanilla
+    /// item's model + inventory icon (BeaconVisuals) and draws a green ground ring showing the
+    /// current aura radius.
     /// </summary>
     public class BeaconItem : GrabbableObject
     {
         private bool _registered;
+        private bool _lookApplied;
         private Light _light;
+        private LineRenderer _ring;
+        private float _ringTimer;
+
+        private const float PivotHeightAboveFloor = 0.5f; // matches verticalOffset / spawn lift
+        private const int RingSegments = 48;
 
         public override void Start()
         {
@@ -26,23 +31,14 @@ namespace AlliedDefenses.Beacon
             Register();
             _light = GetComponentInChildren<Light>();
 
-            // Diagnostic (temporary): confirm the grab-critical setup actually stuck at runtime.
-            // Grabbing requires layer == 8 and tag == "PhysicsProp".
-            try
+            if (!_lookApplied)
             {
-                var col = GetComponent<Collider>();
-                Plugin.Log.LogInfo(
-                    $"[BeaconDiag] layer={gameObject.layer} tag={gameObject.tag} " +
-                    $"twoHanded={(itemProperties != null && itemProperties.twoHanded)} " +
-                    $"grabbable={grabbable} colliders={(propColliders != null ? propColliders.Length : 0)} " +
-                    $"colEnabled={(col != null && col.enabled)} colTrigger={(col != null && col.isTrigger)} " +
-                    $"pos={transform.position}");
+                BeaconVisuals.ApplyVanillaLook(this);
+                _lookApplied = true;
             }
-            catch { }
+            SetupRing();
         }
 
-        // Belt-and-suspenders: if the object is re-enabled after a pool/scene move, make sure
-        // it is in the directory. Register() is idempotent (the registry ignores duplicates).
         private void OnEnable() => Register();
 
         private void Register()
@@ -55,9 +51,18 @@ namespace AlliedDefenses.Beacon
         public override void Update()
         {
             base.Update();
+
             // Glow only when placed: kill the light while carried so it doesn't blind the holder.
             if (_light != null && _light.enabled == isHeld)
                 _light.enabled = !isHeld;
+
+            // Refresh the ground ring a few times a second.
+            _ringTimer += Time.deltaTime;
+            if (_ringTimer >= 0.4f)
+            {
+                _ringTimer = 0f;
+                UpdateRing();
+            }
         }
 
         public override void OnDestroy()
@@ -65,6 +70,64 @@ namespace AlliedDefenses.Beacon
             BeaconRegistry.Unregister(transform);
             _registered = false;
             base.OnDestroy();
+        }
+
+        // ---- ground ring showing the aura radius ----
+
+        private void SetupRing()
+        {
+            if (_ring != null) return;
+            try
+            {
+                var go = new GameObject("BeaconRing");
+                go.transform.SetParent(transform, false);
+                _ring = go.AddComponent<LineRenderer>();
+                _ring.useWorldSpace = false;
+                _ring.loop = true;
+                _ring.widthMultiplier = 0.08f;
+                _ring.positionCount = RingSegments;
+                _ring.numCapVertices = 2;
+                _ring.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                _ring.receiveShadows = false;
+
+                var green = ModConfig.AlliedColor;
+                var sh = Shader.Find("HDRP/Unlit") ?? Shader.Find("Sprites/Default") ?? Shader.Find("Unlit/Color");
+                if (sh != null)
+                {
+                    var mat = new Material(sh);
+                    TrySetColor(mat, green, "_UnlitColor", "_BaseColor", "_Color");
+                    TrySetColor(mat, green * 4f, "_EmissiveColor");
+                    _ring.material = mat;
+                }
+                _ring.startColor = _ring.endColor = green;
+                _ring.enabled = false;
+            }
+            catch (System.Exception e)
+            {
+                Plugin.Log.LogWarning($"BeaconItem: could not build the ring ({e.Message}).");
+            }
+        }
+
+        private void UpdateRing()
+        {
+            if (_ring == null) return;
+            float r = UpgradeManager.MaxAuraRadius();
+            bool show = !isHeld && r > 0.1f;
+            _ring.enabled = show;
+            if (!show) return;
+
+            float y = -PivotHeightAboveFloor + 0.03f; // just above the floor, under the pivot
+            for (int i = 0; i < RingSegments; i++)
+            {
+                float a = (i / (float)RingSegments) * Mathf.PI * 2f;
+                _ring.SetPosition(i, new Vector3(Mathf.Cos(a) * r, y, Mathf.Sin(a) * r));
+            }
+        }
+
+        private static void TrySetColor(Material mat, Color c, params string[] props)
+        {
+            foreach (var p in props)
+                if (mat.HasProperty(p)) { mat.SetColor(p, c); return; }
         }
     }
 }
