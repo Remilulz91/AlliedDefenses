@@ -1,6 +1,11 @@
 # Changelog
 
-## 0.10.2
+## 0.11.0
+- New counter-play: the BARBER (ClaySurgeonAI). It dances toward the closest targetable player via
+  TargetClosestPlayer -> PlayerIsTargetable, so — like the sand worm — a player standing inside an
+  allied-defense/beacon radius is made untargetable and the Barber won't jump at them. New 'barber'
+  upgrade (level 0 = off, radius grows per level). The untargetable patch now covers both the worm
+  (seismic) and the Barber (barber).
 - Beacon ring colour: both rings are now magenta/pink (config Beacon/BeaconRingColorHex, default
   FF2DD0) so they can't be confused with the game's map colours (green terrain, blue exit line).
   The monitor ring recolours an INSTANCE of the radar material, so the game's own exit line is

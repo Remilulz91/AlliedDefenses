@@ -108,6 +108,13 @@ namespace AlliedDefenses.Core
         public static float MuffleRadius() => MuffleRadiusFor(LevelOf("muffle"));
         private static float MuffleRadiusFor(int lvl) => lvl <= 0 ? 0f : 6f + lvl * 2f; // 8m..16m
 
+        // --- Barber (ClaySurgeonAI) counter-play: the Barber "dances" toward the closest targetable
+        //     player (TargetClosestPlayer -> PlayerIsTargetable). While near an allied defense the
+        //     player is made untargetable, so the Barber won't jump toward them. Level 0 = off. ---
+        public static bool BarberEnabled => ModConfig.EnableUpgrades.Value && LevelOf("barber") > 0;
+        public static float BarberRadius() => BarberRadiusFor(LevelOf("barber"));
+        private static float BarberRadiusFor(int lvl) => lvl <= 0 ? 0f : 6f + lvl * 2f; // 8m..16m
+
         /// <summary>Largest active aura radius (for the beacon's ground ring). 0 if none active.</summary>
         public static float MaxAuraRadius()
         {
@@ -116,6 +123,7 @@ namespace AlliedDefenses.Core
             r = Mathf.Max(r, SanityAuraRadius());
             r = Mathf.Max(r, SeismicRadius());
             r = Mathf.Max(r, MuffleRadius());
+            r = Mathf.Max(r, BarberRadius());
             return r;
         }
 
@@ -158,6 +166,9 @@ namespace AlliedDefenses.Core
 
             Add(cfg, "muffle", "Sound muffle", maxLevel: 5, baseCost: 160, growth: 1.5f,
                 describe: lvl => lvl == 0 ? "off (Eyeless Dog)" : $"{MuffleRadiusFor(lvl):0}m quiet zone");
+
+            Add(cfg, "barber", "Barber cloak", maxLevel: 5, baseCost: 170, growth: 1.5f,
+                describe: lvl => lvl == 0 ? "off (Barber)" : $"{BarberRadiusFor(lvl):0}m untargetable");
 
             if (ModConfig.EnableBeacon.Value)
             {
