@@ -33,13 +33,7 @@ namespace AlliedDefenses.Networking
         [HarmonyPatch(typeof(GameNetworkManager), "Start")]
         public static void RegisterPrefab()
         {
-            Plugin.Log.LogInfo("NetworkObjectManager: GameNetworkManager.Start reached.");
-
-            if (_networkPrefab != null)
-            {
-                Plugin.Log.LogInfo("NetworkObjectManager: prefab already created, skipping.");
-                return;
-            }
+            if (_networkPrefab != null) return;
 
             try
             {
@@ -79,16 +73,8 @@ namespace AlliedDefenses.Networking
                     Plugin.Log.LogWarning("NetworkObjectManager: NetworkManager null at StartOfRound.Start.");
                     return;
                 }
-                if (!(nm.IsHost || nm.IsServer))
-                {
-                    Plugin.Log.LogInfo("NetworkObjectManager: not the host; client will receive the handler from the host.");
-                    return;
-                }
-                if (HijackNetworker.Instance != null)
-                {
-                    Plugin.Log.LogInfo("NetworkObjectManager: handler already spawned.");
-                    return;
-                }
+                if (!(nm.IsHost || nm.IsServer)) return; // clients receive the handler from the host
+                if (HijackNetworker.Instance != null) return; // already spawned
                 if (_networkPrefab == null)
                 {
                     Plugin.Log.LogError("NetworkObjectManager: prefab is null (registration failed?); cannot spawn.");
@@ -117,7 +103,6 @@ namespace AlliedDefenses.Networking
                 return;
             }
             field.SetValue(netObj, hash);
-            Plugin.Log.LogInfo($"NetworkObjectManager: GlobalObjectIdHash set to {hash}.");
         }
     }
 }

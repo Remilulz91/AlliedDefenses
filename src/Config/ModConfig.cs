@@ -51,12 +51,6 @@ namespace AlliedDefenses.Config
         /// <summary>One-time credit cost of the Defense Beacon.</summary>
         public static ConfigEntry<int> BeaconPrice = null!;
 
-        /// <summary>Keep the placed beacon standing upright (false = vanilla resting, may lie down).</summary>
-        public static ConfigEntry<bool> BeaconUpright = null!;
-
-        /// <summary>TEMPORARY testing aid: enables the 'ally givecredits &lt;n&gt;' command.</summary>
-        public static ConfigEntry<bool> EnableDevCommands = null!;
-
         /// <summary>Whether upgrades are kept forever (Persistent) or reset on game over (PerSave).</summary>
         public static ConfigEntry<UpgradeSaveMode> UpgradePersistence = null!;
 
@@ -122,16 +116,6 @@ namespace AlliedDefenses.Config
                 "Beacon", "BeaconPrice", 175,
                 "One-time credit cost of the Defense Beacon. Owned/paid state follows the same " +
                 "Persistent/PerSave rule as the upgrades. Re-delivering a lost beacon is free.");
-
-            BeaconUpright = cfg.Bind(
-                "Beacon", "BeaconUpright", true,
-                "Keep a placed beacon standing upright. Set to false to revert to the vanilla resting " +
-                "behaviour (the model may lie on its side when dropped).");
-
-            EnableDevCommands = cfg.Bind(
-                "Dev", "EnableDevCommands", false,
-                "TESTING ONLY. When true, enables 'ally givecredits <n>' to add ship credits so you " +
-                "can test purchases without grinding. Leave false for normal play.");
 
             ColorAlliedDefenses = cfg.Bind(
                 "Visuals", "ColorAlliedDefenses", true,

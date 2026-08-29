@@ -62,9 +62,6 @@ namespace AlliedDefenses.Patches
                 message = HandleUpgrade(__instance, arg.Substring("upgrade ".Length).Trim());
             else if (arg.Equals("beacon", StringComparison.OrdinalIgnoreCase))
                 message = HandleBeacon(__instance);
-            else if (ModConfig.EnableDevCommands.Value &&
-                     arg.StartsWith("givecredits", StringComparison.OrdinalIgnoreCase))
-                message = HandleGiveCredits(__instance, arg.Substring("givecredits".Length).Trim());
             else if (TryMatchGroup(arg, out string typeId))
                 message = HijackManager.ListDefenses(typeId); // "ally mines" / "ally turrets" -> list ids
             else
@@ -85,18 +82,6 @@ namespace AlliedDefenses.Patches
             if (spent > 0)
                 SetCredits(terminal, credits - spent);
             return msg;
-        }
-
-        /// <summary>TESTING ONLY ('ally givecredits &lt;n&gt;'): add credits so purchases can be tested.</summary>
-        private static string HandleGiveCredits(Terminal terminal, string sub)
-        {
-            int amount = 1000;
-            if (!string.IsNullOrEmpty(sub) && !int.TryParse(sub, out amount))
-                return "Usage: ally givecredits <number>  (testing only).";
-            int credits = GetCredits(terminal);
-            int updated = Mathf.Max(0, credits + amount);
-            SetCredits(terminal, updated);
-            return $"[TEST] Added {amount} credits. Balance: {updated}.";
         }
 
         /// <summary>Handles "ally beacon": buy the beacon once, or re-deliver a missing one for free.</summary>

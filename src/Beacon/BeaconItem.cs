@@ -65,21 +65,6 @@ namespace AlliedDefenses.Beacon
             }
         }
 
-        public override void LateUpdate()
-        {
-            base.LateUpdate();
-
-            // Keep a placed beacon standing upright. Done HERE (after base.LateUpdate, which is what
-            // sets the resting rotation) so it isn't immediately overwritten. Only pitch/roll are
-            // flattened; yaw is kept. Config-toggle for a clean rollback to the vanilla look.
-            if (!isHeld && ModConfig.BeaconUpright.Value)
-            {
-                Vector3 e = transform.eulerAngles;
-                if (Mathf.Abs(Mathf.DeltaAngle(e.x, 0f)) > 0.5f || Mathf.Abs(Mathf.DeltaAngle(e.z, 0f)) > 0.5f)
-                    transform.rotation = Quaternion.Euler(0f, e.y, 0f);
-            }
-        }
-
         public override void OnDestroy()
         {
             BeaconRegistry.Unregister(transform);

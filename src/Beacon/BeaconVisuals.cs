@@ -62,8 +62,6 @@ namespace AlliedDefenses.Beacon
                 var lamp = beacon.transform.Find("BeaconLamp");
                 var lampMr = lamp != null ? lamp.GetComponent<MeshRenderer>() : null;
                 if (lampMr != null) lampMr.enabled = false;
-
-                Plugin.Log.LogInfo($"BeaconVisuals: using '{src.itemName}' model/icon for the beacon.");
             }
             catch (System.Exception e)
             {

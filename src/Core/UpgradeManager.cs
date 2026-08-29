@@ -193,6 +193,23 @@ namespace AlliedDefenses.Core
 
         public static int LevelOf(string id) => _byId.TryGetValue(id, out var u) ? u.RuntimeLevel : 0;
 
+        /// <summary>
+        /// Set an upgrade's in-effect level directly (no cost, no persistence). Used by the network
+        /// layer to mirror the team's upgrade levels onto every client. Clamped to the valid range.
+        /// </summary>
+        public static void SetRuntimeLevel(string id, int level)
+        {
+            if (_byId.TryGetValue(id, out var u))
+                u.RuntimeLevel = Mathf.Clamp(level, 0, u.MaxLevel);
+        }
+
+        /// <summary>Every upgrade's id and current level (for broadcasting the full set to a joiner).</summary>
+        public static IEnumerable<(string id, int level)> AllRuntimeLevels()
+        {
+            foreach (var u in _upgrades)
+                yield return (u.Id, u.RuntimeLevel);
+        }
+
         /// <summary>Cost of the NEXT level, or -1 if maxed / unknown.</summary>
         public static int NextCost(Upgrade u)
         {

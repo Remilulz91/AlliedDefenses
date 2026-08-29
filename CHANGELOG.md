@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.9
+- Cleanup: dropped the non-working "upright" attempt (the donor item rests on its side by design)
+  and its BeaconUpright config. Removed the testing-only 'ally givecredits' command and its
+  EnableDevCommands config. Trimmed verbose logs (kept load, defense registration, network spawn,
+  beacon delivery, and all errors/warnings).
+
 ## 0.9.8
 - Upright fix take 2: forcing the rotation in Update didn't stick because GrabbableObject.LateUpdate
   (which sets the resting rotation) runs afterwards and overwrote it. Moved the upright logic into a
