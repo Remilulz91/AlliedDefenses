@@ -91,6 +91,8 @@ namespace AlliedDefenses.UI
             sb.AppendLine("               radius, so it won't dance/lunge toward you (unkillable).");
             sb.AppendLine("  slime      : the Hygrodere (slime) can't target you in the radius,");
             sb.AppendLine("               so the slow blob wanders off instead of following.");
+            sb.AppendLine("  bees       : Circuit Bees drop their chase while you're in the");
+            sb.AppendLine("               radius (they still notice you first, then disengage).");
             sb.AppendLine("               Each is a separate upgrade (level 0 = off).");
             sb.AppendLine("");
             sb.AppendLine("All hijacks last for a set time, then the defense turns hostile");

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.2
+- New counter-play: CIRCUIT BEES (RedLocustBees). Their line-of-sight aggro near the hive can't be
+  blocked, but their chase state validates the target via PlayerIsTargetable, so while in an allied
+  defense/beacon radius they drop the chase and return to the hive (verified in the DLL - it's the
+  game's own "lost target" path, no crash). Weaker than the others (disengage, not full stealth).
+  New 'bees' upgrade (level 0 = off).
+
 ## 0.11.1
 - New counter-play: the HYGRODERE / slime (BlobAI). It picks the closest targetable player via
   TargetClosestPlayer -> PlayerIsTargetable; when no one is targetable it just roams (verified in

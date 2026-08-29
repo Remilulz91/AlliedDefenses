@@ -19,6 +19,9 @@ namespace AlliedDefenses.Patches
     ///     not jumped at.
     ///   - Hygrodere / slime (BlobAI), gated by the 'slime' upgrade. Same TargetClosestPlayer path;
     ///     with no targetable player it just roams, so the slow blob wanders off instead of chasing.
+    ///   - Circuit Bees (RedLocustBees), gated by the 'bees' upgrade. Their line-of-sight aggro near
+    ///     the hive isn't blocked, but their CHASE state validates the target via PlayerIsTargetable,
+    ///     so a cloaked player makes them drop the chase (weaker: disengage, not full stealth).
     ///
     /// Runs where the targeting decision is made (the enemy's owner / host). Both effects are pure
     /// suppression (they hide you), not an off switch: an enemy already mid-lunge can still connect.
@@ -39,6 +42,8 @@ namespace AlliedDefenses.Patches
                 radius = UpgradeManager.BarberRadius();
             else if (__instance is BlobAI && UpgradeManager.SlimeEnabled)
                 radius = UpgradeManager.SlimeRadius();
+            else if (__instance is RedLocustBees && UpgradeManager.BeesEnabled)
+                radius = UpgradeManager.BeesRadius();
             else
                 return true; // not a covered enemy, or its upgrade is off -> vanilla targeting
 

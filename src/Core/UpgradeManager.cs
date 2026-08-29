@@ -123,6 +123,15 @@ namespace AlliedDefenses.Core
         public static float SlimeRadius() => SlimeRadiusFor(LevelOf("slime"));
         private static float SlimeRadiusFor(int lvl) => lvl <= 0 ? 0f : 6f + lvl * 2f; // 8m..16m
 
+        // --- Circuit Bees (RedLocustBees) counter-play: their initial aggro is line-of-sight near
+        //     the hive (can't be blocked), but their CHASE state validates the target through
+        //     PlayerIsTargetable. So while near an allied defense the player is untargetable and the
+        //     bees DROP the chase (game's own "lost target" path). Weaker than the others (disengage,
+        //     not full stealth). Level 0 = off. ---
+        public static bool BeesEnabled => ModConfig.EnableUpgrades.Value && LevelOf("bees") > 0;
+        public static float BeesRadius() => BeesRadiusFor(LevelOf("bees"));
+        private static float BeesRadiusFor(int lvl) => lvl <= 0 ? 0f : 6f + lvl * 2f; // 8m..16m
+
         /// <summary>Largest active aura radius (for the beacon's ground ring). 0 if none active.</summary>
         public static float MaxAuraRadius()
         {
@@ -133,6 +142,7 @@ namespace AlliedDefenses.Core
             r = Mathf.Max(r, MuffleRadius());
             r = Mathf.Max(r, BarberRadius());
             r = Mathf.Max(r, SlimeRadius());
+            r = Mathf.Max(r, BeesRadius());
             return r;
         }
 
@@ -181,6 +191,9 @@ namespace AlliedDefenses.Core
 
             Add(cfg, "slime", "Slime cloak", maxLevel: 5, baseCost: 140, growth: 1.5f,
                 describe: lvl => lvl == 0 ? "off (Hygrodere)" : $"{SlimeRadiusFor(lvl):0}m untargetable");
+
+            Add(cfg, "bees", "Bee cloak", maxLevel: 5, baseCost: 120, growth: 1.5f,
+                describe: lvl => lvl == 0 ? "off (Circuit Bees)" : $"{BeesRadiusFor(lvl):0}m, bees disengage");
 
             if (ModConfig.EnableBeacon.Value)
             {
