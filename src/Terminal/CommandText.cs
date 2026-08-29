@@ -62,6 +62,8 @@ namespace AlliedDefenses.UI
             sb.AppendLine($"  {k} upgrades       see upgrades, levels and costs.");
             sb.AppendLine($"  {k} upgrade <id>   buy the next level with ship credits.");
             sb.AppendLine($"  {k} upgrade reset  reset all upgrades to level 0.");
+            sb.AppendLine("  Upgrades are TEAM-WIDE: bought once from shared credits, every");
+            sb.AppendLine("  player in the lobby benefits (levels are synced to everyone).");
             sb.AppendLine("  Save mode is set in the config (UpgradePersistence):");
             sb.AppendLine("   - Persistent: kept forever, even through a game over (default).");
             sb.AppendLine("   - PerSave: tied to the save slot, wiped on a game over.");

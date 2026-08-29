@@ -75,12 +75,23 @@ namespace AlliedDefenses.Patches
         private static string HandleUpgrade(Terminal terminal, string sub)
         {
             if (sub.Equals("reset", StringComparison.OrdinalIgnoreCase))
-                return UpgradeManager.Reset();
+            {
+                string r = UpgradeManager.Reset();
+                // Mirror the reset (all levels now 0) to the whole lobby.
+                var net = Networking.HijackNetworker.Active;
+                if (net != null)
+                    foreach (var (id, level) in UpgradeManager.AllRuntimeLevels())
+                        net.ShareUpgradeLevel(id, level);
+                return r;
+            }
 
             int credits = GetCredits(terminal);
             var (msg, spent) = UpgradeManager.Buy(sub, credits);
             if (spent > 0)
+            {
                 SetCredits(terminal, credits - spent);
+                Networking.HijackNetworker.Active?.ShareUpgradeLevel(sub, UpgradeManager.LevelOf(sub));
+            }
             return msg;
         }
 
@@ -90,7 +101,11 @@ namespace AlliedDefenses.Patches
             int credits = GetCredits(terminal);
             var (msg, spent) = Beacon.BeaconManager.Purchase(credits);
             if (spent > 0)
+            {
                 SetCredits(terminal, credits - spent);
+                // Share beacon ownership; the host delivers the physical beacon on its side.
+                Networking.HijackNetworker.Active?.ShareUpgradeLevel("beacon", UpgradeManager.LevelOf("beacon"));
+            }
             return msg;
         }
 

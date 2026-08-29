@@ -194,13 +194,16 @@ namespace AlliedDefenses.Core
         public static int LevelOf(string id) => _byId.TryGetValue(id, out var u) ? u.RuntimeLevel : 0;
 
         /// <summary>
-        /// Set an upgrade's in-effect level directly (no cost, no persistence). Used by the network
-        /// layer to mirror the team's upgrade levels onto every client. Clamped to the valid range.
+        /// Set an upgrade's in-effect level directly (no cost). Used by the network layer to mirror
+        /// the team's upgrade levels onto every client. Clamped to the valid range. When
+        /// <paramref name="persistOnHost"/> is true the host also saves it, so team upgrades bought
+        /// by any player survive restarts (clients never persist the mirrored levels).
         /// </summary>
-        public static void SetRuntimeLevel(string id, int level)
+        public static void SetRuntimeLevel(string id, int level, bool persistOnHost = false)
         {
-            if (_byId.TryGetValue(id, out var u))
-                u.RuntimeLevel = Mathf.Clamp(level, 0, u.MaxLevel);
+            if (!_byId.TryGetValue(id, out var u)) return;
+            u.RuntimeLevel = Mathf.Clamp(level, 0, u.MaxLevel);
+            if (persistOnHost) Persist(u);
         }
 
         /// <summary>Every upgrade's id and current level (for broadcasting the full set to a joiner).</summary>

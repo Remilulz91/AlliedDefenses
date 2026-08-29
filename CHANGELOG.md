@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.0
+- Multiplayer sync (step 3): upgrades are now TEAM-WIDE. When any player buys an upgrade (or the
+  beacon) from the shared ship credits, the new level is broadcast to the whole lobby, so every
+  player benefits and the host (which drives enemy behaviour for seismic/muffle) always has the
+  right levels. Late joiners request the full level set from the host on connect. The host persists
+  team upgrades so they survive restarts, even ones a client bought. If a client buys the beacon,
+  the host delivers the physical beacon on its side. All best-effort over the existing networker
+  (solo/host play is unaffected if a build isn't fully netcode-patched).
+
 ## 0.9.9
 - Cleanup: dropped the non-working "upright" attempt (the donor item rests on its side by design)
   and its BeaconUpright config. Removed the testing-only 'ally givecredits' command and its
