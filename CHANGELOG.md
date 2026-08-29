@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.8
+- Upright fix take 2: forcing the rotation in Update didn't stick because GrabbableObject.LateUpdate
+  (which sets the resting rotation) runs afterwards and overwrote it. Moved the upright logic into a
+  LateUpdate override (after base.LateUpdate), so it now holds. Still behind BeaconUpright.
+
 ## 0.9.7
 - Placed beacon now stands upright (the donor model otherwise lay on its side when dropped). Only
   pitch/roll are flattened, yaw is kept. New config 'Beacon/BeaconUpright' (default true) — set it

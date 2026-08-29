@@ -56,22 +56,27 @@ namespace AlliedDefenses.Beacon
             if (_light != null && _light.enabled == isHeld)
                 _light.enabled = !isHeld;
 
-            // Keep a placed beacon standing upright (the donor model otherwise lies on its side when
-            // dropped). We only flatten pitch/roll and keep the yaw, so it can still face any way.
-            // Config-toggle so it's a clean rollback to the vanilla resting look.
-            if (!isHeld && ModConfig.BeaconUpright.Value)
-            {
-                Vector3 e = transform.eulerAngles;
-                if (Mathf.Abs(Mathf.DeltaAngle(e.x, 0f)) > 0.5f || Mathf.Abs(Mathf.DeltaAngle(e.z, 0f)) > 0.5f)
-                    transform.rotation = Quaternion.Euler(0f, e.y, 0f);
-            }
-
             // Refresh the ground ring a few times a second.
             _ringTimer += Time.deltaTime;
             if (_ringTimer >= 0.4f)
             {
                 _ringTimer = 0f;
                 UpdateRing();
+            }
+        }
+
+        public override void LateUpdate()
+        {
+            base.LateUpdate();
+
+            // Keep a placed beacon standing upright. Done HERE (after base.LateUpdate, which is what
+            // sets the resting rotation) so it isn't immediately overwritten. Only pitch/roll are
+            // flattened; yaw is kept. Config-toggle for a clean rollback to the vanilla look.
+            if (!isHeld && ModConfig.BeaconUpright.Value)
+            {
+                Vector3 e = transform.eulerAngles;
+                if (Mathf.Abs(Mathf.DeltaAngle(e.x, 0f)) > 0.5f || Mathf.Abs(Mathf.DeltaAngle(e.z, 0f)) > 0.5f)
+                    transform.rotation = Quaternion.Euler(0f, e.y, 0f);
             }
         }
 
