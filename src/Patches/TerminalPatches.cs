@@ -57,7 +57,7 @@ namespace AlliedDefenses.Patches
                      arg.Equals("settings", StringComparison.OrdinalIgnoreCase))
                 message = CommandText.CurrentConfig();
             else if (arg.Equals("upgrades", StringComparison.OrdinalIgnoreCase))
-                message = UpgradeManager.ListText(GetCredits(__instance));
+                message = UpgradeManager.ListText(ShipCredits.Get(__instance));
             else if (arg.StartsWith("upgrade ", StringComparison.OrdinalIgnoreCase))
                 message = HandleUpgrade(__instance, arg.Substring("upgrade ".Length).Trim());
             else if (arg.Equals("beacon", StringComparison.OrdinalIgnoreCase))
@@ -85,12 +85,20 @@ namespace AlliedDefenses.Patches
                 return r;
             }
 
-            int credits = GetCredits(terminal);
+            var net = Networking.HijackNetworker.Active;
+            if (net != null && !net.IsServer)
+            {
+                // Client: only the host can change the shared credits, so ask the host to buy.
+                net.RequestPurchase("upgrade", sub);
+                return "Purchase request sent to the host (shared credits are host-side).";
+            }
+
+            int credits = ShipCredits.Get(terminal);
             var (msg, spent) = UpgradeManager.Buy(sub, credits);
             if (spent > 0)
             {
-                SetCredits(terminal, credits - spent);
-                Networking.HijackNetworker.Active?.ShareUpgradeLevel(sub, UpgradeManager.LevelOf(sub));
+                ShipCredits.Set(terminal, credits - spent);
+                net?.ShareUpgradeLevel(sub, UpgradeManager.LevelOf(sub));
             }
             return msg;
         }
@@ -98,36 +106,21 @@ namespace AlliedDefenses.Patches
         /// <summary>Handles "ally beacon": buy the beacon once, or re-deliver a missing one for free.</summary>
         private static string HandleBeacon(Terminal terminal)
         {
-            int credits = GetCredits(terminal);
+            var net = Networking.HijackNetworker.Active;
+            if (net != null && !net.IsServer)
+            {
+                net.RequestPurchase("beacon", "");
+                return "Beacon request sent to the host (shared credits are host-side).";
+            }
+
+            int credits = ShipCredits.Get(terminal);
             var (msg, spent) = Beacon.BeaconManager.Purchase(credits);
             if (spent > 0)
             {
-                SetCredits(terminal, credits - spent);
-                // Share beacon ownership; the host delivers the physical beacon on its side.
-                Networking.HijackNetworker.Active?.ShareUpgradeLevel("beacon", UpgradeManager.LevelOf("beacon"));
+                ShipCredits.Set(terminal, credits - spent);
+                net?.ShareUpgradeLevel("beacon", UpgradeManager.LevelOf("beacon"));
             }
             return msg;
-        }
-
-        // Ship credits via reflection (build-safe against member renames).
-        private static int GetCredits(Terminal terminal)
-        {
-            try { return Traverse.Create(terminal).Field("groupCredits").GetValue<int>(); }
-            catch { return 0; }
-        }
-
-        private static void SetCredits(Terminal terminal, int value)
-        {
-            value = Mathf.Max(0, value);
-            try
-            {
-                Traverse.Create(terminal).Field("groupCredits").SetValue(value);
-                int items = 0;
-                try { items = Traverse.Create(terminal).Field("numberOfItemsInDropship").GetValue<int>(); } catch { }
-                // Best-effort network sync so all players see the new balance.
-                try { Traverse.Create(terminal).Method("SyncGroupCreditsServerRpc", value, items).GetValue(); } catch { }
-            }
-            catch (System.Exception e) { Plugin.Log.LogWarning($"SetCredits failed: {e.Message}"); }
         }
 
         /// <summary>

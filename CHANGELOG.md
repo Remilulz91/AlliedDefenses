@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.0
+- Fix multiplayer credits/purchases (host-authoritative). Only the host owns the terminal and can
+  sync the shared credits, so a client buying locally desynced credits and hit "Only the owner can
+  invoke a ServerRpc that requires ownership". Now a client sends a purchase request to the host,
+  which validates against the shared credits, deducts, applies the upgrade / delivers the beacon,
+  and syncs credits + level to everyone. Host/solo purchases are unchanged. Credit read/write moved
+  to a shared ShipCredits helper.
+
 ## 0.13.5
 - Fix the multiplayer beacon: disabled NetworkObject.AutoObjectParentSync on the beacon prefab.
   The game reparents a grabbed item to the player's hand via its own GrabObjectClientRpc; with

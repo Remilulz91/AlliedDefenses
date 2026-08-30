@@ -133,6 +133,49 @@ namespace AlliedDefenses.Networking
             UpgradeManager.SetRuntimeLevel(id, level);
         }
 
+        // ---- host-authoritative purchases ----
+        // Only the host owns the ship terminal, so only the host can change and SYNC the shared
+        // credits. A client that bought locally would desync credits and hit "Only the owner can
+        // invoke a ServerRpc that requires ownership". So a client asks the host to do the whole
+        // purchase against the authoritative credits; the host deducts, applies, and broadcasts.
+
+        /// <summary>Buy something (kind = "upgrade" or "beacon"). Host does it; a client asks the host.</summary>
+        public void RequestPurchase(string kind, string id)
+        {
+            if (IsServer) DoHostPurchase(kind, id);
+            else Safe(() => RequestPurchaseServerRpc(kind, id ?? ""));
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RequestPurchaseServerRpc(string kind, string id) => DoHostPurchase(kind, id);
+
+        private void DoHostPurchase(string kind, string id)
+        {
+            var terminal = ShipCredits.Find();
+            if (terminal == null) return;
+            int credits = ShipCredits.Get(terminal);
+
+            if (kind == "beacon")
+            {
+                var (_, spent) = Beacon.BeaconManager.Purchase(credits);
+                if (spent > 0)
+                {
+                    ShipCredits.Set(terminal, credits - spent);
+                    UpgradeManager.SetRuntimeLevel("beacon", UpgradeManager.LevelOf("beacon"), persistOnHost: true);
+                    Safe(() => ShareUpgradeLevelClientRpc("beacon", UpgradeManager.LevelOf("beacon")));
+                }
+            }
+            else // upgrade
+            {
+                var (_, spent) = UpgradeManager.Buy(id, credits);
+                if (spent > 0)
+                {
+                    ShipCredits.Set(terminal, credits - spent);
+                    Safe(() => ShareUpgradeLevelClientRpc(id, UpgradeManager.LevelOf(id)));
+                }
+            }
+        }
+
         [ServerRpc(RequireOwnership = false)]
         private void RequestAllLevelsServerRpc()
         {
