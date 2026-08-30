@@ -1,4 +1,5 @@
 using HarmonyLib;
+using Unity.Netcode;
 using UnityEngine;
 using AlliedDefenses.Config;
 using AlliedDefenses.Core;
@@ -28,6 +29,9 @@ namespace AlliedDefenses.Beacon
         private const float PivotHeightAboveFloor = 0.5f;
         private const int RingSegments = 48;
 
+        private float _popT;      // deploy "pop" scale animation (0..1)
+        private float _flashT;    // deploy light flash (0..1)
+
         private void Start()
         {
             Register();
@@ -35,6 +39,12 @@ namespace AlliedDefenses.Beacon
             if (!_lookApplied) { BeaconVisuals.ApplyVanillaLook(transform); _lookApplied = true; }
             SetupRing();
             UpdateRing();
+            AddToRadar();
+
+            // Deploy feedback: pop the model up + a brief light flash.
+            transform.localScale = Vector3.one * 0.3f;
+            _popT = 0f;
+            _flashT = 0f;
         }
 
         private void OnEnable() => Register();
@@ -50,12 +60,55 @@ namespace AlliedDefenses.Beacon
         {
             BeaconRegistry.Unregister(transform);
             _registered = false;
+            RemoveFromRadar();
         }
 
         private void Update()
         {
+            // Deploy pop (scale) + light flash. Ring is world-space so scaling the root won't move it.
+            if (_popT < 1f)
+            {
+                _popT = Mathf.Min(1f, _popT + Time.deltaTime * 4.5f);
+                transform.localScale = Vector3.one * Mathf.SmoothStep(0.3f, 1f, _popT);
+            }
+            if (_light != null && _flashT < 1f)
+            {
+                _flashT = Mathf.Min(1f, _flashT + Time.deltaTime * 2.5f);
+                _light.intensity = Mathf.Lerp(2.2f, 0.6f, _flashT);
+            }
+
             _ringTimer += Time.deltaTime;
             if (_ringTimer >= 0.4f) { _ringTimer = 0f; UpdateRing(); }
+        }
+
+        // ---- ship radar target (find/view it from the monitor, like a radar booster) ----
+
+        private void AddToRadar()
+        {
+            if (!ModConfig.BeaconRadarTarget.Value) return;
+            try
+            {
+                var mapScreen = StartOfRound.Instance != null ? StartOfRound.Instance.mapScreen : null;
+                if (mapScreen == null) return;
+                mapScreen.AddTransformAsTargetToRadar(transform, "Defense Beacon", true);
+                // Only the host aligns the target order across clients (mirrors RadarBoosterItem).
+                if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
+                    mapScreen.SyncOrderOfRadarBoostersInList();
+            }
+            catch { /* radar not ready -> ignore */ }
+        }
+
+        private void RemoveFromRadar()
+        {
+            try
+            {
+                var mapScreen = StartOfRound.Instance != null ? StartOfRound.Instance.mapScreen : null;
+                if (mapScreen == null) return;
+                mapScreen.RemoveTargetFromRadar(transform);
+                if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
+                    mapScreen.SyncOrderOfRadarBoostersInList();
+            }
+            catch { }
         }
 
         // ---- ground ring showing the aura radius ----

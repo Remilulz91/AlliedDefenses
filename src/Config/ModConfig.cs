@@ -73,6 +73,9 @@ namespace AlliedDefenses.Config
         /// <summary>Key to recall (store) the deployed beacon (Input System key name).</summary>
         public static ConfigEntry<string> BeaconRecallKey = null!;
 
+        /// <summary>Register the deployed beacon as a selectable target on the ship radar/monitor.</summary>
+        public static ConfigEntry<bool> BeaconRadarTarget = null!;
+
         /// <summary>Whether upgrades are kept forever (Persistent) or reset on game over (PerSave).</summary>
         public static ConfigEntry<UpgradeSaveMode> UpgradePersistence = null!;
 
@@ -163,6 +166,11 @@ namespace AlliedDefenses.Config
                 "Beacon", "BeaconRecallKey", "N",
                 "Key to recall (store) the deployed Defense Beacon so it no longer sits in the world. " +
                 "Uses Unity Input System key names. You can also type 'ally beacon recall' at the terminal.");
+
+            BeaconRadarTarget = cfg.Bind(
+                "Beacon", "BeaconRadarTarget", true,
+                "Register the deployed beacon as a selectable target on the ship radar/monitor, so you " +
+                "can find/view it from the ship like a radar booster.");
 
             ColorAlliedDefenses = cfg.Bind(
                 "Visuals", "ColorAlliedDefenses", true,

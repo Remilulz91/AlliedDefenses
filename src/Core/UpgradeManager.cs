@@ -154,8 +154,10 @@ namespace AlliedDefenses.Core
         }
 
         // --- Defense Beacon ownership. Bought once via the 'beacon' pseudo-upgrade (max level 1),
-        //     so all the persistence / reset plumbing is shared. ---
+        //     so all the persistence / reset plumbing is shared. The 'slots' upgrade lets you have
+        //     more than one deployed at a time. ---
         public static bool BeaconOwned => LevelOf("beacon") > 0;
+        public static int BeaconCapacity() => 1 + LevelOf("slots"); // 1..4 deployed beacons
 
         // ----------------------------------------------------------------
 
@@ -204,7 +206,10 @@ namespace AlliedDefenses.Core
             {
                 // Bought once via 'ally beacon'; BaseCost mirrors the configurable price.
                 Add(cfg, "beacon", "Defense Beacon", maxLevel: 1, baseCost: ModConfig.BeaconPrice.Value, growth: 1f,
-                    describe: lvl => lvl == 0 ? "not owned" : "owned (carry with two hands)");
+                    describe: lvl => lvl == 0 ? "not owned" : "owned (deploy with the key)");
+
+                Add(cfg, "slots", "Beacon slots", maxLevel: 3, baseCost: 200, growth: 1.6f,
+                    describe: lvl => $"{1 + lvl} beacon(s) at once");
 
             }
         }

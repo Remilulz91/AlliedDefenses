@@ -72,6 +72,7 @@ barber       Lv 0/5   (off (Barber))           next: 170 cr
 slime        Lv 0/5   (off (Hygrodere))        next: 140 cr
 bees         Lv 0/5   (off (Circuit Bees))     next: 120 cr
 beacon       Lv 0/1   (not owned)              next: 175 cr
+slots        Lv 0/3   (1 beacon(s) at once)    next: 200 cr
 
 Buy with 'ally upgrade <id>'.
 ```
@@ -99,6 +100,7 @@ The cost of each level **scales up** the more levels you already own.
 | `slime` | Hygrodere (slime) counter-play: while near an allied defense/beacon the blob can't target you, so it wanders off instead of following (radius grows per level) | 5 | 140 |
 | `bees` | Circuit Bees counter-play: they still notice you near their hive, but while you're in the radius they drop the chase and return to the hive (weaker: disengage, not full stealth) | 5 | 120 |
 | `beacon` | Unlocks the Defense Beacon (this is what `ally beacon` buys) | 1 | 175 |
+| `slots` | Deploy more than one beacon at once (1 + level, so up to 4) | 3 | 200 |
 
 Level 0 means **off** for the counter-play auras (`sanity`, `neutralize`, `seismic`, `muffle`,
 `barber`, `slime`, `bees`) — buy at least level 1 to enable them.
@@ -168,6 +170,7 @@ Settings live in `BepInEx/config/Remilulz_91.AlliedDefenses.cfg` (created on fir
 - `BeaconRingColorHex` = `FF2DD0` — ring colour (magenta), a colour the map doesn't use.
 - `BeaconDeployKey` = `B` — key to deploy/move the beacon at your position (Input System key name).
 - `BeaconRecallKey` = `N` — key to recall/store the deployed beacon (or `ally beacon recall`).
+- `BeaconRadarTarget` = `true` — show the beacon as a selectable target on the ship radar/monitor.
 
 **[Visuals]**
 - `ColorAlliedDefenses` = `true` — tint allied defenses (laser/light + radar code).

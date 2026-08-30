@@ -27,6 +27,12 @@ namespace AlliedDefenses.Beacon
             BeaconFactory.EnsureBuilt();
         }
 
+        // Auto-store any deployed beacon when the ship leaves the moon, so it isn't left behind as
+        // an orphaned object across rounds.
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(StartOfRound), "ShipLeave")]
+        public static void OnShipLeave() => DespawnAll();
+
         /// <summary>
         /// Terminal "ally beacon": buy it the first time (paying). No physical delivery here — the
         /// owner deploys it with the deploy key. Returns (message, creditsSpent).
@@ -51,8 +57,14 @@ namespace AlliedDefenses.Beacon
             return (msg, spent);
         }
 
-        /// <summary>True if a deployed beacon currently exists (host authority check).</summary>
-        private static bool BeaconExists() => UnityEngine.Object.FindObjectOfType<BeaconObject>() != null;
+        /// <summary>Despawn one beacon (network-wide on the host).</summary>
+        private static void Despawn(BeaconObject b)
+        {
+            if (b == null) return;
+            var netObj = b.GetComponent<NetworkObject>();
+            if (netObj != null && netObj.IsSpawned) netObj.Despawn(destroy: true);
+            else UnityEngine.Object.Destroy(b.gameObject);
+        }
 
         /// <summary>
         /// Host deploys the beacon at a world position (moving it if one already exists). Called on
@@ -66,12 +78,27 @@ namespace AlliedDefenses.Beacon
                 if (nm == null || !(nm.IsHost || nm.IsServer)) return; // only the host spawns
                 if (!UpgradeManager.BeaconOwned) return;
 
-                DespawnAll();            // move = despawn old, spawn new
                 BeaconFactory.EnsureBuilt();
                 if (BeaconFactory.Prefab == null)
                 {
                     Plugin.Log.LogError("BeaconManager: prefab missing; cannot deploy beacon.");
                     return;
+                }
+
+                // Capacity: keep at most 'slots' beacons. At the cap, remove the one NEAREST the new
+                // spot (so a nearby beacon "moves" to you); below the cap, just add another.
+                int max = Mathf.Max(1, UpgradeManager.BeaconCapacity());
+                var existing = UnityEngine.Object.FindObjectsOfType<BeaconObject>();
+                if (existing.Length >= max)
+                {
+                    BeaconObject nearest = null;
+                    float best = float.MaxValue;
+                    foreach (var b in existing)
+                    {
+                        float d = (b.transform.position - worldPos).sqrMagnitude;
+                        if (d < best) { best = d; nearest = b; }
+                    }
+                    Despawn(nearest);
                 }
 
                 // Rest it on the floor at the requested spot: raycast down, lift the pivot half the
@@ -102,13 +129,8 @@ namespace AlliedDefenses.Beacon
                 var nm = NetworkManager.Singleton;
                 if (nm == null || !(nm.IsHost || nm.IsServer)) return;
 
-                var beacons = UnityEngine.Object.FindObjectsOfType<BeaconObject>();
-                foreach (var b in beacons)
-                {
-                    var netObj = b.GetComponent<NetworkObject>();
-                    if (netObj != null && netObj.IsSpawned) netObj.Despawn(destroy: true);
-                    else UnityEngine.Object.Destroy(b.gameObject);
-                }
+                foreach (var b in UnityEngine.Object.FindObjectsOfType<BeaconObject>())
+                    Despawn(b);
             }
             catch (Exception e)
             {

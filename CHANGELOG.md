@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.16.0
+- Beacon: auto-store when the ship leaves the moon (no orphaned beacon left behind).
+- Beacon: shows on the ship radar/monitor as a selectable target ("Defense Beacon"), like a radar
+  booster, so you can find/view it from the ship. Toggle: config Beacon/BeaconRadarTarget.
+- Beacon: new 'slots' upgrade — deploy more than one beacon at once (1 + level, up to 4). At the cap,
+  deploying moves the nearest beacon; 'ally beacon recall' / the recall key removes them all.
+- Beacon: deploy feedback (a quick scale "pop" + light flash).
+
 ## 0.15.1
 - Beacon recall: store the deployed beacon with a key (config Beacon/BeaconRecallKey, default N) or
   'ally beacon recall', so it no longer has to sit in the world. Added a small deploy/recall
