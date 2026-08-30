@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.4
+- Diagnostic for the "NetworkBehaviour index out of bounds" beacon error: log the beacon's
+  NetworkBehaviour count/order ([BeaconNB]) on each peer to find the host/client mismatch.
+
 ## 0.13.3
 - Fix multiplayer beacon: the host settles the beacon (reachedFloorTarget/targetFloorPosition)
   before spawning, but those fields aren't networked, so clients ran the falling animation from

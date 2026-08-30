@@ -55,6 +55,16 @@ namespace AlliedDefenses.Beacon
             hasHitGround = true;
             fallTime = 1f;
             targetFloorPosition = transform.localPosition;
+
+            // Diagnostic: list this object's NetworkBehaviours. If the host and a client print a
+            // different count/order, that's the "NetworkBehaviour index out of bounds" cause.
+            try
+            {
+                var nbs = GetComponentsInChildren<Unity.Netcode.NetworkBehaviour>(true);
+                var names = string.Join(", ", System.Array.ConvertAll(nbs, b => b.GetType().Name));
+                Plugin.Log.LogInfo($"[BeaconNB] IsServer={IsServer} count={nbs.Length} -> {names}");
+            }
+            catch { }
         }
 
         private void OnEnable() => Register();
