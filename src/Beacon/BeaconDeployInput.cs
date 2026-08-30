@@ -13,8 +13,10 @@ namespace AlliedDefenses.Beacon
     /// </summary>
     public class BeaconDeployInput : MonoBehaviour
     {
-        private Key _key = Key.B;
+        private Key _deployKey = Key.B;
+        private Key _recallKey = Key.N;
         private bool _resolved;
+        private float _cooldownUntil;
 
         private void Update()
         {
@@ -25,12 +27,15 @@ namespace AlliedDefenses.Beacon
 
             if (!_resolved)
             {
-                var name = (ModConfig.BeaconDeployKey.Value ?? "B").Trim();
-                if (!System.Enum.TryParse(name, ignoreCase: true, out _key)) _key = Key.B;
+                _deployKey = ParseKey(ModConfig.BeaconDeployKey.Value, Key.B);
+                _recallKey = ParseKey(ModConfig.BeaconRecallKey.Value, Key.N);
                 _resolved = true;
             }
 
-            if (!kb[_key].wasPressedThisFrame) return;
+            bool deploy = kb[_deployKey].wasPressedThisFrame;
+            bool recall = kb[_recallKey].wasPressedThisFrame;
+            if (!deploy && !recall) return;
+            if (Time.unscaledTime < _cooldownUntil) return;
 
             var sor = StartOfRound.Instance;
             var p = sor != null ? sor.localPlayerController : null;
@@ -43,9 +48,21 @@ namespace AlliedDefenses.Beacon
                 return;
             }
 
-            HijackNetworker.Active?.RequestDeploy(p.transform.position);
-            Tip("Defense Beacon deployed here.");
+            _cooldownUntil = Time.unscaledTime + 0.4f;
+            if (recall)
+            {
+                HijackNetworker.Active?.RequestRecall();
+                Tip("Defense Beacon recalled (stored).");
+            }
+            else
+            {
+                HijackNetworker.Active?.RequestDeploy(p.transform.position);
+                Tip("Defense Beacon deployed here.");
+            }
         }
+
+        private static Key ParseKey(string name, Key fallback) =>
+            System.Enum.TryParse((name ?? "").Trim(), ignoreCase: true, out Key k) ? k : fallback;
 
         private static void Tip(string body)
         {

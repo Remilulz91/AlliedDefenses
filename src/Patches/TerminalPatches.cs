@@ -60,6 +60,9 @@ namespace AlliedDefenses.Patches
                 message = UpgradeManager.ListText(ShipCredits.Get(__instance));
             else if (arg.StartsWith("upgrade ", StringComparison.OrdinalIgnoreCase))
                 message = HandleUpgrade(__instance, arg.Substring("upgrade ".Length).Trim());
+            else if (arg.Equals("beacon recall", StringComparison.OrdinalIgnoreCase) ||
+                     arg.Equals("beacon store", StringComparison.OrdinalIgnoreCase))
+                message = HandleBeaconRecall();
             else if (arg.Equals("beacon", StringComparison.OrdinalIgnoreCase))
                 message = HandleBeacon(__instance);
             else if (TryMatchGroup(arg, out string typeId))
@@ -103,7 +106,14 @@ namespace AlliedDefenses.Patches
             return msg;
         }
 
-        /// <summary>Handles "ally beacon": buy the beacon once, or re-deliver a missing one for free.</summary>
+        /// <summary>Handles "ally beacon recall": remove the deployed beacon from the world.</summary>
+        private static string HandleBeaconRecall()
+        {
+            Networking.HijackNetworker.Active?.RequestRecall();
+            return "Defense Beacon recalled (if one was deployed).";
+        }
+
+        /// <summary>Handles "ally beacon": buy the beacon once (deploy it with the deploy key).</summary>
         private static string HandleBeacon(Terminal terminal)
         {
             var net = Networking.HijackNetworker.Active;

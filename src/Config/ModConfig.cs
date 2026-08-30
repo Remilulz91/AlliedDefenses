@@ -70,6 +70,9 @@ namespace AlliedDefenses.Config
         /// <summary>Key to deploy/move the owned beacon at your position (Input System key name).</summary>
         public static ConfigEntry<string> BeaconDeployKey = null!;
 
+        /// <summary>Key to recall (store) the deployed beacon (Input System key name).</summary>
+        public static ConfigEntry<string> BeaconRecallKey = null!;
+
         /// <summary>Whether upgrades are kept forever (Persistent) or reset on game over (PerSave).</summary>
         public static ConfigEntry<UpgradeSaveMode> UpgradePersistence = null!;
 
@@ -155,6 +158,11 @@ namespace AlliedDefenses.Config
                 "Beacon", "BeaconDeployKey", "B",
                 "Key to deploy (or move) your owned Defense Beacon at your current position. Uses " +
                 "Unity Input System key names (e.g. B, V, N, F, Numpad0). Press again to move it.");
+
+            BeaconRecallKey = cfg.Bind(
+                "Beacon", "BeaconRecallKey", "N",
+                "Key to recall (store) the deployed Defense Beacon so it no longer sits in the world. " +
+                "Uses Unity Input System key names. You can also type 'ally beacon recall' at the terminal.");
 
             ColorAlliedDefenses = cfg.Bind(
                 "Visuals", "ColorAlliedDefenses", true,

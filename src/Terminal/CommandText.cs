@@ -63,6 +63,7 @@ namespace AlliedDefenses.UI
             sb.AppendLine("  default) to drop it at your position - out in the field where there");
             sb.AppendLine("  are no turrets or mines. Press again to move it. It anchors the");
             sb.AppendLine("  counter-play auras below.");
+            sb.AppendLine($"  Recall it with [{ModConfig.BeaconRecallKey.Value}] or '{k} beacon recall'.");
             sb.AppendLine("");
             sb.AppendLine("UNKILLABLE ENEMIES (counter-play auras, near a defense OR beacon):");
             sb.AppendLine("  sanity     : calms your mind, so the Ghost Girl escalates less.");
@@ -148,6 +149,7 @@ namespace AlliedDefenses.UI
             sb.AppendLine($"  ([{ModConfig.BeaconDeployKey.Value}] par defaut) pour la poser a ta position, sur le terrain");
             sb.AppendLine("  la ou il n'y a ni tourelle ni mine. Reappuie pour la deplacer.");
             sb.AppendLine("  Elle ancre les auras de contre-jeu ci-dessous.");
+            sb.AppendLine($"  Range-la avec [{ModConfig.BeaconRecallKey.Value}] ou '{k} beacon recall'.");
             sb.AppendLine("");
             sb.AppendLine("ENNEMIS INCREVABLES (auras de contre-jeu, pres d'une defense/balise) :");
             sb.AppendLine("  sanity     : calme ton esprit, la Fille fantome t'escalade moins.");

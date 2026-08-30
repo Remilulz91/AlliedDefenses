@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.15.1
+- Beacon recall: store the deployed beacon with a key (config Beacon/BeaconRecallKey, default N) or
+  'ally beacon recall', so it no longer has to sit in the world. Added a small deploy/recall
+  cooldown to avoid double-triggers. (Any owner can deploy/move/recall; there's only ever one beacon
+  since deploying always removes the previous one first.)
+
 ## 0.15.0
 - Beacon redesign for reliable multiplayer. The old beacon was a runtime-built custom GrabbableObject
   (NetworkBehaviour); that networking was fragile and crashed clients (reparent exceptions,

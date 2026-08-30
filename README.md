@@ -167,6 +167,7 @@ Settings live in `BepInEx/config/Remilulz_91.AlliedDefenses.cfg` (created on fir
 - `BeaconRingOnMonitor` = `true` — also draw the radius ring on the ship monitor.
 - `BeaconRingColorHex` = `FF2DD0` — ring colour (magenta), a colour the map doesn't use.
 - `BeaconDeployKey` = `B` — key to deploy/move the beacon at your position (Input System key name).
+- `BeaconRecallKey` = `N` — key to recall/store the deployed beacon (or `ally beacon recall`).
 
 **[Visuals]**
 - `ColorAlliedDefenses` = `true` — tint allied defenses (laser/light + radar code).
