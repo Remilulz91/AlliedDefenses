@@ -78,10 +78,10 @@ namespace AlliedDefenses.Patches
             {
                 string r = UpgradeManager.Reset();
                 // Mirror the reset (all levels now 0) to the whole lobby.
-                var net = Networking.HijackNetworker.Active;
-                if (net != null)
+                var resetNet = Networking.HijackNetworker.Active;
+                if (resetNet != null)
                     foreach (var (id, level) in UpgradeManager.AllRuntimeLevels())
-                        net.ShareUpgradeLevel(id, level);
+                        resetNet.ShareUpgradeLevel(id, level);
                 return r;
             }
 
