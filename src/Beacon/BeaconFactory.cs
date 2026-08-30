@@ -151,6 +151,11 @@ namespace AlliedDefenses.Beacon
             // ---- network identity ----
             var netObj = root.AddComponent<NetworkObject>();
             AssignStableHash(netObj, "AlliedDefenses.DefenseBeacon");
+            // CRITICAL for grabbable items: the game reparents the item to the player's hand via
+            // its own GrabObjectClientRpc. If NetworkObject also auto-syncs the parent, clients throw
+            // "Only the server can reparent NetworkObjects" the moment it's grabbed, which then breaks
+            // the object's NetworkBehaviour routing ("index out of bounds"). Let the game handle it.
+            netObj.AutoObjectParentSync = false;
 
             // ---- the grabbable behaviour ----
             var beacon = root.AddComponent<BeaconItem>();

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.13.5
+- Fix the multiplayer beacon: disabled NetworkObject.AutoObjectParentSync on the beacon prefab.
+  The game reparents a grabbed item to the player's hand via its own GrabObjectClientRpc; with
+  auto parent-sync on, clients threw "Only the server can reparent NetworkObjects" (and then
+  cascading "NetworkBehaviour index out of bounds"), which broke the beacon on clients. The game
+  now handles the parenting alone.
+
 ## 0.13.4
 - Diagnostic for the "NetworkBehaviour index out of bounds" beacon error: log the beacon's
   NetworkBehaviour count/order ([BeaconNB]) on each peer to find the host/client mismatch.
