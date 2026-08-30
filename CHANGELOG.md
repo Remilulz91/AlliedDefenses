@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.3
+- Fix multiplayer beacon: the host settles the beacon (reachedFloorTarget/targetFloorPosition)
+  before spawning, but those fields aren't networked, so clients ran the falling animation from
+  unset values (a Unity placement/FallWithCurve error, and the lamp not showing right). Clients now
+  mark the replicated beacon as already settled at its spawn position in OnNetworkSpawn.
+
 ## 0.13.2
 - Temporary diagnostics for the multiplayer beacon issue: log the beacon network-prefab hash on
   each peer, and log BeaconItem.OnNetworkSpawn, to see whether the beacon replicates to clients.

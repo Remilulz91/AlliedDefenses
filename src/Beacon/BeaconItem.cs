@@ -45,9 +45,16 @@ namespace AlliedDefenses.Beacon
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
-            // Diagnostic: proves the beacon replicated to this peer. If a CLIENT never logs this
-            // (but the host does), the prefab isn't spawning on the client (hash/registration).
-            Plugin.Log.LogInfo($"BeaconItem: OnNetworkSpawn (IsServer={IsServer}, IsClient={IsClient}).");
+
+            // The host settles the beacon (reachedFloorTarget etc.) BEFORE spawning, but those
+            // fall-state fields are local and NOT networked. On a client the replicated copy would
+            // otherwise run the falling animation from unset values -> a Unity "placement" /
+            // FallWithCurve error and the lamp not appearing where it should. The initial transform
+            // IS replicated, so we just mark this copy as already settled at its spawn position.
+            reachedFloorTarget = true;
+            hasHitGround = true;
+            fallTime = 1f;
+            targetFloorPosition = transform.localPosition;
         }
 
         private void OnEnable() => Register();
