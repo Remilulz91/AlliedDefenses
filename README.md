@@ -187,6 +187,8 @@ Make sure **every player in the lobby** has the mod, same version.
 
 © 2026 **Remilulz_91**. All rights reserved.
 
-You may download, play, and contribute to this mod (issues, pull requests). You may **not**
-claim authorship/ownership of it or its code, or redistribute it as your own work, without the
-author's permission. The mod remains credited to and owned by Remilulz_91.
+You may download and play this mod, and **report bugs or problems via GitHub issues** (tell me
+where the problem is and I fix it myself). Code contributions are **not** accepted — pull requests
+are disabled on the repository. You may **not** claim authorship/ownership of it or its code, submit
+or merge code changes, or redistribute it as your own work, without the author's permission. The
+mod remains credited to and owned by Remilulz_91.
