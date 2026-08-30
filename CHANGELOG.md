@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.2
+- Temporary diagnostics for the multiplayer beacon issue: log the beacon network-prefab hash on
+  each peer, and log BeaconItem.OnNetworkSpawn, to see whether the beacon replicates to clients.
+
+## 0.13.1
+- Fix: 'ally upgrade reset' set the beacon level to 0 but left the physical beacon in the world.
+  The host now despawns all beacons (network-wide) when beacon ownership is removed.
+
 ## 0.13.0
 - Localization: the terminal help text (ally / ally help / ally config) is now available in English
   or French. New config 'General/Language' (default English). Dynamic upgrade list and buy messages

@@ -145,8 +145,11 @@ namespace AlliedDefenses.Networking
         /// <summary>Host-side side effects of a level arriving (e.g. deliver the beacon it unlocks).</summary>
         private static void OnHostLevelSet(string id, int level)
         {
-            if (id == "beacon" && level > 0)
+            if (id != "beacon") return;
+            if (level > 0)
                 Beacon.BeaconManager.SpawnIfMissing(); // a client bought the beacon -> host delivers it
+            else
+                Beacon.BeaconManager.DespawnAll();     // ownership removed (reset) -> remove the lamp
         }
     }
 }

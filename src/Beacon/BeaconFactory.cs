@@ -198,6 +198,7 @@ namespace AlliedDefenses.Beacon
                 return;
             }
             field.SetValue(netObj, hash);
+            Plugin.Log.LogInfo($"BeaconFactory: beacon network prefab hash = {hash} (must match host & client).");
         }
     }
 }

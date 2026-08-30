@@ -70,6 +70,33 @@ namespace AlliedDefenses.Beacon
         /// <summary>True if a beacon currently exists anywhere (host authority check).</summary>
         private static bool BeaconExists() => UnityEngine.Object.FindObjectOfType<BeaconItem>() != null;
 
+        /// <summary>
+        /// Host despawns every beacon in the world (network-wide). Called when beacon ownership is
+        /// removed (e.g. 'ally upgrade reset'), so the physical lamp doesn't linger after a reset.
+        /// </summary>
+        public static void DespawnAll()
+        {
+            try
+            {
+                var nm = NetworkManager.Singleton;
+                if (nm == null || !(nm.IsHost || nm.IsServer)) return; // only the host despawns
+
+                var beacons = UnityEngine.Object.FindObjectsOfType<BeaconItem>();
+                foreach (var b in beacons)
+                {
+                    var netObj = b.GetComponent<NetworkObject>();
+                    if (netObj != null && netObj.IsSpawned) netObj.Despawn(destroy: true);
+                    else UnityEngine.Object.Destroy(b.gameObject);
+                }
+                if (beacons.Length > 0)
+                    Plugin.Log.LogInfo($"BeaconManager: despawned {beacons.Length} beacon(s) (ownership reset).");
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogError($"BeaconManager: despawn failed: {e}");
+            }
+        }
+
         /// <summary>Host spawns one beacon in the ship if none exists. Returns true if it spawned one.</summary>
         public static bool SpawnIfMissing()
         {

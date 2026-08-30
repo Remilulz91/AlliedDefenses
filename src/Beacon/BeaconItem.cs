@@ -42,6 +42,14 @@ namespace AlliedDefenses.Beacon
             SetupRing();
         }
 
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+            // Diagnostic: proves the beacon replicated to this peer. If a CLIENT never logs this
+            // (but the host does), the prefab isn't spawning on the client (hash/registration).
+            Plugin.Log.LogInfo($"BeaconItem: OnNetworkSpawn (IsServer={IsServer}, IsClient={IsClient}).");
+        }
+
         private void OnEnable() => Register();
 
         private void Register()
