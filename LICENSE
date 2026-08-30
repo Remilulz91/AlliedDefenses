@@ -1,27 +1,32 @@
-AlliedDefenses — Custom License
-Copyright (c) 2026 Remilulz_91. All rights reserved.
+AlliedDefenses — All Rights Reserved
+Copyright (c) 2026 Remilulz_91
 
-This software ("the mod") and its source code are the property of their author,
-Remilulz_91.
+This software (the "Mod"), including its source code, assets, and documentation,
+is the property of Remilulz_91. All rights are reserved.
 
-Permission is granted, free of charge, to any person obtaining a copy of this mod:
+PERMITTED
+- You may download and use the Mod to play Lethal Company.
+- You may report bugs or problems by opening an issue on the official
+  GitHub repository.
 
-1. To download, install, and use the mod for personal play.
-2. To contribute to the mod's development — for example by reporting issues,
-   submitting pull requests, or forking the repository for the purpose of
-   proposing changes back to the original project.
+NOT PERMITTED without the prior written permission of the author
+- Redistributing the Mod or any part of it, in original or modified form,
+  including re-uploading it to Thunderstore or any other platform.
+- Publishing modified versions, forks distributed as releases, or derivative
+  works.
+- Submitting or merging code changes (pull requests are disabled on the
+  repository; code contributions are not accepted).
+- Claiming authorship or ownership of the Mod or its code.
+- Using the Mod's code or assets in another project.
 
-The following are NOT permitted without the prior written permission of the author:
+The Mod remains credited to and owned by Remilulz_91. Reporting a bug or issue
+does not transfer any rights and does not create any obligation on the author.
 
-1. Claiming authorship or ownership of the mod or any part of its source code.
-2. Redistributing the mod, or any modified version of it, as your own work or
-   under a different author name.
-3. Removing or altering this copyright notice or the author attribution.
+THE MOD IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE MOD OR THE USE OR OTHER DEALINGS IN THE MOD.
 
-The mod remains credited to and owned by Remilulz_91 at all times.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+To request permission for anything not permitted above, contact the author
+through the GitHub repository.
