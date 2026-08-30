@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.16.1
+- Cleanup: removed the old one-time turret prefab-tree diagnostic dump (no longer needed).
+
 ## 0.16.0
 - Beacon: auto-store when the ship leaves the moon (no orphaned beacon left behind).
 - Beacon: shows on the ship radar/monitor as a selectable target ("Defense Beacon"), like a radar

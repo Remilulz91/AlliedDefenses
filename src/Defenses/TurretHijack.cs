@@ -64,12 +64,10 @@ namespace AlliedDefenses.Defenses
 
                 TurretVisuals.SetAllied(turret, true);  // green laser/light cue
 
-                // Remember the current barrel direction as the centre of the idle scan,
-                // and log the turret structure once (diagnostic).
+                // Remember the current barrel direction as the centre of the idle scan.
                 if (turret.aimPoint != null && turret.centerPoint != null)
                     _baseDir[turret.GetInstanceID()] =
                         (turret.aimPoint.position - turret.centerPoint.position).normalized;
-                LogHierarchyOnce(turret);
             }
             else
             {
@@ -188,54 +186,6 @@ namespace AlliedDefenses.Defenses
             AimRodAt(rod, pivot.position, muzzle.position, pivot.position + des * 5f, 60f);
         }
 
-        private static bool _diagLogged;
-
-        /// <summary>
-        /// One-time diagnostic (first hijacked turret only): dumps the whole turret
-        /// PREFAB tree (starting a couple of parents up) and, crucially, every Transform
-        /// field on the Turret component via reflection — that tells us exactly which
-        /// node the game rotates so we can drive the same one.
-        /// </summary>
-        private static void LogHierarchyOnce(Turret turret)
-        {
-            if (_diagLogged) return;
-            _diagLogged = true;
-
-            var sb = new System.Text.StringBuilder();
-            sb.AppendLine("[Turret diagnostic] PREFAB TREE (R=Renderer L=Light Ln=LineRenderer T=Turret):");
-
-            // Start a couple of parents up to capture the prefab root (the mesh is a
-            // sibling of TurretScript), but cap depth/count so we never dump the whole level.
-            Transform start = turret.transform;
-            for (int i = 0; i < 2 && start.parent != null; i++) start = start.parent;
-            int count = 0;
-            DumpTree(start, 0, sb, ref count);
-
-            sb.AppendLine("[Turret diagnostic] Transform fields on Turret:");
-            foreach (var f in typeof(Turret).GetFields(
-                         System.Reflection.BindingFlags.Instance |
-                         System.Reflection.BindingFlags.Public |
-                         System.Reflection.BindingFlags.NonPublic))
-            {
-                if (!typeof(Transform).IsAssignableFrom(f.FieldType)) continue;
-                var val = f.GetValue(turret) as Transform;
-                sb.AppendLine($"  {f.Name} -> {(val != null ? val.name : "null")}");
-            }
-
-            Plugin.Log.LogInfo(sb.ToString());
-        }
-
-        private static void DumpTree(Transform t, int depth, System.Text.StringBuilder sb, ref int count)
-        {
-            if (count++ > 80 || depth > 5) return; // safety caps
-            string tags = "";
-            if (t.GetComponent<Renderer>() != null) tags += "R";
-            if (t.GetComponent<Light>() != null) tags += "L";
-            if (t.GetComponent<LineRenderer>() != null) tags += "Ln";
-            if (t.GetComponent<Turret>() != null) tags += "T";
-            sb.AppendLine($"{new string(' ', depth * 2)}{t.name} [{tags}]");
-            foreach (Transform child in t) DumpTree(child, depth + 1, sb, ref count);
-        }
 
         /// <summary>
         /// Draw the allied beam from the barrel along its forward axis, stopping at the

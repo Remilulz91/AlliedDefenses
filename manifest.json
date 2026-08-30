@@ -1,7 +1,7 @@
 {
   "name": "AlliedDefenses",
   "author": "Remilulz_91",
-  "version_number": "0.16.0",
+  "version_number": "0.16.1",
   "website_url": "https://github.com/Remilulz91/AlliedDefenses",
   "description": "Hijack turrets, mines & spikes from the terminal to fight the monsters for you. Team-wide upgrades, a deployable Defense Beacon, and counter-play vs 7 UNKILLABLE enemies. Co-op synced. ALL players need the mod (same version).",
   "dependencies": [
