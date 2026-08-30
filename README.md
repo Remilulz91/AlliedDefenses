@@ -14,8 +14,9 @@ Author: **Remilulz_91** — © 2026 Remilulz_91, all rights reserved.
   turn on the monsters instead of you.
 - 💰 **Team-wide upgrades** — bought once from shared credits, everyone benefits: turret damage,
   fire rate, range, hijack duration, mine radius, and the counter-play auras below.
-- 📡 **Deployable Defense Beacon** — a carryable two-handed prop you set down anywhere to project
-  your protection out in the field, with a radius ring shown in-world **and on the ship monitor**.
+- 📡 **Deployable Defense Beacon** — buy it once, then drop it at your position with a key,
+  anywhere in the field (where there are no turrets/mines), to project your protection. Radius ring
+  shown in-world **and on the ship monitor**.
 - 🛡️ **Counter-play vs 7 UNKILLABLE enemies** — hide from / disable the things you can't shoot:
   Ghost Girl, Coil-Head, Earth Leviathan (sand worm), Eyeless Dogs, Barber, Hygrodere, Circuit Bees.
 - 🤝 **Co-op synced** — upgrade levels and the beacon are shared across the lobby, including
@@ -71,7 +72,6 @@ barber       Lv 0/5   (off (Barber))           next: 170 cr
 slime        Lv 0/5   (off (Hygrodere))        next: 140 cr
 bees         Lv 0/5   (off (Circuit Bees))     next: 120 cr
 beacon       Lv 0/1   (not owned)              next: 175 cr
-haul         Lv 0/5   (47 lb carry)            next: 90 cr
 
 Buy with 'ally upgrade <id>'.
 ```
@@ -99,7 +99,6 @@ The cost of each level **scales up** the more levels you already own.
 | `slime` | Hygrodere (slime) counter-play: while near an allied defense/beacon the blob can't target you, so it wanders off instead of following (radius grows per level) | 5 | 140 |
 | `bees` | Circuit Bees counter-play: they still notice you near their hive, but while you're in the radius they drop the chase and return to the hive (weaker: disengage, not full stealth) | 5 | 120 |
 | `beacon` | Unlocks the Defense Beacon (this is what `ally beacon` buys) | 1 | 175 |
-| `haul` | Lowers the beacon's carry weight, so you move faster while carrying it (≈47 lb → ≈16 lb) | 5 | 90 |
 
 Level 0 means **off** for the counter-play auras (`sanity`, `neutralize`, `seismic`, `muffle`,
 `barber`, `slime`, `bees`) — buy at least level 1 to enable them.
@@ -111,17 +110,18 @@ Level 0 means **off** for the counter-play auras (`sanity`, `neutralize`, `seism
 Outside, around the ship, there are no turrets or mines — so the counter-play auras had nothing
 to anchor to. The **Defense Beacon** fixes that.
 
-- Buy it once with `ally beacon` (costs `BeaconPrice`, default 175 credits). It's delivered to the
-  ship. Bought once, never re-paid; if it's ever lost, `ally beacon` re-delivers one for free.
-- It's a **two-handed** prop (a fancy lamp): carry it out into the field (you can't hold anything
-  else and you move slower), and **set it down** wherever you need cover.
+- Buy it once with `ally beacon` (costs `BeaconPrice`, default 175 credits). Bought once, never
+  re-paid.
+- **Deploy it** by pressing the deploy key (`BeaconDeployKey`, default **B**) — it drops at your
+  position, anywhere in the field. Press again to **move it** to your new position. `ally upgrade
+  reset` removes it.
 - Wherever it sits, it acts as an **allied-defense anchor**, so the `sanity` / `seismic` / `muffle`
-  auras work around it — out by the sand worm, near the dogs, wherever.
+  / `barber` / `slime` / `bees` auras work around it — out by the sand worm, near the dogs, wherever.
 - A **magenta ring** on the ground shows the current aura radius. It also appears on the **ship
   monitor** (radar map) when the camera is looking near the beacon.
-- The `haul` upgrade makes it lighter to carry.
 
-The beacon is **inert on purpose** — it hides/deters, it does not shoot.
+The beacon is **inert on purpose** — it hides/deters, it does not shoot. It is a simple deployed
+object (not a carried item), which keeps it rock-solid in multiplayer.
 
 ---
 
@@ -166,6 +166,7 @@ Settings live in `BepInEx/config/Remilulz_91.AlliedDefenses.cfg` (created on fir
 - `BeaconPrice` = `175` — one-time cost.
 - `BeaconRingOnMonitor` = `true` — also draw the radius ring on the ship monitor.
 - `BeaconRingColorHex` = `FF2DD0` — ring colour (magenta), a colour the map doesn't use.
+- `BeaconDeployKey` = `B` — key to deploy/move the beacon at your position (Input System key name).
 
 **[Visuals]**
 - `ColorAlliedDefenses` = `true` — tint allied defenses (laser/light + radar code).

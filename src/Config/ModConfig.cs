@@ -67,6 +67,9 @@ namespace AlliedDefenses.Config
         /// <summary>Colour of the beacon radius ring (world + monitor), HTML hex without '#'.</summary>
         public static ConfigEntry<string> BeaconRingColorHex = null!;
 
+        /// <summary>Key to deploy/move the owned beacon at your position (Input System key name).</summary>
+        public static ConfigEntry<string> BeaconDeployKey = null!;
+
         /// <summary>Whether upgrades are kept forever (Persistent) or reset on game over (PerSave).</summary>
         public static ConfigEntry<UpgradeSaveMode> UpgradePersistence = null!;
 
@@ -147,6 +150,11 @@ namespace AlliedDefenses.Config
                 "Colour of the beacon radius ring (both in-world and on the monitor), HTML hex " +
                 "without '#'. Default FF2DD0 (magenta/pink) - deliberately a colour the game's map " +
                 "does not use (it is green terrain + blue lines), so the ring can't be mistaken for them.");
+
+            BeaconDeployKey = cfg.Bind(
+                "Beacon", "BeaconDeployKey", "B",
+                "Key to deploy (or move) your owned Defense Beacon at your current position. Uses " +
+                "Unity Input System key names (e.g. B, V, N, F, Numpad0). Press again to move it.");
 
             ColorAlliedDefenses = cfg.Bind(
                 "Visuals", "ColorAlliedDefenses", true,

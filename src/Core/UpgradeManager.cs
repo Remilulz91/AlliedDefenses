@@ -153,14 +153,9 @@ namespace AlliedDefenses.Core
             return r;
         }
 
-        // --- Defense Beacon ownership + "haul" (carry weight). The beacon is bought once via the
-        //     'beacon' pseudo-upgrade (max level 1), so all the persistence / reset plumbing is
-        //     shared. 'haul' lowers the beacon's weight so you carry it faster (floored so it is
-        //     never weightless). ---
+        // --- Defense Beacon ownership. Bought once via the 'beacon' pseudo-upgrade (max level 1),
+        //     so all the persistence / reset plumbing is shared. ---
         public static bool BeaconOwned => LevelOf("beacon") > 0;
-        public static float BeaconWeight() => BeaconWeightFor(LevelOf("haul"));
-        private static float BeaconWeightFor(int lvl) => Mathf.Max(1.15f, 1.45f - lvl * 0.06f); // ~47lb -> ~16lb
-        private static int WeightToLb(float w) => Mathf.RoundToInt((w - 1f) * 105f);
 
         // ----------------------------------------------------------------
 
@@ -211,8 +206,6 @@ namespace AlliedDefenses.Core
                 Add(cfg, "beacon", "Defense Beacon", maxLevel: 1, baseCost: ModConfig.BeaconPrice.Value, growth: 1f,
                     describe: lvl => lvl == 0 ? "not owned" : "owned (carry with two hands)");
 
-                Add(cfg, "haul", "Beacon haul", maxLevel: 5, baseCost: 90, growth: 1.4f,
-                    describe: lvl => $"{WeightToLb(BeaconWeightFor(lvl))} lb carry");
             }
         }
 

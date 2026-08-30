@@ -7,34 +7,19 @@ using AlliedDefenses.Config;
 namespace AlliedDefenses.Beacon
 {
     /// <summary>
-    /// Builds the Defense Beacon prefab ENTIRELY AT RUNTIME (no asset bundle): a small glowing
-    /// pylon made from Unity primitives, wired up as a grabbable networked item.
+    /// Builds the deployed Defense Beacon prefab at runtime: a small glowing pylon (primitives) on a
+    /// GameObject that carries ONLY a NetworkObject (for reliable host->client replication) and a
+    /// plain <see cref="BeaconObject"/> MonoBehaviour (look + ring + aura registration).
     ///
-    /// Pieces required for a working Lethal Company grabbable:
-    ///   - a NetworkObject with a stable GlobalObjectIdHash (so host/clients agree on the prefab),
-    ///   - a Rigidbody + a non-trigger collider on layer 8 and tagged "PhysicsProp" (both are
-    ///     mandatory: PlayerControllerB.BeginGrabObject rejects anything else),
-    ///   - a MeshRenderer (mainObjectRenderer) and the BeaconItem : GrabbableObject component,
-    ///   - an Item ScriptableObject describing weight / two-handedness, assigned to itemProperties.
-    ///
-    /// This is the trickiest part of the mod and CANNOT be verified without running the game, so
-    /// every step logs and the caller guards. If grabbing/'two-handed' misbehaves in-game, the
-    /// BepInEx log from here tells us which piece to adjust.
+    /// Deliberately NOT a GrabbableObject / NetworkBehaviour: a bare NetworkObject replicates cleanly,
+    /// while a runtime-built custom grabbable did not (reparent exceptions, behaviour-index errors,
+    /// client crashes). The beacon is placed by the host and moved by re-spawning, not carried.
     /// </summary>
     public static class BeaconFactory
     {
         public static GameObject? Prefab { get; private set; }
-        public static Item? ItemDef { get; private set; }
 
-        private const string BeaconName = "Defense Beacon";
-
-        // Lethal Company's grabbable-item layer is 6 ("Props"). It is in interactableObjectsMask
-        // (0x40000340) so the interact ray hits it, and it is NOT one of the layers (8 = ship
-        // geometry, 30) that the grab code treats as "not a grabbable" before it ever checks the
-        // "PhysicsProp" tag. Putting the beacon on layer 8 (ship geometry) was why it never grabbed.
-        private const int GrabbableLayer = 6;
-
-        /// <summary>Create the Item scriptable + prefab and register it as a network prefab. Idempotent.</summary>
+        /// <summary>Create the prefab and register it as a network prefab. Idempotent.</summary>
         public static void EnsureBuilt()
         {
             if (Prefab != null) return;
@@ -46,42 +31,9 @@ namespace AlliedDefenses.Beacon
                     return;
                 }
 
-                var item = ScriptableObject.CreateInstance<Item>();
-                item.itemName = BeaconName;
-                item.twoHanded = true;
-                item.twoHandedAnimation = true;
-                item.canBeGrabbedBeforeGameStart = true;   // allowed to sit in the ship pre-landing
-                item.itemSpawnsOnGround = true;
-                item.isScrap = false;
-                item.creditsWorth = 0;
-                item.weight = Core.UpgradeManager.BeaconWeight(); // heavy; the 'haul' upgrade lowers it
-                item.requiresBattery = false;
-                item.automaticallySetUsingPower = false;
-                item.saveItemVariable = false;
-                item.allowDroppingAheadOfPlayer = true;
-                item.floorYOffset = 0;
-                item.verticalOffset = 0.5f; // pivot rests 0.5 m above the floor (see BuildPrefab)
-                item.rotationOffset = Vector3.zero;
-                // Held offset relative to the player's item holder. The model is centred on its
-                // pivot, so a small forward + slight-up offset makes it sit naturally in view
-                // instead of being shoved off the bottom-right of the screen.
-                item.positionOffset = new Vector3(0f, 0.1f, 0.25f);
-                item.meshVariants = Array.Empty<Mesh>();
-                item.materialVariants = Array.Empty<Material>();
-                item.toolTips = Array.Empty<string>();
-                ItemDef = item;
-
-                var root = BuildPrefab(item);
-                item.spawnPrefab = root;
-                Prefab = root;
-
-                // CRITICAL: keep the template INACTIVE. If it stays active its GrabbableObject.Update
-                // runs every frame even in the menu (no StartOfRound / no floor), which throws a
-                // NullReference in FallWithCurve on a loop. Spawned copies are re-activated in
-                // BeaconManager.SpawnIfMissing before NetworkObject.Spawn.
-                root.SetActive(false);
-
-                NetworkManager.Singleton.AddNetworkPrefab(root);
+                Prefab = BuildPrefab();
+                Prefab.SetActive(false); // template stays inactive; spawned copies are activated
+                NetworkManager.Singleton.AddNetworkPrefab(Prefab);
                 Plugin.Log.LogInfo("BeaconFactory: Defense Beacon prefab built and registered.");
             }
             catch (Exception e)
@@ -90,27 +42,19 @@ namespace AlliedDefenses.Beacon
             }
         }
 
-        private static GameObject BuildPrefab(Item item)
+        private static GameObject BuildPrefab()
         {
-            // Root object: physics body + network identity + the grabbable behaviour.
             var root = new GameObject("DefenseBeacon");
             UnityEngine.Object.DontDestroyOnLoad(root);
             root.hideFlags = HideFlags.HideAndDontSave;
-            // Grabbing needs the collider's GameObject on layer 6 ("Props") AND tagged "PhysicsProp".
-            root.layer = GrabbableLayer;
-            try { root.tag = "PhysicsProp"; }
-            catch { Plugin.Log.LogWarning("BeaconFactory: 'PhysicsProp' tag missing; beacon may not be grabbable."); }
 
-            // ---- visual: a glowing pylon (cylinder body + emissive top) ----
-            // NOTE: everything is centred on the ROOT pivot (localY 0), so the pivot sits in the
-            // MIDDLE of the beacon, ~0.5 m off the floor when resting. This is what makes the game's
-            // line-of-sight grab check succeed (a floor-level pivot gets blocked by the floor).
+            // ---- visual: a glowing pylon (cylinder body + emissive lamp), centred on the pivot ----
             var body = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             body.name = "BeaconBody";
             StripCollider(body);
             body.transform.SetParent(root.transform, false);
-            body.transform.localScale = new Vector3(0.35f, 0.5f, 0.35f); // ~1m tall, spans -0.5..+0.5
-            body.transform.localPosition = new Vector3(0f, 0f, 0f);
+            body.transform.localScale = new Vector3(0.35f, 0.5f, 0.35f);
+            body.transform.localPosition = Vector3.zero;
 
             var top = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             top.name = "BeaconLamp";
@@ -124,47 +68,21 @@ namespace AlliedDefenses.Beacon
             TintEmissive(mainRenderer, ModConfig.AlliedColor, 0.12f);
             TintEmissive(lampRenderer, ModConfig.AlliedColor, 0.7f);
 
-            // A soft light so the beacon reads at a glance in the dark (kept dim so it doesn't
-            // wash the whole room green like the first build did).
             var lightGo = new GameObject("BeaconLight");
             lightGo.transform.SetParent(root.transform, false);
-            lightGo.transform.localPosition = new Vector3(0f, 0.1f, 0f); // near the pivot / model centre
+            lightGo.transform.localPosition = new Vector3(0f, 0.1f, 0f);
             var light = lightGo.AddComponent<Light>();
             light.type = LightType.Point;
             light.color = ModConfig.AlliedColor;
             light.range = 4f;
             light.intensity = 0.6f;
 
-            // ---- physics/interaction collider ----
-            // One non-trigger box: it rests on the floor AND is what the grab ray hits. It lives on
-            // the root, so the ray sees root.layer (8) and root.tag ("PhysicsProp").
-            var solid = root.AddComponent<BoxCollider>();
-            solid.center = new Vector3(0f, 0f, 0f);       // centred on the pivot
-            solid.size = new Vector3(0.7f, 1.0f, 0.7f);   // spans -0.5..+0.5 in Y
-
-            var body3d = root.AddComponent<Rigidbody>();
-            body3d.mass = 1f;
-            body3d.isKinematic = true;       // GrabbableObject drives resting position itself
-            body3d.useGravity = false;
-            body3d.interpolation = RigidbodyInterpolation.Interpolate;
-
-            // ---- network identity ----
+            // ---- network identity (bare NetworkObject: replicates existence + spawn transform) ----
             var netObj = root.AddComponent<NetworkObject>();
             AssignStableHash(netObj, "AlliedDefenses.DefenseBeacon");
-            // CRITICAL for grabbable items: the game reparents the item to the player's hand via
-            // its own GrabObjectClientRpc. If NetworkObject also auto-syncs the parent, clients throw
-            // "Only the server can reparent NetworkObjects" the moment it's grabbed, which then breaks
-            // the object's NetworkBehaviour routing ("index out of bounds"). Let the game handle it.
-            netObj.AutoObjectParentSync = false;
 
-            // ---- the grabbable behaviour ----
-            var beacon = root.AddComponent<BeaconItem>();
-            beacon.itemProperties = item;
-            beacon.grabbable = true;
-            beacon.grabbableToEnemies = false;
-            beacon.mainObjectRenderer = mainRenderer;
-            beacon.propColliders = new Collider[] { solid };
-            beacon.useCooldown = 0f;
+            // ---- the (non-networked) behaviour: look, ring, aura registration ----
+            root.AddComponent<BeaconObject>();
 
             return root;
         }
@@ -180,7 +98,6 @@ namespace AlliedDefenses.Beacon
         private static void TintEmissive(Renderer r, Color color, float emission)
         {
             if (r == null) return;
-            // Instance material so we don't touch the shared primitive material.
             var mat = r.material;
             mat.color = color;
             try
@@ -188,7 +105,7 @@ namespace AlliedDefenses.Beacon
                 mat.EnableKeyword("_EMISSION");
                 mat.SetColor("_EmissionColor", color * emission);
             }
-            catch { /* shader without emission -> ignore */ }
+            catch { }
         }
 
         private static void AssignStableHash(NetworkObject netObj, string key)
@@ -203,7 +120,6 @@ namespace AlliedDefenses.Beacon
                 return;
             }
             field.SetValue(netObj, hash);
-            Plugin.Log.LogInfo($"BeaconFactory: beacon network prefab hash = {hash} (must match host & client).");
         }
     }
 }

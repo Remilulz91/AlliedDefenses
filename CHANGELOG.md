@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.15.0
+- Beacon redesign for reliable multiplayer. The old beacon was a runtime-built custom GrabbableObject
+  (NetworkBehaviour); that networking was fragile and crashed clients (reparent exceptions,
+  NetworkBehaviour index errors). The beacon is now a DEPLOY-IN-PLACE object: buy it once, then press
+  the deploy key (config Beacon/BeaconDeployKey, default B) to drop it at your position (press again
+  to move it). It's a bare NetworkObject + a plain MonoBehaviour, which replicates cleanly host->client.
+  Removed the two-handed carry and the 'haul' upgrade (no longer carried). Same auras, ring, and
+  magenta monitor ring. Removed the now-unused BeaconItem grabbable.
+
 ## 0.14.0
 - Fix multiplayer credits/purchases (host-authoritative). Only the host owns the terminal and can
   sync the shared credits, so a client buying locally desynced credits and hit "Only the owner can

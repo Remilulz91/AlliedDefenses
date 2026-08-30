@@ -1,6 +1,7 @@
 using System;
 using AlliedDefenses.Core;
 using Unity.Netcode;
+using UnityEngine;
 
 namespace AlliedDefenses.Networking
 {
@@ -185,14 +186,34 @@ namespace AlliedDefenses.Networking
                 Safe(() => ShareUpgradeLevelClientRpc(id, level));
         }
 
-        /// <summary>Host-side side effects of a level arriving (e.g. deliver the beacon it unlocks).</summary>
+        /// <summary>Host-side side effects of a level arriving. The beacon is deployed manually, so
+        /// we only need to remove it when ownership is reset to 0.</summary>
         private static void OnHostLevelSet(string id, int level)
         {
-            if (id != "beacon") return;
-            if (level > 0)
-                Beacon.BeaconManager.SpawnIfMissing(); // a client bought the beacon -> host delivers it
-            else
-                Beacon.BeaconManager.DespawnAll();     // ownership removed (reset) -> remove the lamp
+            if (id == "beacon" && level <= 0)
+                Beacon.BeaconManager.DespawnAll();
         }
+
+        // ---- beacon deploy / recall (host-authoritative) ----
+
+        /// <summary>Deploy (or move) the beacon at a world position. Host does it; a client asks.</summary>
+        public void RequestDeploy(Vector3 pos)
+        {
+            if (IsServer) Beacon.BeaconManager.DeployAt(pos);
+            else Safe(() => RequestDeployServerRpc(pos));
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RequestDeployServerRpc(Vector3 pos) => Beacon.BeaconManager.DeployAt(pos);
+
+        /// <summary>Recall (despawn) the deployed beacon.</summary>
+        public void RequestRecall()
+        {
+            if (IsServer) Beacon.BeaconManager.DespawnAll();
+            else Safe(() => RequestRecallServerRpc());
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RequestRecallServerRpc() => Beacon.BeaconManager.DespawnAll();
     }
 }

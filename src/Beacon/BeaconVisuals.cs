@@ -17,7 +17,7 @@ namespace AlliedDefenses.Beacon
         private static readonly string[] Preferred =
             { "fancy lamp", "lamp", "flask", "jar", "control pad", "cash register", "gift" };
 
-        public static void ApplyVanillaLook(GrabbableObject beacon)
+        public static void ApplyVanillaLook(Transform beaconRoot)
         {
             try
             {
@@ -28,14 +28,11 @@ namespace AlliedDefenses.Beacon
                 Item src = PickSource(list);
                 if (src == null) return;
 
-                if (src.itemIcon != null && beacon.itemProperties != null)
-                    beacon.itemProperties.itemIcon = src.itemIcon;
-
                 var srcMf = src.spawnPrefab != null ? src.spawnPrefab.GetComponentInChildren<MeshFilter>() : null;
                 if (srcMf == null || srcMf.sharedMesh == null) return;
                 var srcMr = srcMf.GetComponent<MeshRenderer>();
 
-                var bodyT = beacon.transform.Find("BeaconBody");
+                var bodyT = beaconRoot.Find("BeaconBody");
                 var mf = bodyT != null ? bodyT.GetComponent<MeshFilter>() : null;
                 var mr = bodyT != null ? bodyT.GetComponent<MeshRenderer>() : null;
                 if (mf == null) return;
@@ -56,10 +53,10 @@ namespace AlliedDefenses.Beacon
                 // the transform where the mesh's bounds-centre currently is in world space, then
                 // shift the body so that point lands exactly on the pivot.
                 Vector3 meshCenterWorld = bodyT.TransformPoint(b.center);
-                bodyT.position += beacon.transform.position - meshCenterWorld;
+                bodyT.position += beaconRoot.position - meshCenterWorld;
 
                 // Hide the primitive lamp sphere; keep the point light for the glow.
-                var lamp = beacon.transform.Find("BeaconLamp");
+                var lamp = beaconRoot.Find("BeaconLamp");
                 var lampMr = lamp != null ? lamp.GetComponent<MeshRenderer>() : null;
                 if (lampMr != null) lampMr.enabled = false;
             }

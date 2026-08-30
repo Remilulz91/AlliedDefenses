@@ -22,6 +22,7 @@ namespace AlliedDefenses.Core
             Object.DontDestroyOnLoad(go);
             go.hideFlags = HideFlags.HideAndDontSave;
             Instance = go.AddComponent<HijackTicker>();
+            go.AddComponent<Beacon.BeaconDeployInput>(); // watches the beacon deploy key
         }
 
         private void Update() => HijackManager.Tick();
