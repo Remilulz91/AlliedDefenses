@@ -17,6 +17,8 @@ Author: **Remilulz_91** — © 2026 Remilulz_91, all rights reserved.
 - 📡 **Deployable Defense Beacon** — buy it once, then drop it at your position with a key,
   anywhere in the field (where there are no turrets/mines), to project your protection. Radius ring
   shown in-world **and on the ship monitor**.
+- 🖥️ **Hack Tool** — buy it, then aim at a locked big door, turret, mine or spike trap and press a
+  key to trigger it — like typing its code at the terminal, but from inside the facility.
 - 🛡️ **Counter-play vs 7 UNKILLABLE enemies** — hide from / disable the things you can't shoot:
   Ghost Girl, Coil-Head, Earth Leviathan (sand worm), Eyeless Dogs, Barber, Hygrodere, Circuit Bees.
 - 🤝 **Co-op synced** — upgrade levels and the beacon are shared across the lobby, including
@@ -42,7 +44,8 @@ Type these at the ship computer. The keyword `ally` is configurable (see the con
 | `ally upgrades` | Show all **upgrades**, their level, effect and next cost, plus your credits and save mode (see below). |
 | `ally upgrade <id>` | **Buy the next level** of an upgrade with ship credits, e.g. `ally upgrade turretdamage`. |
 | `ally upgrade reset` | Reset **all** upgrades back to level 0. |
-| `ally beacon` | **Buy the Defense Beacon** (one-time), or re-deliver a lost one for free. |
+| `ally beacon` | **Buy the Defense Beacon** (one-time); deploy it with the deploy key. |
+| `ally hack` | **Buy the Hack Tool** (one-time); use it by aiming + the hack key. |
 | `ally help` | Explain how the mod works (also `ally info`). |
 | `ally config` | Show the current settings, read live from the config. |
 
@@ -127,6 +130,16 @@ object (not a carried item), which keeps it rock-solid in multiplayer.
 
 ---
 
+## Hack Tool
+
+Buy it once with `ally hack` (costs `HackToolPrice`, default 150). Then, from **inside the facility**,
+**aim** at a locked **big door**, **turret**, **mine** or **spike trap** within range (`HackRange`,
+default 6 m) and press the **hack key** (`HackKey`, default **H**) to trigger it — exactly like typing
+its code at the ship terminal (open the door / temporarily disable the turret), but on the spot. It
+runs the game's own terminal function via the host, so it's reliable in multiplayer.
+
+---
+
 ## Allied defenses (turrets, mines, spikes)
 
 - **Allied turret** — stops shooting players and fires on the nearest visible enemy in range.
@@ -171,6 +184,12 @@ Settings live in `BepInEx/config/Remilulz_91.AlliedDefenses.cfg` (created on fir
 - `BeaconDeployKey` = `B` — key to deploy/move the beacon at your position (Input System key name).
 - `BeaconRecallKey` = `N` — key to recall/store the deployed beacon (or `ally beacon recall`).
 - `BeaconRadarTarget` = `true` — show the beacon as a selectable target on the ship radar/monitor.
+
+**[HackTool]**
+- `EnableHackTool` = `true` — enable the Hack Tool.
+- `HackToolPrice` = `150` — one-time cost (`ally hack`).
+- `HackKey` = `H` — key to hack the object you're aiming at (Input System key name).
+- `HackRange` = `6` — max hack distance (m).
 
 **[Visuals]**
 - `ColorAlliedDefenses` = `true` — tint allied defenses (laser/light + radar code).

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.17.0
+- New HACK TOOL: buy it with 'ally hack', then aim at a locked big door, turret, mine or spike trap
+  and press the hack key (config HackTool/HackKey, default H) to trigger it - like typing its code at
+  the ship terminal, but from inside the facility. Range and price are configurable. Runs the game's
+  own CallFunctionFromTerminal via the host (reliable in multiplayer). Feature toggle
+  HackTool/EnableHackTool.
+
 ## 0.16.1
 - Cleanup: removed the old one-time turret prefab-tree diagnostic dump (no longer needed).
 

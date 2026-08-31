@@ -55,6 +55,18 @@ namespace AlliedDefenses.Config
         /// <summary>Enable the buy-with-credits upgrade system.</summary>
         public static ConfigEntry<bool> EnableUpgrades = null!;
 
+        /// <summary>Enable the Hack Tool (aim at a door/turret/mine + key to trigger it, like typing its code).</summary>
+        public static ConfigEntry<bool> EnableHackTool = null!;
+
+        /// <summary>One-time credit cost of the Hack Tool ability.</summary>
+        public static ConfigEntry<int> HackToolPrice = null!;
+
+        /// <summary>Key to use the Hack Tool on the object you're aiming at (Input System key name).</summary>
+        public static ConfigEntry<string> HackKey = null!;
+
+        /// <summary>Max distance (m) to hack the object you're aiming at.</summary>
+        public static ConfigEntry<float> HackRange = null!;
+
         /// <summary>Enable the carryable Defense Beacon (bought once from the terminal).</summary>
         public static ConfigEntry<bool> EnableBeacon = null!;
 
@@ -130,6 +142,24 @@ namespace AlliedDefenses.Config
             EnableUpgrades = cfg.Bind(
                 "Economy", "EnableUpgrades", true,
                 "Enable the buy-with-credits upgrade system (ally upgrades / ally upgrade <id>).");
+
+            EnableHackTool = cfg.Bind(
+                "HackTool", "EnableHackTool", true,
+                "Enable the Hack Tool: after buying it ('ally hack'), aim at a locked big door, turret, " +
+                "mine or spike trap and press the hack key to trigger it - like typing its code, but " +
+                "from inside the facility.");
+
+            HackToolPrice = cfg.Bind(
+                "HackTool", "HackToolPrice", 150,
+                "One-time credit cost of the Hack Tool ability (bought with 'ally hack').");
+
+            HackKey = cfg.Bind(
+                "HackTool", "HackKey", "H",
+                "Key to use the Hack Tool on the object you're aiming at. Unity Input System key names.");
+
+            HackRange = cfg.Bind(
+                "HackTool", "HackRange", 6f,
+                "Maximum distance (m) at which the Hack Tool can trigger the object you aim at.");
 
             UpgradePersistence = cfg.Bind(
                 "Economy", "UpgradePersistence", UpgradeSaveMode.Persistent,

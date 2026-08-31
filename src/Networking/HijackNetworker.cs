@@ -215,5 +215,28 @@ namespace AlliedDefenses.Networking
 
         [ServerRpc(RequireOwnership = false)]
         private void RequestRecallServerRpc() => Beacon.BeaconManager.DespawnAll();
+
+        // ---- Hack Tool: trigger a TerminalAccessibleObject (door/turret/mine) the player aims at ----
+        // Routed through the host so it works reliably from any client (the host runs the game's own
+        // CallFunctionFromTerminal, which fires the object's networked open/disable event).
+
+        public void RequestHack(TerminalAccessibleObject tao)
+        {
+            if (tao == null) return;
+            if (IsServer) DoHack(tao);
+            else Safe(() => RequestHackServerRpc(tao)); // implicit TerminalAccessibleObject -> NetworkBehaviourReference
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RequestHackServerRpc(NetworkBehaviourReference taoRef)
+        {
+            if (taoRef.TryGet(out TerminalAccessibleObject tao)) DoHack(tao);
+        }
+
+        private static void DoHack(TerminalAccessibleObject tao)
+        {
+            try { tao.CallFunctionFromTerminal(); }
+            catch (Exception e) { Plugin.Log.LogWarning($"Hack Tool failed: {e.Message}"); }
+        }
     }
 }

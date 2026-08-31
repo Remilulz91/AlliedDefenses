@@ -31,7 +31,8 @@ namespace AlliedDefenses.UI
                 $"{k} mines    : list all mines and their ids\n" +
                 $"{k} spikes   : list all spike traps and their ids\n" +
                 $"{k} upgrades : buy upgrades with ship credits\n" +
-                $"{k} beacon   : buy/deliver the carryable Defense Beacon\n" +
+                $"{k} beacon   : buy the deployable Defense Beacon\n" +
+                $"{k} hack     : buy the Hack Tool (aim at a door/turret + key)\n" +
                 $"{k} help     : how the mod works\n" +
                 $"{k} config   : show the current settings\n";
         }
@@ -64,6 +65,11 @@ namespace AlliedDefenses.UI
             sb.AppendLine("  are no turrets or mines. Press again to move it. It anchors the");
             sb.AppendLine("  counter-play auras below.");
             sb.AppendLine($"  Recall it with [{ModConfig.BeaconRecallKey.Value}] or '{k} beacon recall'.");
+            sb.AppendLine("");
+            sb.AppendLine("HACK TOOL (control the facility from inside):");
+            sb.AppendLine($"  {k} hack  buy it. Then AIM at a locked big door, turret, mine or");
+            sb.AppendLine($"  spike trap and press the hack key ([{ModConfig.HackKey.Value}]) to trigger it -");
+            sb.AppendLine("  like typing its code at the terminal, but from inside the facility.");
             sb.AppendLine("");
             sb.AppendLine("UNKILLABLE ENEMIES (counter-play auras, near a defense OR beacon):");
             sb.AppendLine("  sanity     : calms your mind, so the Ghost Girl escalates less.");
@@ -116,7 +122,8 @@ namespace AlliedDefenses.UI
                 $"{k} mines    : lister toutes les mines et leurs ids\n" +
                 $"{k} spikes   : lister tous les pieges a pointes et leurs ids\n" +
                 $"{k} upgrades : acheter des ameliorations avec les credits du vaisseau\n" +
-                $"{k} beacon   : acheter/livrer la balise de defense portable\n" +
+                $"{k} beacon   : acheter la balise de defense deployable\n" +
+                $"{k} hack     : acheter l'outil de piratage (viser + touche)\n" +
                 $"{k} help     : comment fonctionne le mod\n" +
                 $"{k} config   : afficher les reglages actuels\n";
         }
@@ -150,6 +157,11 @@ namespace AlliedDefenses.UI
             sb.AppendLine("  la ou il n'y a ni tourelle ni mine. Reappuie pour la deplacer.");
             sb.AppendLine("  Elle ancre les auras de contre-jeu ci-dessous.");
             sb.AppendLine($"  Range-la avec [{ModConfig.BeaconRecallKey.Value}] ou '{k} beacon recall'.");
+            sb.AppendLine("");
+            sb.AppendLine("OUTIL DE PIRATAGE (piloter le complexe depuis l'interieur) :");
+            sb.AppendLine($"  {k} hack  achete-le. Ensuite VISE une porte verrouillee, une");
+            sb.AppendLine($"  tourelle, une mine ou un piege et appuie sur la touche ([{ModConfig.HackKey.Value}])");
+            sb.AppendLine("  pour le declencher - comme taper son code, mais depuis l'interieur.");
             sb.AppendLine("");
             sb.AppendLine("ENNEMIS INCREVABLES (auras de contre-jeu, pres d'une defense/balise) :");
             sb.AppendLine("  sanity     : calme ton esprit, la Fille fantome t'escalade moins.");

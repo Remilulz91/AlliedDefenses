@@ -65,6 +65,8 @@ namespace AlliedDefenses.Patches
                 message = HandleBeaconRecall();
             else if (arg.Equals("beacon", StringComparison.OrdinalIgnoreCase))
                 message = HandleBeacon(__instance);
+            else if (arg.Equals("hack", StringComparison.OrdinalIgnoreCase))
+                message = HandleUpgrade(__instance, "hack"); // buy the Hack Tool (host-authoritative)
             else if (TryMatchGroup(arg, out string typeId))
                 message = HijackManager.ListDefenses(typeId); // "ally mines" / "ally turrets" -> list ids
             else

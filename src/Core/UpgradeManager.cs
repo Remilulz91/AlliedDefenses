@@ -159,6 +159,9 @@ namespace AlliedDefenses.Core
         public static bool BeaconOwned => LevelOf("beacon") > 0;
         public static int BeaconCapacity() => 1 + LevelOf("slots"); // 1..4 deployed beacons
 
+        /// <summary>Whether the Hack Tool ability has been bought (via 'ally hack').</summary>
+        public static bool HackToolOwned => LevelOf("hack") > 0;
+
         // ----------------------------------------------------------------
 
         public static void Init(ConfigFile cfg)
@@ -210,8 +213,11 @@ namespace AlliedDefenses.Core
 
                 Add(cfg, "slots", "Beacon slots", maxLevel: 3, baseCost: 200, growth: 1.6f,
                     describe: lvl => $"{1 + lvl} beacon(s) at once");
-
             }
+
+            if (ModConfig.EnableHackTool.Value)
+                Add(cfg, "hack", "Hack Tool", maxLevel: 1, baseCost: ModConfig.HackToolPrice.Value, growth: 1f,
+                    describe: lvl => lvl == 0 ? "not owned" : "owned (aim + key)");
         }
 
         private static void Add(ConfigFile cfg, string id, string name, int maxLevel, int baseCost,
