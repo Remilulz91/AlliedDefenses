@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.18.0
+- New counter-play: SENSOR CLOAK ('cloak' upgrade). While inside an allied-defense/beacon radius the
+  player's IVisibleThreat.GetVisibility is forced to 0 (the value the game uses for a dead player),
+  so the detection-based enemies can't see them: the unkillable OLD BIRD (RadMechAI), and as a bonus
+  the Forest Giant, Baboon Hawk, Kidnapper Fox and Giant Kiwi. Verified safe (the game already
+  handles visibility 0). Patched manually (explicit interface method). Level 0 = off.
+
 ## 0.17.0
 - New HACK TOOL: buy it with 'ally hack', then aim at a locked big door, turret, mine or spike trap
   and press the hack key (config HackTool/HackKey, default H) to trigger it - like typing its code at

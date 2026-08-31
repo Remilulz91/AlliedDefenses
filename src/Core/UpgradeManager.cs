@@ -139,6 +139,15 @@ namespace AlliedDefenses.Core
         public static float BeesRadius() => BeesRadiusFor(LevelOf("bees"));
         private static float BeesRadiusFor(int lvl) => lvl <= 0 ? 0f : 6f + lvl * 2f; // 8m..16m
 
+        // --- "Sensor cloak": while near an allied defense/beacon, the player's threat visibility
+        //     (IVisibleThreat.GetVisibility) is forced to 0 - the same value the game uses for a dead
+        //     player - so the big DETECTION-based enemies ignore them: the unkillable Old Bird
+        //     (RadMechAI), plus the Forest Giant, Baboon Hawk, Kidnapper Fox and Giant Kiwi.
+        //     Level 0 = off; each level widens the radius. ---
+        public static bool CloakEnabled => ModConfig.EnableUpgrades.Value && LevelOf("cloak") > 0;
+        public static float CloakRadius() => CloakRadiusFor(LevelOf("cloak"));
+        private static float CloakRadiusFor(int lvl) => lvl <= 0 ? 0f : 8f + lvl * 3f; // 11m..23m
+
         /// <summary>Largest active aura radius (for the beacon's ground ring). 0 if none active.</summary>
         public static float MaxAuraRadius()
         {
@@ -150,6 +159,7 @@ namespace AlliedDefenses.Core
             r = Mathf.Max(r, BarberRadius());
             r = Mathf.Max(r, SlimeRadius());
             r = Mathf.Max(r, BeesRadius());
+            r = Mathf.Max(r, CloakRadius());
             return r;
         }
 
@@ -204,6 +214,9 @@ namespace AlliedDefenses.Core
 
             Add(cfg, "bees", "Bee cloak", maxLevel: 5, baseCost: 120, growth: 1.5f,
                 describe: lvl => lvl == 0 ? "off (Circuit Bees)" : $"{BeesRadiusFor(lvl):0}m, bees disengage");
+
+            Add(cfg, "cloak", "Sensor cloak", maxLevel: 5, baseCost: 220, growth: 1.5f,
+                describe: lvl => lvl == 0 ? "off (Old Bird + big threats)" : $"{CloakRadiusFor(lvl):0}m invisible");
 
             if (ModConfig.EnableBeacon.Value)
             {

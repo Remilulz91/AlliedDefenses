@@ -27,7 +27,7 @@ namespace AlliedDefenses
         public const string Author = "Remilulz_91";
         public const string Guid = "Remilulz_91.AlliedDefenses";
         public const string Name = "AlliedDefenses";
-        public const string Version = "0.17.0";
+        public const string Version = "0.18.0";
 
         /// <summary>Singleton instance, accessible anywhere via Plugin.Instance.</summary>
         public static Plugin Instance { get; private set; } = null!;
@@ -72,6 +72,24 @@ namespace AlliedDefenses
                 catch (Exception ex)
                 {
                     Log.LogWarning($"Could not hook the game-over reset: {ex.Message}");
+                }
+
+                // 3c) 'cloak' upgrade: hook the player's explicit IVisibleThreat.GetVisibility so a
+                //     protected player reads as invisible to detection-based enemies (Old Bird, etc.).
+                //     Patched manually because it's an explicit interface implementation.
+                try
+                {
+                    var vis = AccessTools.Method(typeof(GameNetcodeStuff.PlayerControllerB),
+                        "GameNetcodeStuff.IVisibleThreat.GetVisibility");
+                    if (vis != null)
+                        _harmony.Patch(vis, postfix: new HarmonyMethod(
+                            typeof(Patches.CloakPatch), nameof(Patches.CloakPatch.Postfix)));
+                    else
+                        Log.LogWarning("IVisibleThreat.GetVisibility not found; the 'cloak' upgrade won't apply.");
+                }
+                catch (Exception ex)
+                {
+                    Log.LogWarning($"Could not hook GetVisibility for the cloak: {ex.Message}");
                 }
 
                 // 4) Start the ticker (hijack expiry + passive-defense targeting).

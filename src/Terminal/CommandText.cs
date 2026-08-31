@@ -79,6 +79,9 @@ namespace AlliedDefenses.UI
             sb.AppendLine("  barber     : the Barber can't target you in the radius.");
             sb.AppendLine("  slime      : the Hygrodere can't target you (it wanders off).");
             sb.AppendLine("  bees       : Circuit Bees drop their chase in the radius.");
+            sb.AppendLine("  cloak      : big DETECTION enemies can't see you in the radius -");
+            sb.AppendLine("               the Old Bird (unkillable), Forest Giant, Baboon Hawk,");
+            sb.AppendLine("               Kidnapper Fox, Giant Kiwi.");
             sb.AppendLine("  Each is a separate upgrade (level 0 = off).");
             sb.AppendLine("");
             sb.AppendLine("All hijacks last a set time, then turn hostile again. Everyone in");
@@ -171,6 +174,9 @@ namespace AlliedDefenses.UI
             sb.AppendLine("  barber     : le Coiffeur ne peut pas te cibler dans le rayon.");
             sb.AppendLine("  slime      : l'Hygrodere ne peut pas te cibler (il s'en va).");
             sb.AppendLine("  bees       : les Abeilles abandonnent leur poursuite dans le rayon.");
+            sb.AppendLine("  cloak      : les gros ennemis a DETECTION ne te voient plus dans le");
+            sb.AppendLine("               rayon - Vieil Oiseau (increvable), Gardien de la foret,");
+            sb.AppendLine("               Faucon babouin, Renard, Kiwi geant.");
             sb.AppendLine("  Chacune est une amelioration separee (niveau 0 = desactive).");
             sb.AppendLine("");
             sb.AppendLine("Chaque piratage dure un temps donne, puis redevient hostile. Tous");
